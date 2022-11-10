@@ -29,9 +29,14 @@ def check_df(df):
         else:
             return True
 
-    
+def calc_auc(df):
+    return auc(df['time'], df['glc'])   
+
 def auc_helper(df):
-    return auc(df['time'], df['glc'])
+    hourly_auc = df.groupby(df.time.map(lambda t: t.hour)).apply(calc_auc)
+    daily_auc = hourly_auc.groupby(hourly_auc.time.map(lambda t: t.date)).apply(calc_auc)
+    avg_auc = daily_auc.mean()
+    return avg_auc, daily_auc, hourly_auc
 
 def mage_helper(df):
     '''
@@ -186,41 +191,38 @@ def number_of_hypos(df):
     number_lv1_hypos = number_hypos - number_lv2_hypos
     
     # Save as dataframe and return
-    frame = {'Total hypogylcemic episodes':number_hypos, 'Level 1 hypogylcemic episodes':number_lv1_hypos, 'Level 2 hypogylcemic episodes':number_lv2_hypos,
-                           'Average length of hypoglycemic episodes':avg_length, 'Total time in hypoglycemia':total_time_hypo}
+    frame = {'Total hypogylcemic episodes1':number_hypos, 'Level 1 hypogylcemic episodes1':number_lv1_hypos, 'Level 2 hypogylcemic episodes1':number_lv2_hypos,
+                           'Average length of hypoglycemic episodes1':str(avg_length), 'Total time in hypoglycemiaZ':str(total_time_hypo)}
     return frame
 
-def helper_hypo_episodes(df, time, glc, breakdown, gap_size, interpolate, interp_method, exercise):
+def helper_hypo_episodes(df, gap_size, interpolate=False, interp_method='pchip', lv1_threshold=3.9, lv2_threshold=3):
     """
     Helper function for hypoglycemic_episodes.
     """
     # Setting a copy so the df isn't altered in the following forloop
     df = copy.copy(df)
     # Convert time column to datetime and sort by time then reset index
-    df[time] = pd.to_datetime(df[time])
-    df.sort_values(time, inplace=True)
+    df['time'] = pd.to_datetime(df['time'])
+    df.sort_values('time', inplace=True)
     df.reset_index(drop=True)
 
     # Calls the interpolate function if interpolate==True
     if interpolate:
-        df.set_index(time, inplace=True)
+        df.set_index('time', inplace=True)
         df = df.resample(rule='min', origin='start').asfreq()
-        df[glc] = df[glc].interpolate(method=interp_method, limit_area='inside',
+        df['glc'] = df['glc'].interpolate(method=interp_method, limit_area='inside',
                                       limit_direction='forward', limit=gap_size)
         df.reset_index(inplace=True)
         gap_size = 1
 
     # set a boolean array where glc goes below 3.9, unless exercise thresholds are set then it's 7
-    if exercise:
-        bool_array = df[glc] < 7
-    else:
-        bool_array = df[glc] < 3.9
+    bool_array = df['glc'] < lv1_threshold
     # gives a consecutive unique number to every bout below 3.9
     unique_consec_number = bool_array.ne(bool_array.shift()).cumsum()
     # the number of consecutive readings below 3.9
     number_consec_readings = unique_consec_number.map(unique_consec_number.value_counts()).where(bool_array)
     # set up a df using these values to identify each bout of hypogylcaemia
-    df_full = pd.DataFrame({'time_rep': df[time], 'glc_rep': df[glc],
+    df_full = pd.DataFrame({'time_rep': df['time'], 'glc_rep': df['glc'],
                             'unique_number': unique_consec_number,
                             'consec_readings': number_consec_readings})
     # drop nulls and reset index to only get bouts below 3.9 in df
@@ -237,7 +239,7 @@ def helper_hypo_episodes(df, time, glc, breakdown, gap_size, interpolate, interp
         df_full['low'].iloc[df_full[df_full['unique_number'] == num].index] = df_full[
             df_full['unique_number'] == num]['glc_rep'].min()
         # calculate whether the bout was a lv_2 hypo by calling the lv2_calc function
-        lv2 = lv2_calc(df_full[df_full['unique_number'] == num], 'time_rep', 'glc_rep')
+        lv2 = lv2_calc(df_full[df_full['unique_number'] == num], 'time_rep', 'glc_rep', lv2_threshold)
         # set the lv2 column equal to the boolean value
         df_full['lv2'].iloc[df_full[df_full['unique_number'] == num].index] = lv2
 
@@ -320,8 +322,8 @@ def helper_hypo_episodes(df, time, glc, breakdown, gap_size, interpolate, interp
     avg_length = duration.mean()
     total_time_hypo = duration.sum()
     if pd.notnull(avg_length):
-        avg_length = avg_length.total_seconds() / 60
-        total_time_hypo = total_time_hypo.total_seconds() / 60
+        avg_length = str(avg_length.round('1s')) # .total_seconds() / 60
+        total_time_hypo = str(total_time_hypo.round('1s')) #.total_seconds() / 60
     elif number_hypos == 0:
         avg_length = 0
         total_time_hypo = 0
@@ -332,18 +334,13 @@ def helper_hypo_episodes(df, time, glc, breakdown, gap_size, interpolate, interp
     number_lv2_hypos = results[results['lv2']].shape[0]
     number_lv1_hypos = number_hypos - number_lv2_hypos
 
-    # if breakdown hasn't been selected, return overview statistics
-    if not breakdown:
-        return pd.DataFrame([[number_hypos, avg_length, total_time_hypo, number_lv1_hypos, number_lv2_hypos]],
-                            columns=['number_hypos', 'avg_length_of_hypo', 'total_time_in_hypos', 'number_lv1_hypos',
-                                     'number_lv2_hypos'])
+    overview = {'Total hypogylcemic episodes':number_hypos, 'Level 1 hypogylcemic episodes':number_lv1_hypos, 'Level 2 hypogylcemic episodes':number_lv2_hypos,
+                           'Average length of hypoglycemic episodes':avg_length, 'Total time in hypoglycemia':total_time_hypo}
 
-    # if breakdown has been selected, gives a breakdown of all the hypoglycaemic episodes start and finish time
-    else:
-        return results
+    return overview, results
 
 
-def lv2_calc(df, time, glc):
+def lv2_calc(df, time, glc, lv2_threshold):
     """
     Determines whether a hypoglycaemic episode is a level 2 hypoglycaemic
     episode. Lv2 is when glc drops below 3.0mmol/L for at least 15 consecutive 
@@ -353,7 +350,7 @@ def lv2_calc(df, time, glc):
     # lv2 is false unless proven otherwise
     lv2 = False
     # gives a unique number to all episodes where glc drops below 3
-    bool_array = df[glc] < 3
+    bool_array = df[glc] < lv2_threshold
     unique_consec_number = bool_array.ne(bool_array.shift()).cumsum()
     number_consec_values = unique_consec_number.map(unique_consec_number.value_counts()).where(bool_array)
     df_comb = pd.DataFrame({'time_rep': df[time], 'unique_lv2': unique_consec_number,

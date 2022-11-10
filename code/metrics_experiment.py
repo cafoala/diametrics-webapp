@@ -27,8 +27,13 @@ def calculate_all_metrics(df, ID, unit, interval):
         ranges = metrics_helper.tir_helper(df.glc)
         results.update(ranges)
 
+        # New method
         hypos = metrics_helper.number_of_hypos(df)
         results.update(hypos)
+
+        # Old method 
+        old_hypos, breakdown = metrics_helper.helper_hypo_episodes(df, gap_size=interval)
+        results.update(old_hypos)
         
         mage_results = metrics_helper.mage_helper(df)
 

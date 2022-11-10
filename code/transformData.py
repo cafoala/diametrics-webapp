@@ -1,6 +1,5 @@
 import pandas as pd
 import autoprocessing
-import checkDevices
 
 class transformData:
     def __init__(self, df):
