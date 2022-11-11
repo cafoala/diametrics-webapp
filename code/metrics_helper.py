@@ -371,29 +371,28 @@ def lv2_calc(df, time, glc, lv2_threshold):
     return lv2
 
 
-def helper_missing(df, time, glc, gap_size, start_time, end_time):
+def helper_missing(df, gap_size): #, start_time, end_time
     """
     Helper for percent_missing function
     """
     # dropping nulls in glc and time and returning 100% missing if df is empty
-    df = df.dropna(subset=[glc, time]).sort_values(time)
-    if df.empty:
-        return 100
+    df = df.dropna(subset=['glc', 'time']).sort_values('time')
 
     # calculate the missing data based on start and end of df
-    if start_time is None:
-        start_time = df[time].iloc[0]
-    if end_time is None:
-        end_time = df[time].iloc[-1]
+    start_time = df['time'].iloc[0]
+    end_time = df['time'].iloc[-1]
 
     # calculate the number of non-null values
-    cut_df = df.loc[(df[time] >= start_time) & (df[time] <= end_time)]
+    #cut_df = df.loc[(df['time'] >= start_time) & (df['time'] <= end_time)]
     # print(cut_df)
     if gap_size == 5:
         freq = '5min'
-    else:
+    elif gap_size==15:
         freq = '15min'
-    number_readings = sum(cut_df.set_index(time).groupby(pd.Grouper(freq=freq)).count()[glc] > 0)
+    else:
+        return print('EXPLODE THE PROGRAM')
+    '''
+    number_readings = sum(cut_df.set_index('time').groupby(pd.Grouper(freq=freq)).count()['glc'] > 0)
     time_diff = (end_time - start_time)
     total_readings = time_diff.total_seconds() / (60 * gap_size)
     if number_readings >= total_readings:
@@ -401,8 +400,9 @@ def helper_missing(df, time, glc, gap_size, start_time, end_time):
     else:
         perc_missing = (total_readings - number_readings) * 100 / total_readings
     '''
-    df_resampled = cut_df.drop_duplicates(subset='time').set_index('time').resample(rule='min', origin='start').asfreq()
-    df_resampled['interp'] = df_resampled[glc].interpolate(method='zero', limit_area='inside',
+
+    df_resampled = df.drop_duplicates(subset='time').set_index('time').resample(rule='min', origin='start').asfreq()
+    df_resampled['interp'] = df_resampled['glc'].interpolate(method='zero', limit_area='inside',
                                                            limit_direction='forward', limit=gap_size)
     #df_resampled = df_resampled.append([df_resampled.iloc[-1]]*(gap_size-1), ignore_index=True)
     #df_resampled = df_resampled[:-1] #.drop(index=df_resampled.iloc[-1].index, inplace=True)
@@ -422,7 +422,7 @@ def helper_missing(df, time, glc, gap_size, start_time, end_time):
     nulls = total_readings-non_null
     
     perc_missing = 100*nulls/total_readings
-    '''
+    
     if perc_missing > 100:
         perc_missing = 100
-    return perc_missing
+    return {'Start Time': str(start_time.round('min')), 'End Time':str(end_time.round('min')), 'Data Sufficiency':np.round(100-perc_missing, 1)}

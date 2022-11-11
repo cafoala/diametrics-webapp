@@ -91,7 +91,7 @@ switches = html.Div(
         ),
     ]
 )
-selection_right= html.Div(
+metrics_section= html.Div(
     [
         html.H2('Calculate standard metrics '),
         dbc.Label('Metrics'), 
@@ -128,14 +128,14 @@ app.layout = html.Div([
             dbc.Row([
                 dbc.Col(
                     dbc.Collapse(
-                        dbc.Card(selection_left, body=True),
+                        dbc.Card(upload_section, body=True),
                         id="left-collapse",
                         is_open=True,
                     )
                 ), 
                 dbc.Col(
                     dbc.Collapse(
-                        dbc.Card(selection_right, body=True),
+                        dbc.Card(metrics_section, body=True),
                         id="right-collapse",
                         is_open=True,
                     )
@@ -199,6 +199,7 @@ def toggle_right_options(n_toggle, n_metrics, is_open):
         return not is_open
     return is_open
 
+
 # List the filenames
 @app.callback(Output('filelist', 'children'),
               Input('upload-data', 'contents'),
@@ -226,25 +227,55 @@ def update_output(list_of_contents, n, list_of_names, list_of_dates):
                 parse_contents(c, n, d) for c, n, d in
                 zip(list_of_contents, list_of_names, list_of_dates)]
             
+            
+            data_details = pd.DataFrame.from_dict(children)[['Filename', 'ID', 'Usable', 'Device', 'Interval', 'Data Sufficiency', 'Start Time', 'End Time']]
+
             dict_results = []
             for i in children:
-                if i.usable==True:
-                    df_id = i.data
-                    results = metrics_experiment.calculate_all_metrics(df_id, ID=i.id, unit=i.units, interval=i.interval)
+                if i['Usable']==True:
+                    df_id = i['data']
+                    results = metrics_experiment.calculate_all_metrics(df_id, ID=i['ID'], unit=i['Units'], interval=i['Interval'])
                     dict_results.append(results)
-            metrics = pd.DataFrame.from_dict(dict_results).round(2)
+            metrics = pd.DataFrame.from_dict(dict_results).round(2) # this is stupid - already a dict
 
 
             return html.Div([
                 #html.H5(datetime.datetime.fromtimestamp(date)),
                 
                 html.Div([
+                    html.H6('Data details'),
+
+                    dash_table.DataTable(
+                        id='data_tbl',
+                        columns=[
+                                    {"name": i, "id": i, "deletable": False, "selectable": True, "hideable": False}
+                                    if i == "iso_alpha3" or i == "Filename" or i == "id"
+                                    else {"name": i, "id": i, "hideable": True, "selectable": True}
+                                    for i in data_details.columns
+                        ],
+                        data=data_details.to_dict('records'),
+                        style_data={
+                                    'whiteSpace': 'normal',
+                                    'height': 'auto',
+                                    #'width':'200px'
+                                },
+                        
+                        style_table={
+                            'overflowX': 'auto',
+                            #'height': 300,
+                            },
+                        editable=True,              # allow editing of data inside all cells
+                        filter_action="native",     # allow filtering of data by user ('native') or not ('none')
+                        sort_action="native",       # enables data to be sorted per-column by user or not ('none')
+                        
+                        
+                        ),
                     html.H6('Metrics of Glycemic Control'),
                     dash_table.DataTable(
                         id='metrics_tbl',
                         columns=[
                                     {"name": i, "id": i, "deletable": False, "selectable": True, "hideable": False}
-                                    if i == "iso_alpha3" or i == "ID" or i == "id"
+                                    if i == "iso_alpha3" or i == "Filename" or i == "id"
                                     else {"name": i, "id": i, "hideable": True, "selectable": True}
                                     for i in metrics.columns
                         ],
