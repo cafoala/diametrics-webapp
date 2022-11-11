@@ -426,3 +426,31 @@ def helper_missing(df, gap_size): #, start_time, end_time
     if perc_missing > 100:
         perc_missing = 100
     return {'Start Time': str(start_time.round('min')), 'End Time':str(end_time.round('min')), 'Data Sufficiency':np.round(100-perc_missing, 1)}
+
+# LBGI and HBGI
+def calc_bgi(glucose, mmol=True):
+    if mmol:
+        num1=1.794
+        num2=1.026
+        num3=1.861
+    else:
+        num1=1.509
+        num2=1.084
+        num3=5.381
+    bgi = num1*(np.log(glucose)**num2 - num3)
+    return bgi
+    
+def calc_lbgi(glucose, mmol=True):
+    bgi = calc_bgi(glucose, mmol)
+    lbgi = 10*(min(bgi, 0)**2)
+    return lbgi
+
+def calc_hbgi(glucose, mmol=True):
+    bgi = calc_bgi(glucose, mmol)
+    hbgi = 10*(max(bgi, 0)**2)
+    return hbgi
+
+def helper_bgi(df):
+    lbgi = df['glc'].apply(lambda x: calc_lbgi(x)).mean()
+    hbgi = df['glc'].apply(lambda x: calc_hbgi(x)).mean()
+    return {'LBGI': lbgi, 'HBGI':hbgi}
