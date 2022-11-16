@@ -28,16 +28,27 @@ def check_df(df):
             return False
         else:
             return True
-
-def calc_auc(df):
-    return auc(df['time'], df['glc'])   
+def calculate_auc(df):
+    if df.shape[0]>1:
+        start_time = df.time.iloc[0]
+        mins_from_start = df.time.apply(lambda x: x-start_time)
+        df['hours_from_start'] = mins_from_start.apply(lambda x: (x.total_seconds()/60)/60)
+        avg_auc = auc(df['hours_from_start'], df['glc'])#/24
+        return avg_auc
+    else:
+        return np.nan
 
 def auc_helper(df):
-    hourly_auc = df.groupby(df.time.map(lambda t: t.hour)).apply(calc_auc)
-    daily_auc = hourly_auc.groupby(hourly_auc.time.map(lambda t: t.date)).apply(calc_auc)
-    avg_auc = daily_auc.mean()
-    return avg_auc, daily_auc, hourly_auc
-
+    df['date'] = df['time'].dt.date
+    df['hour'] = df['time'].dt.hour
+    hourly_breakdown = df.groupby([df.date, df.hour]).apply(lambda group: calculate_auc(group)).reset_index()
+    hourly_breakdown.columns = ['date', 'hour', 'auc']
+    daily_breakdown = hourly_breakdown.groupby('date').auc.mean()
+    hourly_avg = hourly_breakdown.auc.mean()
+    #daily_auc = df.groupby(df['time'].dt.date).apply(lambda group: calculate_auc(group))/24 # .reset_index()
+    #daily_avg = daily_auc.mean()
+    return  hourly_avg, daily_breakdown, hourly_breakdown 
+    
 def mage_helper(df):
     '''
     Calculates the mage using Scipy's signal class
@@ -61,7 +72,7 @@ def mage_helper(df):
         mage_mean = abs(mage_negative)
     else:
         mage_mean = 0  # np.nan
-    return pd.DataFrame([[mage_mean]], columns=['mage_mean'])
+    return {'MAGE':mage_mean}
 
 def convert_to_rounded_percent(value, length):
     return round(value * 100 / length, 2)
@@ -85,18 +96,18 @@ def tir_helper(series):
     tir_lv1_hyper = convert_to_rounded_percent(series.loc[(series <= 13.9) & (series > 10)].size, df_len)
 
     tir_lv2_hyper = convert_to_rounded_percent(series.loc[series > 13.9].size, df_len)
-    '''
-    tir_norm_1 = (series.loc[(series >= 3.9) & (series <= 7.8)]).size, df_len)
-
-    tir_norm_2 = (series.loc[(series >= 7.8) & (series <= 10)]).size, df_len)
     
+    #tir_norm_1 = convert_to_rounded_percent((series.loc[(series >= 3.9) & (series < 7.8)]).size, df_len)
+
+    #tir_norm_2 = convert_to_rounded_percent((series.loc[(series >= 7.8) & (series <= 10)]).size, df_len)
+    '''
     tir_hypo_ex = series.loc[series < 5].size, df_len)
 
     tir_norm_ex = (series.loc[(series >= 5) & (series <= 15)]).size, df_len)
 
     tir_hyper_ex = series.loc[series > 15].size, df_len)
     '''
-    return {'TIR normal': tir_norm, 'TIR hypoglycemia':tir_hypo, 'TIR level 1 hypoglycemia':tir_lv1_hypo, 'TIR level 2 hypoglycemia':tir_lv2_hypo, 
+    return {'TIR normal': tir_norm, 'TIR hypoglycemia':tir_hypo, 'TIR level 1 hypoglycemia':tir_lv1_hypo, 'TIR level 2 hypoglycemia':tir_lv2_hypo, #'TIR normal (3.9-7.8)': tir_norm_1, 'TIR normal (7.8-10)': tir_norm_2, 
             'TIR hyperglycemia':tir_hyper, 'TIR level 1 hyperglycemia':tir_lv1_hyper, 'TIR level 2 hyperglycemia':tir_lv2_hyper}
 
 
@@ -375,57 +386,29 @@ def helper_missing(df, gap_size): #, start_time, end_time
     """
     Helper for percent_missing function
     """
-    # dropping nulls in glc and time and returning 100% missing if df is empty
-    df = df.dropna(subset=['glc', 'time']).sort_values('time')
-
-    # calculate the missing data based on start and end of df
+    # Calculate start and end time from dataframe
     start_time = df['time'].iloc[0]
     end_time = df['time'].iloc[-1]
-
-    # calculate the number of non-null values
-    #cut_df = df.loc[(df['time'] >= start_time) & (df['time'] <= end_time)]
-    # print(cut_df)
+    
     if gap_size == 5:
         freq = '5min'
     elif gap_size==15:
         freq = '15min'
     else:
         return print('EXPLODE THE PROGRAM')
-    '''
-    number_readings = sum(cut_df.set_index('time').groupby(pd.Grouper(freq=freq)).count()['glc'] > 0)
-    time_diff = (end_time - start_time)
-    total_readings = time_diff.total_seconds() / (60 * gap_size)
-    if number_readings >= total_readings:
-        perc_missing = 0
-    else:
-        perc_missing = (total_readings - number_readings) * 100 / total_readings
-    '''
+    
+    # calculate the number of non-null values
+    number_readings = sum(df.set_index('time').groupby(pd.Grouper(freq=freq)).count()['glc'] > 0)
+    # calculate the missing data based on start and end of df
+    total_readings = ((end_time - start_time)+timedelta(minutes=gap_size))/+timedelta(minutes=gap_size)
 
-    df_resampled = df.drop_duplicates(subset='time').set_index('time').resample(rule='min', origin='start').asfreq()
-    df_resampled['interp'] = df_resampled['glc'].interpolate(method='zero', limit_area='inside',
-                                                           limit_direction='forward', limit=gap_size)
-    #df_resampled = df_resampled.append([df_resampled.iloc[-1]]*(gap_size-1), ignore_index=True)
-    #df_resampled = df_resampled[:-1] #.drop(index=df_resampled.iloc[-1].index, inplace=True)
-    total_readings = df_resampled.shape[0] #cut_df.shape[0]
-    non_null = df_resampled.dropna(subset=['interp']).shape[0]
-    #non_null = df_resampled.loc[pd.notnull(df_resampled['interp'])].shape[0]
-    print(df_resampled)
-    print(non_null)
-    #non_null = cut_df.shape[0]
-    # calculate number of total readings
-    #total_minutes = (end_time - start_time).total_seconds()/60
-    #total_readings = 1+total_minutes/gap_size
-    #print(total_readings)
+
+    if number_readings >= total_readings:
+        data_sufficiency = 100
+    else:
+        data_sufficiency = number_readings*100/total_readings
     
-    if (total_readings == 0) | (non_null == 0):
-        return 100
-    nulls = total_readings-non_null
-    
-    perc_missing = 100*nulls/total_readings
-    
-    if perc_missing > 100:
-        perc_missing = 100
-    return {'Start Time': str(start_time.round('min')), 'End Time':str(end_time.round('min')), 'Data Sufficiency':np.round(100-perc_missing, 1)}
+    return {'Start Time': str(start_time.round('min')), 'End Time':str(end_time.round('min')), 'Data Sufficiency':np.round(data_sufficiency, 1)}
 
 # LBGI and HBGI
 def calc_bgi(glucose, mmol=True):

@@ -14,6 +14,7 @@ import dash_uploader as du
 #sys.path.append("/Users/cr591/OneDrive - University of Exeter/Desktop/diametrics/diametrics")
 import preprocessing
 import metrics_experiment
+import periods
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -74,7 +75,6 @@ upload_section= html.Div(
                 },),
     ],    
 ),
-
 
 switches = html.Div(
     [
@@ -230,14 +230,30 @@ def update_output(list_of_contents, n, list_of_names, list_of_dates):
             
             data_details = pd.DataFrame.from_dict(children)[['Filename', 'ID', 'Usable', 'Device', 'Interval', 'Data Sufficiency', 'Start Time', 'End Time']]
 
-            dict_results = []
+            all_results = []
+            day_results = []
+            night_results = []
+
             for i in children:
                 if i['Usable']==True:
                     df_id = i['data']
-                    results = metrics_experiment.calculate_all_metrics(df_id, ID=i['ID'], unit=i['Units'], interval=i['Interval'])
-                    dict_results.append(results)
-            metrics = pd.DataFrame.from_dict(dict_results).round(2) # this is stupid - already a dict
+                    # Total df
+                    all = metrics_experiment.calculate_all_metrics(df_id, ID=i['ID'], unit=i['Units'], interval=i['Interval'])
+                    all_results.append(all)
 
+                    # Breakdown df into night and day
+                    df_day, df_night = periods.get_day_night_breakdown(df_id)
+                    
+                    # Daytime breakdown metrics 
+                    day= metrics_experiment.calculate_all_metrics(df_day, ID=i['ID'], unit=i['Units'], interval=i['Interval'])
+                    day_results.append(day)
+                    
+                    # Night breakdown metrics
+                    night= metrics_experiment.calculate_all_metrics(df_night, ID=i['ID'], unit=i['Units'], interval=i['Interval'])
+                    night_results.append(night)
+
+            metrics = pd.DataFrame.from_dict(all_results).round(2) # this is stupid - already a dict
+            print(metrics['AUC'])
 
             return html.Div([
                 #html.H5(datetime.datetime.fromtimestamp(date)),
@@ -267,7 +283,8 @@ def update_output(list_of_contents, n, list_of_names, list_of_dates):
                         editable=True,              # allow editing of data inside all cells
                         filter_action="native",     # allow filtering of data by user ('native') or not ('none')
                         sort_action="native",       # enables data to be sorted per-column by user or not ('none')
-                        
+                        export_format="csv",
+                        export_headers="display",
                         
                         ),
                     html.H6('Metrics of Glycemic Control'),
@@ -290,10 +307,12 @@ def update_output(list_of_contents, n, list_of_names, list_of_dates):
                             'overflowX': 'auto',
                             #'height': 300,
                             },
-                        editable=True,              # allow editing of data inside all cells
+                        #editable=True,              # allow editing of data inside all cells                        
                         filter_action="native",     # allow filtering of data by user ('native') or not ('none')
                         sort_action="native",       # enables data to be sorted per-column by user or not ('none')
-                        
+                        export_format="csv",
+                        export_headers="display",
+                        column_selectable='multi',
                         
                         ),
                     dcc.Store(id='metrics', data=metrics.to_dict('records')),

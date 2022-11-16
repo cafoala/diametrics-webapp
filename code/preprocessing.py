@@ -26,6 +26,7 @@ def preprocess_df(df, filename):
         # Check that the whole datetime works
         try:
             df_transformed.data['time'] = pd.to_datetime(df_transformed.data['time'])
+            df_transformed.data = df_transformed.data.sort_values(['time'])
             df_transformed.data['glc'] = pd.to_numeric(df_transformed.data['glc'])
             if 'scan_glc' in df_transformed.data.columns:
                 df_transformed.data['scan_glc'] = pd.to_numeric(df_transformed.data['scan_glc'])
@@ -33,7 +34,6 @@ def preprocess_df(df, filename):
             # log that there is a non-dt item in the col
             print(ex)
             return None
-
 
         # Calculate if mmol/L or mg/dL
         data_dictionary['Units'] = autoprocessing.assert_units(df_transformed.data['glc'])
@@ -55,9 +55,9 @@ def preprocess_df(df, filename):
         data_dictionary['data'] = df_transformed.data
         data_dictionary['ID'] = df_transformed.id
         data_dictionary.update(data_stats)
-        print(data_dictionary)
         return data_dictionary
     else:
         # Log the errors?
         return None
+    
     

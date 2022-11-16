@@ -50,7 +50,11 @@ class transformData:
         df.columns = ['time', 'glc', 'scan_glc']
         self.data = df
 
-
+    # Newer libre!
+    '''
+    'Device', 'Serial Number', 'Device Timestamp', 'Record Type',
+        'Historic Glucose mmol/L', 'Scan Glucose mmol/L',
+    '''
     def autoprocess(self, df):
         self.device = 'Unknown'
 
