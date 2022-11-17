@@ -28,6 +28,7 @@ def check_df(df):
             return False
         else:
             return True
+            
 def calculate_auc(df):
     if df.shape[0]>1:
         start_time = df.time.iloc[0]

@@ -100,11 +100,21 @@ metrics_section= html.Div(
         dbc.Button('Calculate metrics', id='calculate-metrics')
     ],    
     ),
-
-content= html.Div([
+data_content = html.Div([
+                    html.Div(
+                    id='data-tbl',
+                    #style={
+                    #    'width': '80%',
+                    #    'height': '60px',
+                    #    'textAlign': 'center',
+                    #    'margin': '10px'
+                    #},
+                    ),
+])
+metrics_content= html.Div([
 
         html.Div(
-                id='output-data-upload',
+                id='metrics-tbl',
                 #style={
                 #    'width': '80%',
                 #    'height': '60px',
@@ -132,7 +142,9 @@ app.layout = html.Div([
                         id="left-collapse",
                         is_open=True,
                     )
-                ), 
+                ),
+            ]),
+            dbc.Row([
                 dbc.Col(
                     dbc.Collapse(
                         dbc.Card(metrics_section, body=True),
@@ -142,8 +154,10 @@ app.layout = html.Div([
                 ), 
             ]),
             dbc.Row([
-                dbc.Col(content),
-
+                dbc.Col(data_content),
+            ]),
+            dbc.Row([
+                dbc.Col(metrics_content),
             ]),
         ])
     )
@@ -211,16 +225,15 @@ def list_files(list_of_contents, list_of_names):
                 )
 
 # Create metrics table
-@app.callback(Output('output-data-upload', 'children'),
-              State('upload-data', 'contents'),
+@app.callback(#Output('data-tbl', 'children'),
+              Output('metrics-tbl', 'children'),
               Input('calculate-metrics', 'n_clicks'),
+              State('upload-data', 'contents'),
               State('upload-data', 'filename'),
               State('upload-data', 'last_modified'))
-
-
-def update_output(list_of_contents, n, list_of_names, list_of_dates):
-    if n is not None:
-        n = 0
+def update_output(list_of_contents, n_clicks, list_of_names, list_of_dates):
+    if n_clicks is not None:
+        n_clicks = 0
         if list_of_contents is not None:
 
             children = [
@@ -254,11 +267,10 @@ def update_output(list_of_contents, n, list_of_names, list_of_dates):
 
             metrics = pd.DataFrame.from_dict(all_results).round(2) # this is stupid - already a dict
             print(metrics['AUC'])
+            dcc.Store(id='metrics', data=metrics.to_dict('records')),                    
 
-            return html.Div([
-                #html.H5(datetime.datetime.fromtimestamp(date)),
-                
-                html.Div([
+
+            data_table = html.Div([
                     html.H6('Data details'),
 
                     dash_table.DataTable(
@@ -287,6 +299,9 @@ def update_output(list_of_contents, n, list_of_names, list_of_dates):
                         export_headers="display",
                         
                         ),
+                ]),
+
+            metrics_table = html.Div([                
                     html.H6('Metrics of Glycemic Control'),
                     dash_table.DataTable(
                         id='metrics_tbl',
@@ -315,15 +330,13 @@ def update_output(list_of_contents, n, list_of_names, list_of_dates):
                         column_selectable='multi',
                         
                         ),
-                    dcc.Store(id='metrics', data=metrics.to_dict('records')),
-                    html.Hr()], #style={'display': 'block'}
-                    ),
-                    
                     dcc.Graph(
                         id='example-graph',
                         figure=px.bar(metrics, x='ID', y='Average glucose')
                 )
             ], style={'display': 'block'})
+            
+            return metrics_table # data_table 
 
 
 
