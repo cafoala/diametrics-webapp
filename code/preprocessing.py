@@ -52,7 +52,7 @@ def preprocess_df(df, filename):
         data_dictionary['Filename'] = filename
         data_dictionary['Device'] = df_transformed.device
         data_dictionary['Interval'] = df_transformed.interval
-        data_dictionary['data'] = df_transformed.data
+        data_dictionary['data'] = df_transformed.data.to_dict('records')
         data_dictionary['ID'] = df_transformed.id
         data_dictionary.update(data_stats)
         return data_dictionary
