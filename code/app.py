@@ -10,8 +10,6 @@ import pandas as pd
 import numpy as np
 import dash_bootstrap_components as dbc
 import dash_uploader as du
-#import sys
-#sys.path.append("/Users/cr591/OneDrive - University of Exeter/Desktop/diametrics/diametrics")
 import preprocessing
 import metrics_experiment
 import periods
@@ -30,11 +28,9 @@ app.config.suppress_callback_exceptions = True
 
 navbar = dbc.NavbarSimple(
     children=[
-        dbc.NavItem(dbc.NavLink("Home", href="#")),
-        dbc.NavItem(dbc.NavLink("1 Trace Close Up", href="#")),
-        dbc.NavItem(dbc.NavLink("Advanced Visualisations", href="#")),
-        dbc.NavItem(dbc.NavLink("Periodic Analysis", href="#")),
-        dbc.NavItem(dbc.NavLink("Theory & Code", href="#")),
+        dbc.NavItem(dbc.NavLink("Dashboard", href="#")),
+        dbc.NavItem(dbc.NavLink("How-to", href="#")),
+        dbc.NavItem(dbc.NavLink("Theory and Code", href="#")),
         dbc.NavItem(dbc.NavLink("About Us", href="#")),
         ],
     brand="Diametrics",
@@ -44,10 +40,10 @@ navbar = dbc.NavbarSimple(
 )
 intro = html.Div(
     [
-        html.H1('Diametrics'#, style={'textAlign': 'center'}
+        html.H1('Diametrics', style={'textAlign': 'center'}
         ),
         html.P('A no-code webtool for calculating the metrics of glycemic control, creating visualisations and exploring CGM data',
-                #style={'textAlign': 'center'}
+                style={'textAlign': 'center'}
                 ),
     ]
 )
@@ -56,7 +52,7 @@ upload_section= html.Div(
     [
         dbc.Row(
             [
-                dbc.Col(html.H2('Upload and process files'), width=7),
+                dbc.Col(html.H2('Upload files'), width=7),
                 dbc.Col(dcc.Upload(dbc.Button('Select Files', color="secondary"),
                     multiple=True,
                     id='upload-data',
@@ -121,12 +117,11 @@ app.layout = html.Div([
                     )
                 ),
             ]),
-            
             dbc.Row([
-                dbc.Col(data_content),
+                dbc.Col(id='data-tbl'),
             ]),
             dbc.Row([
-                dbc.Col(metrics_content),
+                dbc.Col(id='metrics-tbl'),
             ]),
         ])
     )
@@ -159,16 +154,16 @@ def parse_contents(contents, filename, date):
     return preprocessing.preprocess_df(df, filename)
 
 # Collapse left options panel once calculated
-@app.callback(Output("left-collapse", "is_open"),
+@app.callback([Output("left-collapse", "is_open"),
+    Output('data-tbl-collapse', 'is_open')],
     Input("collapse-options", "n_clicks"), 
     Input('calculate-metrics', 'n_clicks'),
     State("left-collapse", "is_open"),
     prevent_initial_call=True)
 def toggle_left_options(n_toggle, n_metrics, is_open):
-    logging.debug('reaching here')
     if n_toggle or n_metrics:
-        return not is_open
-    return is_open
+        return [not is_open, not is_open]
+    return [is_open, is_open]
 
     
 # Collapse options panel once calculated
@@ -245,7 +240,15 @@ def preprocess_data(list_of_dates, list_of_contents, list_of_names):
                 ),
                 dbc.Button('Calculate metrics', id='calculate-metrics')
         ]),
-    return (children, data_table)
+        
+    collapse_table = dbc.Row([
+                dbc.Collapse(
+                    dbc.Card(data_table, body=True),
+                    id="data-tbl-collapse",
+                    is_open=True,
+                )
+        ]),
+    return (children, collapse_table)
 
 
 # Create metrics table
@@ -298,15 +301,18 @@ def calculate_metrics(n_clicks, raw_data):
                             for i in metrics.columns
                 ],
                 data=metrics.to_dict('records'),
+                style_cell={
+                            'whiteSpace': 'normal',
+                },
                 style_data={
                             'whiteSpace': 'normal',
                             'height': 'auto',
-                            #'width':'200px'
+                            'width':'200px'
                         },
                 
                 style_table={
                     'overflowX': 'auto',
-                    #'height': 300,
+                    'height': 300,
                     },
                 #editable=True,              # allow editing of data inside all cells                        
                 filter_action="native",     # allow filtering of data by user ('native') or not ('none')
@@ -314,15 +320,45 @@ def calculate_metrics(n_clicks, raw_data):
                 export_format="csv",
                 export_headers="display",
                 column_selectable='multi',
-                
+                fill_width=False
                 ),
-            dcc.Graph(
-                id='example-graph',
+            
+    ],# style={'display': 'block'}
+    )
+    
+    graph1 = dcc.Graph(
+                id='example-graph1',
                 figure=px.bar(metrics, x='ID', y='Average glucose')
         )
-    ], style={'display': 'block'})
-    
-    return metrics_table # data_table, 
+
+    graph2 = dcc.Graph(
+                id='example-graph2',
+                figure=px.box(metrics, x='eA1c')#, y='Average glucose')
+    )
+
+    graph3 = dcc.Graph(
+                id='example-graph3',
+                figure=px.line(raw_data[0]['data'], x='time', y='glc')
+    )
+
+    dashboard_layout = html.Div([
+        dbc.Card(
+            dbc.CardBody([
+                dbc.Row([
+                    dbc.Col([metrics_table], width=8),
+                    dbc.Col(graph1),
+
+                ]),
+                dbc.Row([
+                    dbc.Col(graph2, width=5),
+                    dbc.Col(graph3),
+                ]),
+            ])
+        )
+])
+
+
+    return dashboard_layout #metrics_table # data_table, 
 
 
 
