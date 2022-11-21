@@ -287,8 +287,7 @@ def calculate_metrics(n_clicks, raw_data):
             night_results.append(night)
 
     metrics = pd.DataFrame.from_dict(all_results).round(2) # this is stupid - already a dict
-    print(metrics['AUC'])
-    dcc.Store(storage_type='local', id='metrics-store', data=metrics.to_dict('records')),                 
+    #dcc.Store(storage_type='local', id='metrics-store', data=metrics.to_dict('records')),                 
 
     metrics_table = html.Div([                
             html.H6('Metrics of Glycemic Control'),
@@ -326,31 +325,82 @@ def calculate_metrics(n_clicks, raw_data):
     ],# style={'display': 'block'}
     )
     
-    graph1 = dcc.Graph(
-                id='example-graph1',
-                figure=px.bar(metrics, x='ID', y='Average glucose')
+    graph1 = html.Div([
+        dcc.Dropdown(
+                metrics.columns.unique(),
+                'Average glucose',
+                id='xaxis-column'
+        ),
+        dcc.Graph(
+                    id='example-graph1',
+                    figure=px.bar(metrics, x='ID', y='Average glucose')
         )
+    ])
 
-    graph2 = dcc.Graph(
+    graph2 = html.Div([
+        dcc.Dropdown(
+                metrics.columns.unique(),
+                'eA1c',
+                id='xaxis-column'
+            ),
+        dcc.Graph(
                 id='example-graph2',
-                figure=px.box(metrics, x='eA1c')#, y='Average glucose')
+                figure=px.box(metrics, y='eA1c')#, y='Average glucose')
     )
+    ])
 
-    graph3 = dcc.Graph(
-                id='example-graph3',
-                figure=px.line(raw_data[0]['data'], x='time', y='glc')
-    )
+    graph3 = html.Div([
 
+        #html.Div([
+         #   dcc.Dropdown(
+          #      metrics['ID'].unique(),
+           #     metrics['ID'].unique()[0],
+            #    id='xaxis-column'
+            #),
+            
+        #], style={'width': '48%', 'display': 'inline-block'}),
+            dcc.Dropdown(
+                metrics['ID'].unique(),
+                metrics['ID'].unique()[0],
+                id='xaxis-column'
+            ),
+            dcc.Graph(
+                        id='example-graph3',
+                        figure=px.line(raw_data[0]['data'], x='time', y='glc')
+            )
+    ])
+
+    units = dcc.RadioItems(
+                ['mmol/L ', 'mg/dL '],
+                'mmol/L ',
+                id='yaxis-type',
+                inline=True
+            ),
+    time_period = dcc.RadioItems(
+                ['All ', 'Day ', 'Night '],
+                'All ',
+                id='period-type',
+                inline=True
+            )
     dashboard_layout = html.Div([
+        dbc.Row([
+                    dbc.Col(units),
+                    dbc.Col(time_period),
+                    
+
+                ],justify="end"
+                ),
         dbc.Card(
             dbc.CardBody([
+                
                 dbc.Row([
                     dbc.Col([metrics_table], width=8),
-                    dbc.Col(graph1),
+                    dbc.Col(graph2),
 
-                ]),
+                ],
+                className="g-0",),
                 dbc.Row([
-                    dbc.Col(graph2, width=5),
+                    dbc.Col(graph1, width=5),
                     dbc.Col(graph3),
                 ]),
             ])
