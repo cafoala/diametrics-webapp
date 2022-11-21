@@ -1,0 +1,8 @@
+pandas
+dash
+dash-bootstrap-components
+dash-uploader
+packaging
+scipy
+scikit-learn
+
