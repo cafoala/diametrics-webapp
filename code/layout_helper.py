@@ -1,4 +1,5 @@
 from dash import dcc, html, dash_table
+import plotly.express as px
 
 def create_metrics_table(df):    
     return dash_table.DataTable(
@@ -31,3 +32,20 @@ def create_metrics_table(df):
                 column_selectable='multi',
                 fill_width=False
                 )
+
+def create_bargraph(df, y_axis):
+    return html.Div([
+        
+        dcc.Graph(
+                id='bargraph',
+                figure=px.bar(df, x='ID', y=y_axis)
+        )
+    ])
+
+def create_boxplot(df, y_axis):
+    return html.Div([
+        dcc.Graph(
+                id='boxplot',
+                figure=px.box(df, y=y_axis)
+    )
+    ])

@@ -121,11 +121,6 @@ app.layout = html.Div([
             dbc.Row([
                 dbc.Col(id='metrics-tbl'),
             ]),
-            dbc.Row([dbc.Col(html.Div([
-                html.H2('IS ANYONE THERE!??!'),
-                html.Div(id='test-table-main')]))
-            ]),
-
             dbc.Row([
                 dbc.Col(id='group-figs'),
             ]),
@@ -341,40 +336,9 @@ def calculate_metrics(n_clicks, raw_data):
                 id='period-type',
                 inline=True
             )
-    graph1 = html.Div([
-        dcc.Dropdown(
-                metrics.columns.unique(),
-                'Average glucose',
-                id='xaxis-column'
-        ),
-        dcc.Graph(
-                    id='example-graph1',
-                    figure=px.bar(metrics, x='ID', y='Average glucose')
-        )
-    ])
-
-    graph2 = html.Div([
-        dcc.Dropdown(
-                metrics.columns.unique(),
-                'eA1c',
-                id='xaxis-column'
-            ),
-        dcc.Graph(
-                id='example-graph2',
-                figure=px.box(metrics, y='eA1c')#, y='Average glucose')
-    )
-    ])
+    
 
     graph3 = html.Div([
-
-        #html.Div([
-         #   dcc.Dropdown(
-          #      metrics['ID'].unique(),
-           #     metrics['ID'].unique()[0],
-            #    id='xaxis-column'
-            #),
-            
-        #], style={'width': '48%', 'display': 'inline-block'}),
             dcc.Dropdown(
                 metrics['ID'].unique(),
                 metrics['ID'].unique()[0],
@@ -393,16 +357,8 @@ def calculate_metrics(n_clicks, raw_data):
                     dbc.Col(time_period),
         ]),
         dbc.Row([
-                dbc.Col(id='test-table',)# width=8),
-                #dbc.Col([metrics_table], width=8),
-                #dbc.Col(graph2),
-
-                ],
-                className="g-0",),
-        '''dbc.Row([
-            dbc.Col(graph1, width=5),
-            dbc.Col(graph3),
-        ])'''
+                dbc.Col(id='test-table'),
+                ]),
     ])
     collapse_table = html.Div([
             dbc.Button('3. Metrics'),                 
@@ -433,7 +389,56 @@ def update_metrics_table(period, metrics_data):
     return metrics_table
 
 
+@app.callback(
+    Output('group-figs', 'children'),
+    Input('calculate-metrics', 'n_clicks'),
+    State('metrics-store', 'data')
+)
+def create_group_figs(n_clicks, metrics):
+    if n_clicks is None:
+        PreventUpdate
+    df = pd.DataFrame.from_dict(metrics)
+    y_dropdown = dcc.Dropdown(
+                df.columns.unique(),
+                'Average glucose',
+                id='yaxis-column'
+        ),
+    figs_layout = html.Div([
+        dbc.Row([
+                    dbc.Col(html.H2('Overview figures for participants')),
+                    dbc.Col(y_dropdown),
+        ]),
+        dbc.Row([
+                dbc.Col(id='bar-graph',),
+                dbc.Col(id='box-plot',)
 
+        ])
+    ])
+    collapse_figs = html.Div([
+            dbc.Button('4. Overview figures'),                 
+            dbc.Row([
+                    dbc.Collapse(
+                        dbc.Card(figs_layout),
+                        id="metrics-tbl-collapse",
+                        is_open=True,
+                    )
+            ]),
+        ])
+    return collapse_figs
+
+@app.callback(
+    Output('bar-graph', 'children'),
+    Output('box-plot', 'children'),
+    Input('yaxis-column', 'value'),
+    Input('period-type', 'value'),
+    State('metrics-store', 'data')
+)
+def update_group_figs(yaxis, period, data):
+    df = pd.DataFrame.from_dict(data)
+    sub_df = df[df['period']==period]
+    bargraph = layout_helper.create_bargraph(sub_df, yaxis)
+    boxplot = layout_helper.create_boxplot(sub_df, yaxis)
+    return bargraph, boxplot
 
 @app.callback(Output('output-div', 'children'),
               Input('submit-button','n_clicks'),
