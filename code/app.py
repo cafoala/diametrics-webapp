@@ -121,6 +121,11 @@ app.layout = html.Div([
             dbc.Row([
                 dbc.Col(id='metrics-tbl'),
             ]),
+            dbc.Row([dbc.Col(html.Div([
+                html.H2('IS ANYONE THERE!??!'),
+                html.Div(id='test-table-main')]))
+            ]),
+
             dbc.Row([
                 dbc.Col(id='group-figs'),
             ]),
@@ -305,7 +310,7 @@ def calculate_metrics(n_clicks, raw_data):
             logging.debug(df_id.head())
             # Total df
             all = metrics_experiment.calculate_all_metrics(df_id, ID=i['ID'], unit=i['Units'], interval=i['Interval'])
-            all['period'] = 'all'
+            all['period'] = 'All'
             all_results.append(all)
 
             # Breakdown df into night and day
@@ -313,34 +318,29 @@ def calculate_metrics(n_clicks, raw_data):
             
             # Daytime breakdown metrics 
             day= metrics_experiment.calculate_all_metrics(df_day, ID=i['ID'], unit=i['Units'], interval=i['Interval'])
-            day['period'] = 'day'
+            day['period'] = 'Day'
             #day_results.append(day)
             all_results.append(day)
 
             
             # Night breakdown metrics
             night= metrics_experiment.calculate_all_metrics(df_night, ID=i['ID'], unit=i['Units'], interval=i['Interval'])
-            night['period'] = 'night'
+            night['period'] = 'Night'
             #night_results.append(night)
             all_results.append(night)
-            
     metrics = pd.DataFrame.from_dict(all_results).round(2) # this is stupid - already a dict
-
     units = dcc.RadioItems(
-                ['mmol/L ', 'mg/dL '],
+                ['mmol/L', 'mg/dL'],
                 'mmol/L ',
-                id='yaxis-type',
+                id='unit-type',
                 inline=True
             ),
     time_period = dcc.RadioItems(
-                ['All ', 'Day ', 'Night '],
-                'All ',
+                ['All', 'Day', 'Night'],
+                'All',
                 id='period-type',
                 inline=True
             )
-    
-    metrics_table = layout_helper.create_metrics_table(metrics.loc[metrics['period']=='all'])
-    
     graph1 = html.Div([
         dcc.Dropdown(
                 metrics.columns.unique(),
@@ -385,33 +385,6 @@ def calculate_metrics(n_clicks, raw_data):
                         figure=px.line(raw_data[0]['data'], x='time', y='glc')
             )
     ])
-
-   
-                   
-    dashboard_layout = html.Div([
-        dbc.Row([
-                    dbc.Col(units),
-                    dbc.Col(time_period),
-                    
-
-                ],justify="end"
-                ),
-        dbc.Card(
-            dbc.CardBody([
-                
-                dbc.Row([
-                    dbc.Col([metrics_table], width=8),
-                    dbc.Col(graph2),
-
-                ],
-                className="g-0",),
-                dbc.Row([
-                    dbc.Col(graph1, width=5),
-                    dbc.Col(graph3),
-                ]),
-            ])
-        )
-])
     
     metrics_layout = html.Div([
         dbc.Row([
@@ -420,28 +393,45 @@ def calculate_metrics(n_clicks, raw_data):
                     dbc.Col(time_period),
         ]),
         dbc.Row([
-                dbc.Col([metrics_table], width=8),
-                dbc.Col(graph2),
+                dbc.Col(id='test-table',)# width=8),
+                #dbc.Col([metrics_table], width=8),
+                #dbc.Col(graph2),
 
                 ],
                 className="g-0",),
-                dbc.Row([
-                    dbc.Col(graph1, width=5),
-                    dbc.Col(graph3),
-        ])
+        '''dbc.Row([
+            dbc.Col(graph1, width=5),
+            dbc.Col(graph3),
+        ])'''
     ])
     collapse_table = html.Div([
-            dbc.Button('Metrics'),                 
+            dbc.Button('3. Metrics'),                 
             dbc.Row([
                     dbc.Collapse(
-                        dbc.Card(metrics_layout, body=True),
+                        dbc.Card(metrics_layout),
                         id="metrics-tbl-collapse",
                         is_open=True,
                     )
             ]),
         ])
-    
-    return metrics.to_dict('records'), collapse_table #metrics_table # data_table, 
+    #metrics.to_dict('records')
+    return all_results, collapse_table #metrics_table # data_table, 
+
+
+@app.callback(
+    Output('test-table', 'children'),
+    #Input('unit-type', 'value'),
+    Input('period-type', 'value'),
+    State('metrics-store', 'data')
+    )
+def update_metrics_table(period, metrics_data):
+    print(period)
+    df = pd.DataFrame.from_dict(metrics_data)
+    sub_df = df[df['period']==period].round(2)
+    metrics_table = layout_helper.create_metrics_table(sub_df)
+    #print(metrics_table.head())
+    return metrics_table
+
 
 
 

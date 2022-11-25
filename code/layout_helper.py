@@ -1,12 +1,11 @@
 from dash import dcc, html, dash_table
 
 def create_metrics_table(df):    
-    return html.Div([                
-            dash_table.DataTable(
-                id='metrics_tbl',
+    return dash_table.DataTable(
+                #id='metrics_tbl',
                 columns=[
                             {"name": i, "id": i, "deletable": False, "selectable": True, "hideable": False}
-                            if i == "iso_alpha3" or i == "Filename" or i == "id"
+                            if i == "iso_alpha3" or i == "ID" or i == "id"
                             else {"name": i, "id": i, "hideable": True, "selectable": True}
                             for i in df.columns
                 ],
@@ -31,7 +30,4 @@ def create_metrics_table(df):
                 export_headers="display",
                 column_selectable='multi',
                 fill_width=False
-                ),
-            
-    ],# style={'display': 'block'}
-    )
+                )

@@ -43,8 +43,8 @@ def calculate_all_metrics(df, ID, interval, unit='mmol'):
         results.update(old_hypos)
         
         # Amount of data available
-        data_sufficiency = metrics_helper.helper_missing(df,  gap_size=interval)
-        results.update(data_sufficiency)                        
+        #data_sufficiency = metrics_helper.helper_missing(df,  gap_size=interval)
+        #results.update(data_sufficiency)                        
 
         return results
     
