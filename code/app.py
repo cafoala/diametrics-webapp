@@ -337,19 +337,6 @@ def calculate_metrics(n_clicks, raw_data):
                 inline=True
             )
     
-
-    graph3 = html.Div([
-            dcc.Dropdown(
-                metrics['ID'].unique(),
-                metrics['ID'].unique()[0],
-                id='xaxis-column'
-            ),
-            dcc.Graph(
-                        id='example-graph3',
-                        figure=px.line(raw_data[0]['data'], x='time', y='glc')
-            )
-    ])
-    
     metrics_layout = html.Div([
         dbc.Row([
                     dbc.Col(html.H2('Metrics of Glycemic Control')),
@@ -392,11 +379,14 @@ def update_metrics_table(period, metrics_data):
 @app.callback(
     Output('group-figs', 'children'),
     Input('calculate-metrics', 'n_clicks'),
-    State('metrics-store', 'data')
+    State('metrics-store', 'data'),
+    prevent_initial_call=True
 )
 def create_group_figs(n_clicks, metrics):
     if n_clicks is None:
         PreventUpdate
+    '''if n_clicks == 0:
+        PreventUpdate'''
     df = pd.DataFrame.from_dict(metrics)
     y_dropdown = dcc.Dropdown(
                 df.columns.unique(),
@@ -410,7 +400,12 @@ def create_group_figs(n_clicks, metrics):
         ]),
         dbc.Row([
                 dbc.Col(id='bar-graph',),
-                dbc.Col(id='box-plot',)
+                dbc.Col(id='box-plot',),
+
+        ]),
+        dbc.Row([
+                dbc.Col(id='scatter-plot'),
+                dbc.Col(id='summary-stats'),
 
         ])
     ])
@@ -419,8 +414,8 @@ def create_group_figs(n_clicks, metrics):
             dbc.Row([
                     dbc.Collapse(
                         dbc.Card(figs_layout),
-                        id="metrics-tbl-collapse",
-                        is_open=True,
+                        id="overview-figs-collapse",
+                        is_open=False,
                     )
             ]),
         ])
@@ -429,6 +424,8 @@ def create_group_figs(n_clicks, metrics):
 @app.callback(
     Output('bar-graph', 'children'),
     Output('box-plot', 'children'),
+    Output('scatter-plot', 'children'),
+    Output('summary-stats', 'children'),
     Input('yaxis-column', 'value'),
     Input('period-type', 'value'),
     State('metrics-store', 'data')
@@ -438,7 +435,51 @@ def update_group_figs(yaxis, period, data):
     sub_df = df[df['period']==period]
     bargraph = layout_helper.create_bargraph(sub_df, yaxis)
     boxplot = layout_helper.create_boxplot(sub_df, yaxis)
-    return bargraph, boxplot
+    scatterplot, stats = layout_helper.create_scatter(sub_df, 'eA1c', 'TIR normal')
+    return bargraph, boxplot, scatterplot, stats
+
+@app.callback(
+    Output('individual-figs', 'children'),
+    Input('calculate-metrics', 'n_clicks'),
+    State('metrics-store', 'data'),
+    prevent_initial_call=True
+)
+def create_individual_figs(n_clicks, metrics):
+    if n_clicks is None:
+        PreventUpdate
+    df = pd.DataFrame.from_dict(metrics)
+    subject_id = dcc.Dropdown(
+                metrics['ID'].unique(),
+                metrics['ID'].unique()[0],
+                id='subject-id'
+            ),
+    figs_layout = html.Div([
+        dbc.Row([
+                    dbc.Col(html.H2('Closer look at individual participants')),
+                    dbc.Col(subject_id),
+        ]),
+        dbc.Row([
+                dbc.Col(id='amb-glc-profile',),
+        ]),
+        dbc.Row([
+                dbc.Col(id='scatter-plot'),
+                dbc.Col(id='summary-stats'),
+
+        ])
+    ])
+    collapse_figs = html.Div([
+            dbc.Button('4. Individual breakdown'),                 
+            dbc.Row([
+                    dbc.Collapse(
+                        dbc.Card(figs_layout),
+                        id="individual-figs-collapse",
+                        is_open=False,
+                    )
+            ]),
+        ])
+    return collapse_figs
+
+
 
 @app.callback(Output('output-div', 'children'),
               Input('submit-button','n_clicks'),
