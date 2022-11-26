@@ -98,8 +98,8 @@ metrics_content= html.Div([
         ),
     
 app.layout = html.Div([
-    dcc.Store(storage_type='local', id='raw-data-store'),
-    dcc.Store(storage_type='local', id='metrics-store'),
+    dcc.Store(storage_type='memory', id='raw-data-store'),
+    dcc.Store(storage_type='memory', id='metrics-store'),
     dbc.Col(navbar),
     dbc.Card(
         dbc.CardBody([
@@ -255,7 +255,7 @@ def preprocess_data(n_clicks, list_of_dates, list_of_contents, list_of_names):
                     
                     style_table={
                         'overflowX': 'auto',
-                        #'height': 300,
+                        'height': 300,
                         },
                     editable=True,              # allow editing of data inside all cells
                     filter_action="native",     # allow filtering of data by user ('native') or not ('none')
@@ -323,7 +323,7 @@ def calculate_metrics(n_clicks, raw_data):
             night['period'] = 'Night'
             #night_results.append(night)
             all_results.append(night)
-    metrics = pd.DataFrame.from_dict(all_results).round(2) # this is stupid - already a dict
+    #metrics = pd.DataFrame.from_dict(all_results).round(2) # this is stupid - already a dict
     units = dcc.RadioItems(
                 ['mmol/L', 'mg/dL'],
                 'mmol/L ',
@@ -376,17 +376,19 @@ def update_metrics_table(period, metrics_data):
     return metrics_table
 
 
+
 @app.callback(
     Output('group-figs', 'children'),
-    Input('calculate-metrics', 'n_clicks'),
+    #Input('calculate-metrics', 'n_clicks'),
+    Input('metrics-store', 'modified_timestamp'),
     State('metrics-store', 'data'),
     prevent_initial_call=True
 )
-def create_group_figs(n_clicks, metrics):
-    if n_clicks is None:
-        PreventUpdate
-    '''if n_clicks == 0:
-        PreventUpdate'''
+def create_group_figs(ts, metrics):
+    if ts is None:
+        raise PreventUpdate
+    #if n_clicks == 0:
+     #   raise PreventUpdate
     df = pd.DataFrame.from_dict(metrics)
     y_dropdown = dcc.Dropdown(
                 df.columns.unique(),
@@ -415,7 +417,7 @@ def create_group_figs(n_clicks, metrics):
                     dbc.Collapse(
                         dbc.Card(figs_layout),
                         id="overview-figs-collapse",
-                        is_open=False,
+                        is_open=True,
                     )
             ]),
         ])
@@ -440,17 +442,19 @@ def update_group_figs(yaxis, period, data):
 
 @app.callback(
     Output('individual-figs', 'children'),
-    Input('calculate-metrics', 'n_clicks'),
+    #Input('calculate-metrics', 'n_clicks'),
+    Input('metrics-store', 'modified_timestamp'),
     State('metrics-store', 'data'),
     prevent_initial_call=True
 )
-def create_individual_figs(n_clicks, metrics):
-    if n_clicks is None:
-        PreventUpdate
+def create_individual_figs(ts, metrics):
+    if ts is None:
+        raise PreventUpdate
     df = pd.DataFrame.from_dict(metrics)
+    print(df['ID'].unique())
     subject_id = dcc.Dropdown(
-                metrics['ID'].unique(),
-                metrics['ID'].unique()[0],
+                df['ID'].unique(),
+                df['ID'].unique()[0],
                 id='subject-id'
             ),
     figs_layout = html.Div([
@@ -462,9 +466,7 @@ def create_individual_figs(n_clicks, metrics):
                 dbc.Col(id='amb-glc-profile',),
         ]),
         dbc.Row([
-                dbc.Col(id='scatter-plot'),
-                dbc.Col(id='summary-stats'),
-
+                dbc.Col(id='glc-trace'),
         ])
     ])
     collapse_figs = html.Div([
@@ -473,13 +475,28 @@ def create_individual_figs(n_clicks, metrics):
                     dbc.Collapse(
                         dbc.Card(figs_layout),
                         id="individual-figs-collapse",
-                        is_open=False,
+                        is_open=True,
                     )
             ]),
         ])
     return collapse_figs
 
-
+@app.callback(
+    Output('amb-glc-profile', 'children'),
+    Output('glc-trace', 'children'),
+    Input('subject-id', 'value'),
+    State('raw-data-store', 'data'),
+    #prevent_initial_call=True
+)
+def update_group_figs(subject_id, data):
+    print(subject_id)
+    subject_data = next(item for item in data if item["ID"] == subject_id)
+    print(subject_data)
+    df = pd.DataFrame.from_dict(subject_data['data'])
+    print(df.head())
+    agp = layout_helper.create_amb_glc_profile(df)
+    glc_trace = layout_helper.create_glucose_trace(df)
+    return agp, glc_trace
 
 @app.callback(Output('output-div', 'children'),
               Input('submit-button','n_clicks'),
