@@ -10,11 +10,18 @@ import pandas as pd
 import numpy as np
 import dash_bootstrap_components as dbc
 import dash_uploader as du
-import preprocessing
+#import preprocessing
 import metrics_experiment
 import periods
 from dash.exceptions import PreventUpdate
+import layout
 import layout_helper
+# Import modules with content
+import upload_content_section
+import data_tbl_section
+import metrics_tbl_section
+import overview_figs_section
+import individual_figs_section
 #from preprocess_data_dash import *
 logging.basicConfig(level=logging.DEBUG)
 
@@ -26,136 +33,7 @@ colors = {
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)#, suppress_callback_exceptions=True)
 app.config.suppress_callback_exceptions = True
 
-
-navbar = dbc.NavbarSimple(
-    children=[
-        dbc.NavItem(dbc.NavLink("Dashboard", href="#")),
-        dbc.NavItem(dbc.NavLink("How-to", href="#")),
-        dbc.NavItem(dbc.NavLink("Theory and Code", href="#")),
-        dbc.NavItem(dbc.NavLink("About Us", href="#")),
-        ],
-    brand="Diametrics",
-    brand_href="#",
-    color="dark",
-    dark=True,
-)
-intro = html.Div(
-    [
-        html.H3('Welcome to', style={'textAlign': 'center'}),
-
-        html.H1('Diametrics', style={'textAlign': 'center'}),
-
-        html.P('A no-code webtool for calculating the metrics of glycemic control, creating visualisations and exploring continuous glucose monitoring (CGM) data',
-                style={'textAlign': 'center'}
-                ),
-    ]
-)
-
-upload_section= html.Div([
-        dbc.Row([
-                dbc.Col(html.Div([
-                    html.H2('Upload files'),
-                    html.P('To begin, use the button below to select your CGM files'),
-                    ]
-                #style={'textAlign': 'left'}
-                ), width=8),
-                dbc.Col(dcc.Upload(dbc.Button('Select Files', color="secondary"),
-                                multiple=True,
-                                id='upload-data',))
-        ]),
-        dbc.Row([
-                dbc.Col(html.Div(id='filelist'))
-            ]),
-    
-       
-    ],    
-),
-
-
-data_content = html.Div([
-                    html.Div(
-                    id='data-tbl',
-                    style={
-                        'width': '80%',
-                        'height': '60px',
-                        'textAlign': 'center',
-                        'margin': '10px'
-                    },
-                    ),
-])
-metrics_content= html.Div([
-
-        html.Div(
-                id='metrics-tbl',
-                style={
-                    'width': '80%',
-                    'height': '60px',
-                    'textAlign': 'center',
-                    'margin': '10px'
-                },
-            ),
-        ],
-        ),
-    
-app.layout = html.Div([
-    dcc.Store(storage_type='memory', id='raw-data-store'),
-    dcc.Store(storage_type='memory', id='metrics-store'),
-    dbc.Col(navbar),
-    dbc.Card(
-        dbc.CardBody([
-            dbc.Row([dbc.Col(dbc.Collapse(intro, id='intro-collapse', is_open=True))
-                ]),
-            dbc.Button("1. Upload files", color="primary", id="collapse-upload-button", n_clicks=0),
-            dbc.Row([
-                dbc.Col(
-                    dbc.Collapse(
-                        dbc.Card(upload_section, body=True),
-                        id="upload-section-collapse",
-                        is_open=True,
-                    )
-                ),
-            ]),
-            dbc.Row([
-                dbc.Col(id='data-tbl'),
-            ]),
-            dbc.Row([
-                dbc.Col(id='metrics-tbl'),
-            ]),
-            dbc.Row([
-                dbc.Col(id='group-figs'),
-            ]),
-            dbc.Row([
-                dbc.Col(id='individual-figs'),
-            ]),
-        ])
-    )
-])
-
-def parse_contents(contents, filename, date):
-    content_type, content_string = contents.split(',')
-
-    decoded = base64.b64decode(content_string)
-    
-    try:
-        if 'csv' in filename:
-            # Assume that the user uploaded a CSV file
-            df = pd.read_csv(
-                io.StringIO(decoded.decode('utf-8')), header=None)
-        elif 'xls' in filename:
-            # Assume that the user uploaded an excel file
-            df = pd.read_excel(io.BytesIO(decoded), header=None)
-
-        elif 'txt' or 'tsv' in filename:
-            # Assume that the user upl, delimiter = r'\s+'oaded an excel file
-            df = pd.read_csv(
-                io.StringIO(decoded.decode('utf-8')), delimiter = r'\s+', header=None)
-
-    except Exception as e:
-        print(e)
-        return html.Div([
-            'There was an error processing file with name: ' + filename
-        ])
-    return preprocessing.preprocess_df(df, filename)
+app.layout = layout.create_layout()
 
 
 # Collapse data table options panel once calculated
@@ -189,6 +67,15 @@ def toggle_right_options(n_clicks):
     if n_clicks:
         return False
 
+for section in [['metrics-tbl-collapse','metrics-button'], ['overview-figs-collapse','overview-figs-button'], ['individual-figs-collapse','individual-figs-button']]:
+    @app.callback(Output(section[0], 'is_open'),
+        Input(section[1], 'n_clicks'),
+        State(section[0], 'is_open')
+    )
+    def toggle_buttons(n_clicks, is_open):
+        if n_clicks:
+            return not is_open# , not is_open]
+        return is_open#, is_open]
 
 # List the filenames
 @app.callback(Output('filelist', 'children'),
@@ -198,22 +85,7 @@ def toggle_right_options(n_clicks):
 def list_files(list_of_contents, list_of_names):
     if list_of_contents is not None:
 
-        file_list = html.Div([
-            html.H5('Selected files:'),
-            html.Div([i for i in list_of_names], 
-            style={"overflow": "scroll",
-                    'width': '70%',
-                    'height': '100px',
-                    'lineHeight': '60px',
-                    'borderWidth': '1px',
-                    'borderStyle': 'dashed',
-                    'borderRadius': '5px',
-                    'textAlign': 'center',
-                    'margin': '10px',
-                    'justify': "center",}),
-            html.P('If you\'re happy with these files, click the button below to process your data'),
-            dbc.Button('Preprocess data', id='preprocess-button', color='secondary', n_clicks=0)
-            ])
+        file_list = upload_content_section.create_file_list(list_of_names)
         return file_list#, False
                 
 @app.callback([Output('raw-data-store', 'data'),
@@ -224,63 +96,25 @@ def list_files(list_of_contents, list_of_names):
     State('upload-data', 'filename'),
     prevent_initial_call=True)
 def preprocess_data(n_clicks, list_of_dates, list_of_contents, list_of_names):
-    #if n_clicks is not None:
-    #    n_clicks = 0
     if n_clicks is None or list_of_dates is None:
         raise PreventUpdate
-    if n_clicks >0:
-        print('preprocessing')
-        children = [
-            parse_contents(c, n, d) for c, n, d in
-            zip(list_of_contents, list_of_names, list_of_dates)]
-        
-        data_details = pd.DataFrame.from_dict(children)[['Filename', 'ID', 'Usable', 'Device', 'Interval', 'Data Sufficiency', 'Start Time', 'End Time']]
-        data_table = html.Div([
-                html.H2('Data details'),
-
-                dash_table.DataTable(
-                    id='data_tbl',
-                    columns=[
-                                {"name": i, "id": i, "deletable": False, "selectable": True, "hideable": False}
-                                if i == "iso_alpha3" or i == "Filename" or i == "id"
-                                else {"name": i, "id": i, "hideable": True, "selectable": True}
-                                for i in data_details.columns
-                    ],
-                    data=data_details.to_dict('records'),
-                    style_data={
-                                'whiteSpace': 'normal',
-                                'height': 'auto',
-                                #'width':'200px'
-                            },
-                    
-                    style_table={
-                        'overflowX': 'auto',
-                        'height': 300,
-                        },
-                    editable=True,              # allow editing of data inside all cells
-                    filter_action="native",     # allow filtering of data by user ('native') or not ('none')
-                    sort_action="native",       # enables data to be sorted per-column by user or not ('none')
-                    export_format="csv",
-                    export_headers="display",
-                    ),
-                    html.P('The table shows your preprocessed data. Please make sure to check that the data is \
-                        what you want for your files and edit accordingly. Most importantly, the ID, the start and \
-                            end dates as these will be used for the rest of your data analysis. If you do edit, \
-                              please press the reprocess button to get an updated table'),
-                    dbc.Button('Calculate metrics', id='calculate-metrics', color='secondary')
-            ]),
-            
-        collapse_table = html.Div([
-                dbc.Button("2. Check your data", color="primary", id="collapse-data-tbl-button", n_clicks=0),
-                dbc.Row([
-                    dbc.Collapse(
-                        dbc.Card(data_table, body=True),
-                        id="data-tbl-collapse",
-                        is_open=True,
-                    )
-            ]),
-        ])
-        return (children, collapse_table)
+    children = [
+        data_tbl_section.parse_contents(c, n, d) for c, n, d in
+        zip(list_of_contents, list_of_names, list_of_dates)]
+    
+    data_table = data_tbl_section.create_data_table(children)
+    
+    collapse_table = html.Div([
+        dbc.Button("2. Check your data", color="primary", id="collapse-data-tbl-button", n_clicks=0),
+        dbc.Row([
+            dbc.Collapse(
+                dbc.Card(data_table, body=True),
+                id="data-tbl-collapse",
+                is_open=True,
+            )
+        ]),
+    ])
+    return (children, collapse_table)
 
 
 # Create metrics table
@@ -294,61 +128,13 @@ def calculate_metrics(n_clicks, raw_data):
         # prevent the None callbacks is important with the store component.
         # you don't want to update the store for nothing.
         raise PreventUpdate
-    all_results = []
-    #day_results = []
-    #night_results = []
-
-    for i in raw_data:
-        if i['Usable']==True:
-            df_id = pd.DataFrame.from_dict(i['data'])
-            df_id.time = pd.to_datetime(df_id.time)
-            logging.debug(df_id.head())
-            # Total df
-            all = metrics_experiment.calculate_all_metrics(df_id, ID=i['ID'], unit=i['Units'], interval=i['Interval'])
-            all['period'] = 'All'
-            all_results.append(all)
-
-            # Breakdown df into night and day
-            df_day, df_night = periods.get_day_night_breakdown(df_id)
-            
-            # Daytime breakdown metrics 
-            day= metrics_experiment.calculate_all_metrics(df_day, ID=i['ID'], unit=i['Units'], interval=i['Interval'])
-            day['period'] = 'Day'
-            #day_results.append(day)
-            all_results.append(day)
-
-            
-            # Night breakdown metrics
-            night= metrics_experiment.calculate_all_metrics(df_night, ID=i['ID'], unit=i['Units'], interval=i['Interval'])
-            night['period'] = 'Night'
-            #night_results.append(night)
-            all_results.append(night)
+    all_results = metrics_tbl_section.calculate_metrics(raw_data)
     #metrics = pd.DataFrame.from_dict(all_results).round(2) # this is stupid - already a dict
-    units = dcc.RadioItems(
-                ['mmol/L', 'mg/dL'],
-                'mmol/L ',
-                id='unit-type',
-                inline=True
-            ),
-    time_period = dcc.RadioItems(
-                ['All', 'Day', 'Night'],
-                'All',
-                id='period-type',
-                inline=True
-            )
     
-    metrics_layout = html.Div([
-        dbc.Row([
-                    dbc.Col(html.H2('Metrics of Glycemic Control')),
-                    dbc.Col(units),
-                    dbc.Col(time_period),
-        ]),
-        dbc.Row([
-                dbc.Col(id='test-table'),
-                ]),
-    ])
+    metrics_layout = metrics_tbl_section.get_metrics_layout()
+    
     collapse_table = html.Div([
-            dbc.Button('3. Metrics'),                 
+            dbc.Button('3. Metrics', id='metrics-button'),                 
             dbc.Row([
                     dbc.Collapse(
                         dbc.Card(metrics_layout),
@@ -357,9 +143,7 @@ def calculate_metrics(n_clicks, raw_data):
                     )
             ]),
         ])
-    #metrics.to_dict('records')
-    return all_results, collapse_table #metrics_table # data_table, 
-
+    return all_results, collapse_table
 
 @app.callback(
     Output('test-table', 'children'),
@@ -368,32 +152,27 @@ def calculate_metrics(n_clicks, raw_data):
     State('metrics-store', 'data')
     )
 def update_metrics_table(period, metrics_data):
-    print(period)
     df = pd.DataFrame.from_dict(metrics_data)
     sub_df = df[df['period']==period].round(2)
-    metrics_table = layout_helper.create_metrics_table(sub_df)
+    metrics_table = metrics_tbl_section.create_metrics_table(sub_df)
     #print(metrics_table.head())
     return metrics_table
-
 
 
 @app.callback(
     Output('group-figs', 'children'),
     #Input('calculate-metrics', 'n_clicks'),
     Input('metrics-store', 'modified_timestamp'),
-    State('metrics-store', 'data'),
+    #State('metrics-store', 'data'),
     prevent_initial_call=True
 )
-def create_group_figs(ts, metrics):
+def create_group_figs(ts):#, metrics):
     if ts is None:
         raise PreventUpdate
-    #if n_clicks == 0:
-     #   raise PreventUpdate
-    #df = pd.DataFrame.from_dict(metrics)
     options = ['Time in range', 'Average glucose', 'SD', 'CV', 'eA1c', 
     'Hypoglycemic episodes', 'AUC', 'MAGE', 'LBGI/HBGI']
     y_dropdown = dcc.Dropdown(options,
-                'Average glucose',
+                'Time in range',
                 id='yaxis-column'
         ),
     figs_layout = html.Div([
@@ -413,7 +192,7 @@ def create_group_figs(ts, metrics):
         ])
     ])
     collapse_figs = html.Div([
-            dbc.Button('4. Overview figures'),                 
+            dbc.Button('4. Overview figures', id='overview-figs-button'),                 
             dbc.Row([
                     dbc.Collapse(
                         dbc.Card(figs_layout),
@@ -427,8 +206,8 @@ def create_group_figs(ts, metrics):
 @app.callback(
     Output('bar-graph', 'children'),
     Output('box-plot', 'children'),
-    Output('scatter-plot', 'children'),
-    Output('summary-stats', 'children'),
+    #Output('scatter-plot', 'children'),
+    #Output('summary-stats', 'children'),
     Input('yaxis-column', 'value'),
     Input('period-type', 'value'),
     State('metrics-store', 'data')
@@ -436,10 +215,10 @@ def create_group_figs(ts, metrics):
 def update_group_figs(yaxis, period, data):
     df = pd.DataFrame.from_dict(data)
     sub_df = df[df['period']==period]
-    bargraph = layout_helper.create_bargraph(sub_df, yaxis)
-    boxplot = layout_helper.create_boxplot(sub_df, yaxis)
-    scatterplot, stats = layout_helper.create_scatter(sub_df, 'eA1c', 'TIR normal')
-    return bargraph, boxplot, scatterplot, stats
+    bargraph = overview_figs_section.create_bargraph(sub_df, yaxis)
+    boxplot = overview_figs_section.create_boxplot(sub_df, yaxis)
+    #scatterplot, stats = overview_figs_section.create_scatter(sub_df, 'eA1c', 'TIR normal')
+    return bargraph, boxplot, #scatterplot, stats
 
 @app.callback(
     Output('individual-figs', 'children'),
@@ -452,7 +231,6 @@ def create_individual_figs(ts, metrics):
     if ts is None:
         raise PreventUpdate
     df = pd.DataFrame.from_dict(metrics)
-    print(df['ID'].unique())
     subject_id = dcc.Dropdown(
                 df['ID'].unique(),
                 df['ID'].unique()[0],
@@ -471,7 +249,7 @@ def create_individual_figs(ts, metrics):
         ])
     ])
     collapse_figs = html.Div([
-            dbc.Button('4. Individual breakdown'),                 
+            dbc.Button('4. Individual breakdown', id='individual-figs-button'),                 
             dbc.Row([
                     dbc.Collapse(
                         dbc.Card(figs_layout),
@@ -490,27 +268,12 @@ def create_individual_figs(ts, metrics):
     #prevent_initial_call=True
 )
 def update_group_figs(subject_id, data):
-    print(subject_id)
     subject_data = next(item for item in data if item["ID"] == subject_id)
-    print(subject_data)
     df = pd.DataFrame.from_dict(subject_data['data'])
-    print(df.head())
-    agp = layout_helper.create_amb_glc_profile(df)
-    glc_trace = layout_helper.create_glucose_trace(df)
+    agp = individual_figs_section.create_amb_glc_profile(df)
+    glc_trace = individual_figs_section.create_glucose_trace(df)
     return agp, glc_trace
 
-@app.callback(Output('output-div', 'children'),
-              Input('submit-button','n_clicks'),
-              State('stored-data','data'),
-              State('xaxis-data','value'),
-              State('yaxis-data', 'value'))
-def make_graphs(n, data, x_data, y_data):
-    if n is None:
-        return dash.no_update
-    else:
-        bar_fig = px.bar(data, x=x_data, y=y_data)
-        # print(data)
-        return dcc.Graph(figure=bar_fig)
 
 if __name__ == '__main__':
     app.run_server(debug=True)#, dev_tools_ui=False)
