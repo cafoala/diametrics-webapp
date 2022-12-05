@@ -39,19 +39,42 @@ def create_metrics_table(df):
                 )
 
 def create_bargraph(df, y_axis):
+    if y_axis=='Time in range':
+        fig = px.bar(df, x='ID', y=['TIR level 2 hypoglycemia', 'TIR level 1 hypoglycemia', 'TIR normal', 'TIR level 1 hyperglycemia', 'TIR level 2 hyperglycemia'])
+    elif y_axis =='Hypoglycemic episodes':
+        fig = px.bar(df, x='ID', y=['Level 1 hypoglycemic episodes', 'Level 2 hypoglycemic episodes'])
+    elif y_axis == 'LBGI/HBGI':
+        fig = px.bar(df, x='ID', y=['LBGI', 'HBGI'])
+    else:
+        fig = px.bar(df, y=y_axis)
+    return html.Div([
+        dcc.Graph(
+                id='bargraph',
+                figure=fig
+    )
+    ])
+    '''
     return html.Div([
         
         dcc.Graph(
                 id='bargraph',
                 figure=px.bar(df, x='ID', y=y_axis)
         )
-    ])
+    ])'''
 
 def create_boxplot(df, y_axis):
+    if y_axis=='Time in range (all)':
+        fig = px.box(df, x='ID', y=['TIR level 2 hypoglycemia', 'TIR level 1 hypoglycemia', 'TIR normal', 'TIR level 1 hyperglycemia', 'TIR level 2 hyperglycemia'])
+    elif y_axis =='Hypoglycemic episodes':
+        fig = px.box(df, x='ID', y=['Level 1 hypoglycemic episodes', 'Level 2 hypoglycemic episodes'])
+    elif y_axis == 'LBGI/HBGI':
+        fig = px.box(df, x='ID', y=['LBGI', 'HBGI'])
+    else:
+        fig = px.box(df, y=y_axis)
     return html.Div([
         dcc.Graph(
                 id='boxplot',
-                figure=px.box(df, y=y_axis)
+                figure=fig
     )
     ])
 

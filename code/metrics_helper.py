@@ -203,8 +203,8 @@ def number_of_hypos(df):
     number_lv1_hypos = number_hypos - number_lv2_hypos
     
     # Save as dataframe and return
-    frame = {'Total hypogylcemic episodes1':number_hypos, 'Level 1 hypogylcemic episodes1':number_lv1_hypos, 'Level 2 hypogylcemic episodes1':number_lv2_hypos,
-                           'Average length of hypoglycemic episodes1':str(avg_length), 'Total time in hypoglycemiaZ':str(total_time_hypo)}
+    frame = {'Total hypoglycemic episodes':number_hypos, 'Level 1 hypoglycemic episodes':number_lv1_hypos, 'Level 2 hypoglycemic episodes':number_lv2_hypos,
+                           'Average length of hypoglycemic episodes':str(avg_length), 'Total time in hypoglycemia':str(total_time_hypo)}
     return frame
 
 def helper_hypo_episodes(df, gap_size, interpolate=False, interp_method='pchip', lv1_threshold=3.9, lv2_threshold=3):
@@ -346,7 +346,7 @@ def helper_hypo_episodes(df, gap_size, interpolate=False, interp_method='pchip',
     number_lv2_hypos = results[results['lv2']].shape[0]
     number_lv1_hypos = number_hypos - number_lv2_hypos
 
-    overview = {'Total hypogylcemic episodes':number_hypos, 'Level 1 hypogylcemic episodes':number_lv1_hypos, 'Level 2 hypogylcemic episodes':number_lv2_hypos,
+    overview = {'Total hypoglycemic episodes':number_hypos, 'Level 1 hypoglycemic episodes':number_lv1_hypos, 'Level 2 hypoglycemic episodes':number_lv2_hypos,
                            'Average length of hypoglycemic episodes':avg_length, 'Total time in hypoglycemia':total_time_hypo}
 
     return overview, results

@@ -389,9 +389,10 @@ def create_group_figs(ts, metrics):
         raise PreventUpdate
     #if n_clicks == 0:
      #   raise PreventUpdate
-    df = pd.DataFrame.from_dict(metrics)
-    y_dropdown = dcc.Dropdown(
-                df.columns.unique(),
+    #df = pd.DataFrame.from_dict(metrics)
+    options = ['Time in range', 'Average glucose', 'SD', 'CV', 'eA1c', 
+    'Hypoglycemic episodes', 'AUC', 'MAGE', 'LBGI/HBGI']
+    y_dropdown = dcc.Dropdown(options,
                 'Average glucose',
                 id='yaxis-column'
         ),
