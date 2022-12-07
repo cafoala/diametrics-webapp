@@ -4,6 +4,32 @@ import pandas as pd
 import metrics_experiment
 import periods
 
+def get_metrics_layout():
+    units = dcc.RadioItems(
+                ['mmol/L', 'mg/dL'],
+                'mmol/L ',
+                id='unit-type',
+                inline=True
+            ),
+    time_period = dcc.RadioItems(
+                ['All', 'Day', 'Night'],
+                'All',
+                id='period-type',
+                inline=True
+            )
+    
+    metrics_layout = html.Div([
+        dbc.Row([
+                    dbc.Col(html.H2('Metrics of Glycemic Control')),
+                    dbc.Col(units),
+                    dbc.Col(time_period),
+        ]),
+        dbc.Row([
+                dbc.Col(id='test-table'),
+                ]),
+    ])
+    return metrics_layout
+    
 def calculate_metrics(raw_data):
     all_results = []
     #day_results = []
@@ -66,29 +92,3 @@ def create_metrics_table(df):
                 column_selectable='multi',
                 fill_width=False
                 )
-
-def get_metrics_layout():
-    units = dcc.RadioItems(
-                ['mmol/L', 'mg/dL'],
-                'mmol/L ',
-                id='unit-type',
-                inline=True
-            ),
-    time_period = dcc.RadioItems(
-                ['All', 'Day', 'Night'],
-                'All',
-                id='period-type',
-                inline=True
-            )
-    
-    metrics_layout = html.Div([
-        dbc.Row([
-                    dbc.Col(html.H2('Metrics of Glycemic Control')),
-                    dbc.Col(units),
-                    dbc.Col(time_period),
-        ]),
-        dbc.Row([
-                dbc.Col(id='test-table'),
-                ]),
-    ])
-    return metrics_layout

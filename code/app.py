@@ -1,6 +1,6 @@
-import base64
-import datetime
-import io
+#import base64
+#import datetime
+#import io
 import plotly.express as px
 import dash
 from dash.dependencies import Input, Output, State
@@ -9,20 +9,21 @@ import logging
 import pandas as pd
 import numpy as np
 import dash_bootstrap_components as dbc
-import dash_uploader as du
+#import dash_uploader as du
 #import preprocessing
-import metrics_experiment
-import periods
+#import metrics_experiment
+#import periods
 from dash.exceptions import PreventUpdate
 import layout
-import layout_helper
-# Import modules with content
-import upload_content_section
-import data_tbl_section
-import metrics_tbl_section
-import overview_figs_section
-import individual_figs_section
-#from preprocess_data_dash import *
+#import layout_helper
+
+# Import modules with section contents
+import section_upload_content
+import section_data_tbl
+import section_analysis_options
+import section_metrics_tbl
+import section_overview_figs
+import section_individual_figs
 logging.basicConfig(level=logging.DEBUG)
 
 external_stylesheets = [dbc.themes.JOURNAL]
@@ -35,7 +36,7 @@ app.config.suppress_callback_exceptions = True
 
 app.layout = layout.create_layout()
 
-
+## COLLAPSIBLES ##
 # Collapse data table options panel once calculated
 @app.callback(Output("upload-section-collapse", "is_open"),
     Input("collapse-upload-button", "n_clicks"), 
@@ -77,6 +78,7 @@ for section in [['metrics-tbl-collapse','metrics-button'], ['overview-figs-colla
             return not is_open# , not is_open]
         return is_open#, is_open]
 
+## FILELIST ## 
 # List the filenames
 @app.callback(Output('filelist', 'children'),
         Input('upload-data', 'contents'),
@@ -85,9 +87,10 @@ for section in [['metrics-tbl-collapse','metrics-button'], ['overview-figs-colla
 def list_files(list_of_contents, list_of_names):
     if list_of_contents is not None:
 
-        file_list = upload_content_section.create_file_list(list_of_names)
+        file_list = section_upload_content.create_file_list(list_of_names)
         return file_list#, False
-                
+
+## DATA TABLE ##                
 @app.callback([Output('raw-data-store', 'data'),
     Output('data-tbl', 'children')],
     Input('preprocess-button', 'n_clicks'),
@@ -99,10 +102,10 @@ def preprocess_data(n_clicks, list_of_dates, list_of_contents, list_of_names):
     if n_clicks is None or list_of_dates is None:
         raise PreventUpdate
     children = [
-        data_tbl_section.parse_contents(c, n, d) for c, n, d in
+        section_data_tbl.parse_contents(c, n, d) for c, n, d in
         zip(list_of_contents, list_of_names, list_of_dates)]
     
-    data_table = data_tbl_section.create_data_table(children)
+    data_table = section_data_tbl.create_data_table(children)
     
     collapse_table = html.Div([
         dbc.Button("2. Check your data", color="primary", id="collapse-data-tbl-button", n_clicks=0),
@@ -116,8 +119,48 @@ def preprocess_data(n_clicks, list_of_dates, list_of_contents, list_of_names):
     ])
     return (children, collapse_table)
 
+## ANALYSIS OPTIONS ##
+# Layout
+@app.callback(Output('analysis-options', 'children'),
+        Input('calculate-metrics', 'n_clicks'),
+        State('raw-data-store', 'data'),
+        prevent_initial_call=True)
+def select_options(n_clicks, raw_data):
+    if n_clicks is None or raw_data is None:
+        # prevent the None callbacks is important with the store component.
+        # you don't want to update the store for nothing.
+        raise PreventUpdate
+   
+    analysis_options_layout = section_analysis_options.get_analysis_options_layout()
+    
+    collapse_table = html.Div([
+            dbc.Button('3. Analysis options', id='analysis-options-button'),                 
+            dbc.Row([
+                    dbc.Collapse(
+                        dbc.Card(analysis_options_layout),
+                        id="analysis-options-collapse",
+                        is_open=True,
+                    )
+            ]),
+        ])
+    return collapse_table
+# Update
+'''@app.callback(
+    Output('test-table', 'children'),
+    #Input('unit-type', 'value'),
+    Input('period-type', 'value'),
+    State('metrics-store', 'data')
+    )
+def update_metrics_table(period, metrics_data):
+    df = pd.DataFrame.from_dict(metrics_data)
+    sub_df = df[df['period']==period].round(2)
+    metrics_table = section_metrics_tbl.create_metrics_table(sub_df)
+    #print(metrics_table.head())
+    return metrics_table
+'''
 
-# Create metrics table
+## METRICS TABLE ##
+# Layout
 @app.callback([Output('metrics-store', 'data'),
         Output('metrics-tbl', 'children')],
         Input('calculate-metrics', 'n_clicks'),
@@ -128,10 +171,10 @@ def calculate_metrics(n_clicks, raw_data):
         # prevent the None callbacks is important with the store component.
         # you don't want to update the store for nothing.
         raise PreventUpdate
-    all_results = metrics_tbl_section.calculate_metrics(raw_data)
+    all_results = section_metrics_tbl.calculate_metrics(raw_data)
     #metrics = pd.DataFrame.from_dict(all_results).round(2) # this is stupid - already a dict
     
-    metrics_layout = metrics_tbl_section.get_metrics_layout()
+    metrics_layout = section_metrics_tbl.get_metrics_layout()
     
     collapse_table = html.Div([
             dbc.Button('3. Metrics', id='metrics-button'),                 
@@ -144,7 +187,7 @@ def calculate_metrics(n_clicks, raw_data):
             ]),
         ])
     return all_results, collapse_table
-
+# Update
 @app.callback(
     Output('test-table', 'children'),
     #Input('unit-type', 'value'),
@@ -154,11 +197,12 @@ def calculate_metrics(n_clicks, raw_data):
 def update_metrics_table(period, metrics_data):
     df = pd.DataFrame.from_dict(metrics_data)
     sub_df = df[df['period']==period].round(2)
-    metrics_table = metrics_tbl_section.create_metrics_table(sub_df)
+    metrics_table = section_metrics_tbl.create_metrics_table(sub_df)
     #print(metrics_table.head())
     return metrics_table
 
-
+## GROUP FIGS ##
+# Layout
 @app.callback(
     Output('group-figs', 'children'),
     #Input('calculate-metrics', 'n_clicks'),
@@ -202,7 +246,7 @@ def create_group_figs(ts):#, metrics):
             ]),
         ])
     return collapse_figs
-
+# Update
 @app.callback(
     Output('bar-graph', 'children'),
     Output('box-plot', 'children'),
@@ -215,11 +259,12 @@ def create_group_figs(ts):#, metrics):
 def update_group_figs(yaxis, period, data):
     df = pd.DataFrame.from_dict(data)
     sub_df = df[df['period']==period]
-    bargraph = overview_figs_section.create_bargraph(sub_df, yaxis)
-    boxplot = overview_figs_section.create_boxplot(sub_df, yaxis)
-    #scatterplot, stats = overview_figs_section.create_scatter(sub_df, 'eA1c', 'TIR normal')
+    bargraph = section_overview_figs.create_bargraph(sub_df, yaxis)
+    boxplot = section_overview_figs.create_boxplot(sub_df, yaxis)
+    #scatterplot, stats = section_overview_figs.create_scatter(sub_df, 'eA1c', 'TIR normal')
     return bargraph, boxplot, #scatterplot, stats
 
+## INDIVIDUAL FIGS ##
 @app.callback(
     Output('individual-figs', 'children'),
     #Input('calculate-metrics', 'n_clicks'),
@@ -249,7 +294,7 @@ def create_individual_figs(ts, metrics):
         ])
     ])
     collapse_figs = html.Div([
-            dbc.Button('4. Individual breakdown', id='individual-figs-button'),                 
+            dbc.Button('5. Individual breakdown', id='individual-figs-button'),                 
             dbc.Row([
                     dbc.Collapse(
                         dbc.Card(figs_layout),
@@ -270,8 +315,8 @@ def create_individual_figs(ts, metrics):
 def update_group_figs(subject_id, data):
     subject_data = next(item for item in data if item["ID"] == subject_id)
     df = pd.DataFrame.from_dict(subject_data['data'])
-    agp = individual_figs_section.create_amb_glc_profile(df)
-    glc_trace = individual_figs_section.create_glucose_trace(df)
+    agp = section_individual_figs.create_amb_glc_profile(df)
+    glc_trace = section_individual_figs.create_glucose_trace(df)
     return agp, glc_trace
 
 

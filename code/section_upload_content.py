@@ -1,6 +1,7 @@
 from dash import dcc, html, dash_table
 import dash_bootstrap_components as dbc
 
+
 def create_file_list(list_of_names):
     return html.Div([
             html.H5('Selected files:'),

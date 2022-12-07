@@ -29,7 +29,7 @@ upload_section= html.Div([
         dbc.Row([
                 dbc.Col(html.Div([
                     html.H2('Upload files'),
-                    html.P('To begin, use the button below to select your CGM files'),
+                    html.P('To begin, use the button to select your CGM files'),
                     ]
                 #style={'textAlign': 'left'}
                 ), width=8),
@@ -45,31 +45,6 @@ upload_section= html.Div([
     ],    
 ),
 
-
-'''data_content = html.Div([
-                    html.Div(
-                    id='data-tbl',
-                    style={
-                        'width': '80%',
-                        'height': '60px',
-                        'textAlign': 'center',
-                        'margin': '10px'
-                    },
-                    ),
-])
-metrics_content= html.Div([
-
-        html.Div(
-                id='metrics-tbl',
-                style={
-                    'width': '80%',
-                    'height': '60px',
-                    'textAlign': 'center',
-                    'margin': '10px'
-                },
-            ),
-        ],
-        ),'''
 
 def create_layout():
     return html.Div([
@@ -93,6 +68,10 @@ def create_layout():
             dbc.Row([
                 dbc.Col(id='data-tbl'),
             ]),
+            dbc.Row([
+                dbc.Col(id='analysis-options'),
+            ]),
+
             dbc.Row([
                 dbc.Col(id='metrics-tbl'),
             ]),
