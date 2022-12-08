@@ -66,5 +66,5 @@ def create_data_table(children):
                         what you want for your files and edit accordingly. Most importantly, the ID, the start and \
                             end dates as these will be used for the rest of your data analysis. If you do edit, \
                               please press the reprocess button to get an updated table'),
-                    dbc.Button('Calculate metrics', id='calculate-metrics', color='secondary')    
+                    dbc.Button('Choose analysis options', id='analysis-options-button', color='secondary')    
             ])

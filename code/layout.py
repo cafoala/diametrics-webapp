@@ -49,6 +49,7 @@ upload_section= html.Div([
 def create_layout():
     return html.Div([
     dcc.Store(storage_type='memory', id='raw-data-store'),
+    dcc.Store(storage_type='memory', id='poi-data-store'),
     dcc.Store(storage_type='memory', id='metrics-store'),
     dbc.Col(navbar),
     dbc.Card(

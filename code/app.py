@@ -51,8 +51,19 @@ def collapse_upload(n_toggle, n_metrics, is_open):
 # Collapse data table options panel once calculated
 @app.callback(Output('data-tbl-collapse', 'is_open'),
     Input("collapse-data-tbl-button", "n_clicks"), 
-    Input('calculate-metrics', 'n_clicks'),
+    Input('analysis-options-button', 'n_clicks'),
     State("data-tbl-collapse", "is_open"),
+    prevent_initial_call=True)
+def collapse_datatbl(n_toggle, n_metrics, is_open):
+    if n_toggle or n_metrics:
+        return not is_open# , not is_open]
+    return is_open#, is_open]
+
+# Collapse analysis options panel once calculated
+@app.callback(Output('analysis-options-collapse', 'is_open'),
+    Input("collapse-analysis-options-button", "n_clicks"), 
+    Input('calculate-metrics', 'n_clicks'),
+    State("analysis-options-collapse", "is_open"),
     prevent_initial_call=True)
 def collapse_datatbl(n_toggle, n_metrics, is_open):
     if n_toggle or n_metrics:
@@ -122,7 +133,7 @@ def preprocess_data(n_clicks, list_of_dates, list_of_contents, list_of_names):
 ## ANALYSIS OPTIONS ##
 # Layout
 @app.callback(Output('analysis-options', 'children'),
-        Input('calculate-metrics', 'n_clicks'),
+        Input('analysis-options-button', 'n_clicks'),
         State('raw-data-store', 'data'),
         prevent_initial_call=True)
 def select_options(n_clicks, raw_data):
@@ -134,7 +145,7 @@ def select_options(n_clicks, raw_data):
     analysis_options_layout = section_analysis_options.get_analysis_options_layout()
     
     collapse_table = html.Div([
-            dbc.Button('3. Analysis options', id='analysis-options-button'),                 
+            dbc.Button('3. Analysis options', id='collapse-analysis-options-button'),                 
             dbc.Row([
                     dbc.Collapse(
                         dbc.Card(analysis_options_layout),
@@ -144,6 +155,18 @@ def select_options(n_clicks, raw_data):
             ]),
         ])
     return collapse_table
+
+def analysis_options_callbacks(app):
+    @app.callback(Output('tir-sliders', 'children'),
+            Input('add-tir-slider', 'n_clicks'),
+            State('tir-sliders', 'children'),
+            State('unit-type-options', 'value'))
+    def create_range_slider(n_clicks, children, units):
+        return section_analysis_options.create_range_slider(n_clicks, children, units)
+    
+    #@app.callback(Output())
+
+analysis_options_callbacks(app)
 # Update
 '''@app.callback(
     Output('test-table', 'children'),
