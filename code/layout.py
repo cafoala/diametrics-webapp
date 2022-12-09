@@ -1,5 +1,11 @@
 import dash_bootstrap_components as dbc
 from dash import dcc, html, dash_table
+import section_upload_content
+import section_data_tbl
+import section_analysis_options
+import section_metrics_tbl
+import section_overview_figs
+import section_individual_figs
 
 navbar = dbc.NavbarSimple(
     children=[
@@ -45,6 +51,29 @@ upload_section= html.Div([
     ],    
 ),
 
+def create_tabs_layout():
+    return html.Div([
+    dcc.Store(storage_type='memory', id='raw-data-store'),
+    dcc.Store(storage_type='memory', id='poi-data-store'),
+    dcc.Store(storage_type='memory', id='metrics-store'),
+    navbar,
+    intro,
+    dbc.Card(
+        dbc.CardBody([
+            dbc.Tabs(
+                    [
+                        dbc.Tab(section_upload_content.get_upload_layout(), label="1. Upload files", tab_id="upload-tab", id='upload-tab', active_label_style={"color": "#FB79B3"}),
+                        dbc.Tab(section_data_tbl.get_datatable_layout(), label="2. Check data", tab_id="data-tab",id="data-tab", disabled=True, active_label_style={"color": "#FB79B3"}),
+                        dbc.Tab(section_analysis_options.get_analysis_options_layout(), label="3. Analysis options", tab_id="other-metrics-tab", id='other-metrics-tab', disabled=False, active_label_style={"color": "#FB79B3"}),
+                        dbc.Tab(section_metrics_tbl.get_metrics_layout(), label="4. Standard metrics", tab_id="metrics-tab", id='metrics-tab', disabled=False, active_label_style={"color": "#FB79B3"}),
+                        dbc.Tab(label="5. Incorporating external factors", tab_id="poi-tab", id='poi-tab', disabled=True, active_label_style={"color": "#FB79B3"}),
+                    ],
+                    id="card-tabs",
+                    active_tab="upload-tab",
+            )
+        ])
+    ),
+])
 
 def create_layout():
     return html.Div([
@@ -54,8 +83,26 @@ def create_layout():
     dbc.Col(navbar),
     dbc.Card(
         dbc.CardBody([
-            dbc.Row([dbc.Col(dbc.Collapse(intro, id='intro-collapse', is_open=True))
-                ]),
+            dbc.Row([dbc.Col(dbc.Collapse(intro, id='intro-collapse', is_open=True)),
+            ]),
+            dbc.Card(
+                    [
+                        dbc.CardHeader(
+                            dbc.Tabs(
+                                [
+                                    dbc.Tab(label="1. Upload files", tab_id="tab-1"),
+                                    dbc.Tab(label="2. Check data", tab_id="tab-2", disabled=True),
+                                    dbc.Tab(label="3. Standard metrics", tab_id="tab-3", disabled=True),
+                                    dbc.Tab(label="Additional metrics", tab_id="tab-4", disabled=True),
+                                    dbc.Tab(label="Incorporating external factors", tab_id="tab-5", disabled=True),
+                                ],
+                                id="card-tabs",
+                                active_tab="tab-1",
+                            )
+                        ),
+                        dbc.CardBody(html.P(id="card-content", className="card-text")),
+                    ]
+                ),
             dbc.Button("1. Upload files", color="primary", id="collapse-upload-button", n_clicks=0),
             dbc.Row([
                 dbc.Col(

@@ -31,6 +31,18 @@ def parse_contents(contents, filename, date):
         ])
     return preprocessing.preprocess_df(df, filename)
 
+def get_datatable_layout():
+    return html.Div([
+                html.H2('Data details'),
+
+                dash_table.DataTable(id='data_tbl'),
+                html.P('The table shows your preprocessed data. Please make sure to check that the data is \
+                    what you want for your files and edit accordingly. Most importantly, the ID, the start and \
+                        end dates as these will be used for the rest of your data analysis. If you do edit, \
+                            please press the reprocess button to get an updated table'),
+                dbc.Button('Choose analysis options', id='analysis-options-button', color='secondary')    
+            ])
+
 def create_data_table(children):
     data_details = pd.DataFrame.from_dict(children)[['Filename', 'ID', 'Usable', 'Device', 'Interval', 'Data Sufficiency', 'Start Time', 'End Time']]
     
