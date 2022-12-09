@@ -35,22 +35,17 @@ def get_datatable_layout():
     return html.Div([
                 html.H2('Data details'),
 
-                dash_table.DataTable(id='data_tbl'),
-                html.P('The table shows your preprocessed data. Please make sure to check that the data is \
-                    what you want for your files and edit accordingly. Most importantly, the ID, the start and \
-                        end dates as these will be used for the rest of your data analysis. If you do edit, \
-                            please press the reprocess button to get an updated table'),
-                dbc.Button('Choose analysis options', id='analysis-options-button', color='secondary')    
+                html.Div(dbc.Spinner(spinner_style={"width": "3rem", "height": "3rem"}), id='data-tbl-div'), 
             ])
 
 def create_data_table(children):
     data_details = pd.DataFrame.from_dict(children)[['Filename', 'ID', 'Usable', 'Device', 'Interval', 'Data Sufficiency', 'Start Time', 'End Time']]
     
     return html.Div([
-                html.H2('Data details'),
+                #html.H2('Data details'),
 
-                dash_table.DataTable(
-                    id='data_tbl',
+        dash_table.DataTable(
+                    id='data-tbl',
                     columns=[
                                 {"name": i, "id": i, "deletable": False, "selectable": True, "hideable": False}
                                 if i == "iso_alpha3" or i == "Filename" or i == "id"

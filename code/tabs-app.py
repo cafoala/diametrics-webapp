@@ -1,7 +1,7 @@
 import plotly.express as px
 import dash
 from dash.dependencies import Input, Output, State
-from dash import dcc, html, dash_table
+from dash import dcc, html, dash_table, ctx
 import logging
 import pandas as pd
 import numpy as np
@@ -19,7 +19,7 @@ import section_overview_figs
 import section_individual_figs
 logging.basicConfig(level=logging.DEBUG)
 
-external_stylesheets = [dbc.themes.JOURNAL]
+external_stylesheets = [dbc.themes.BOOTSTRAP]
 colors = {
     'background': '#111111',
     'text': '#7FDBFF'
@@ -27,64 +27,9 @@ colors = {
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)#, suppress_callback_exceptions=True)
 app.config.suppress_callback_exceptions = True
 
-upload_section= dbc.Card(
-    dbc.CardBody([
-        dbc.Row([
-                dbc.Col(html.Div([
-                    html.H2('Upload files'),
-                    html.P('To begin, use the button to select your CGM files'),
-                    ]
-                #style={'textAlign': 'left'}
-                ), width=8),
-                dbc.Col(dcc.Upload(dbc.Button('Select Files', color="secondary"),
-                                multiple=True,
-                                id='upload-data',))
-        ]),
-        dbc.Row([
-                dbc.Col(html.Div(id='filelist'))
-            ]),
-    ])  
-),
-#upload_section = section_upload_content.get_upload_layout()
-
-tab1_content = dbc.Card(
-    dbc.CardBody(
-        [
-            html.P("This is tab 1!", className="card-text"),
-            dbc.Button("Click here", color="success"),
-        ]
-    ),
-    className="mt-3",
-)
-
-tab2_content = dbc.Card(
-    dbc.CardBody(
-        [
-            html.P("This is tab 2!", className="card-text"),
-            dbc.Button("Don't click here", color="danger"),
-        ]
-    ),
-    className="mt-3",
-)
-
-
-
-app.layout = html.Div([
-                dbc.Tabs(
-                    [
-                        dbc.Tab(section_upload_content.get_upload_layout(), label="1. Upload files", tab_id="upload-tab", id='upload-tab', active_label_style={"color": "#FB79B3"}),
-                        dbc.Tab(section_data_tbl.get_datatable_layout(), label="2. Check data", tab_id="data-tab",id="data-tab", disabled=True, active_label_style={"color": "#FB79B3"}),
-                        dbc.Tab(section_analysis_options.get_analysis_options_layout(), label="3. Analysis options", tab_id="other-metrics-tab", id='other-metrics-tab', disabled=False, active_label_style={"color": "#FB79B3"}),
-                        dbc.Tab(section_metrics_tbl.get_metrics_layout(), label="4. Standard metrics", tab_id="metrics-tab", id='metrics-tab', disabled=False, active_label_style={"color": "#FB79B3"}),
-                        dbc.Tab(label="5. Incorporating external factors", tab_id="poi-tab", id='poi-tab', disabled=True, active_label_style={"color": "#FB79B3"}),
-                    ],
-                    id="card-tabs",
-                    active_tab="upload-tab",
-                )
-])
 app.layout = layout.create_tabs_layout()
 
-@app.callback(Output('other-metrics-tab', 'disabled'),
+'''@app.callback(Output('other-metrics-tab', 'disabled'),
         Output('poi-tab', 'disabled'),
         Output('metrics-tab', 'disabled'),
         #Output('card-tabs', 'active_tab'),
@@ -93,28 +38,47 @@ def show_all_tabs(n_clicks):
     if n_clicks is None:
         raise PreventUpdate
     return False, #'metrics-tab'
+'''
 
-@app.callback(Output('data-tab', 'disabled'),
-Output('card-tabs', 'active_tab'),
-Input('preprocess-button', 'n_clicks')
-)
-def show_next_tab(n_clicks):    
+@app.callback(Output('card-tabs', 'active_tab'),
+    Input('preprocess-button', 'n_clicks'),
+    Input('analysis-options-button', 'n_clicks'),
+    Input('calculate-metrics', 'n_clicks'),
+    prevent_initial_call=True)
+def switch_tabs(n1, n2, n3):
+    triggered_id = ctx.triggered_id
+    if triggered_id=='preprocess-button':
+        if n1 is None:
+            raise PreventUpdate
+        return 'data-tab'
+    elif triggered_id == 'analysis-options-button':
+        if n2 is None:
+            raise PreventUpdate
+        return 'other-metrics-tab'
+    elif triggered_id == 'calculate-metrics':
+        if n3 is None:
+            raise PreventUpdate
+        'metrics-tab'
+
+'''@app.callback(Output('data_tab', 'disabled'),
+    Input('preprocess-button', 'n_clicks'),
+    prevent_initial_call=True)
+def show_next_tab(n_clicks):
     if n_clicks is None:
         raise PreventUpdate
-    return False, 'data-tab'
+    print('clicked')
+    return False
+'''
 
-@app.callback(Output("card-content", "children"), [Input("card-tabs", "active_tab")])
-def switch_tab(at):
-    print(at)
-    if at == "upload-tab":
-        return upload_section
-    elif at == "data-tab":
-        return section_data_tbl.get_datatable_layout()
-    elif at == "metrics-tab":
-        return section_metrics_tbl.get_metrics_layout()
-    elif at == 'other-metrics-tab':
-        return section_analysis_options.get_analysis_options_layout()
-    return html.P("Empty page alert!")
+for i in [['data_tab', 'preprocess-button'],['other-metrics-tab', 'analysis-options-button'], ['metrics-tab', 'calculate-metrics']]:
+    @app.callback(Output(i[0], 'disabled'),
+    Input(i[1], 'n_clicks'),)
+    def show_next_tab(n_clicks):
+        print(i[1])
+        if n_clicks is None:
+            raise PreventUpdate
+        print(i[1])
+        return False
 
 
 # CALLBACKS # 
@@ -130,6 +94,70 @@ def list_files(list_of_contents, list_of_names):
 
         file_list = section_upload_content.create_file_list(list_of_names)
         return file_list#, False
+
+## DATA TABLE ##                
+@app.callback([Output('raw-data-store', 'data'),
+    Output('data-tbl-div', 'children')],
+    Input('preprocess-button', 'n_clicks'),
+    State('upload-data', 'last_modified'),
+    State('upload-data', 'contents'),
+    State('upload-data', 'filename'),
+    prevent_initial_call=True)
+def preprocess_data(n_clicks, list_of_dates, list_of_contents, list_of_names):
+    if n_clicks is None or list_of_dates is None:
+        raise PreventUpdate
+    children = [
+        section_data_tbl.parse_contents(c, n, d) for c, n, d in
+        zip(list_of_contents, list_of_names, list_of_dates)]
+    
+    data_table = section_data_tbl.create_data_table(children)
+    print('preprocess clicked')
+    return (children, data_table)
+
+
+## ANALYSIS OPTIONS ##
+def analysis_options_callbacks(app):
+    @app.callback(Output('tir-sliders', 'children'),
+            Input('add-tir-slider', 'n_clicks'),
+            State('tir-sliders', 'children'),
+            State('unit-type-options', 'value'))
+    def create_range_slider(n_clicks, children, units):
+        return section_analysis_options.create_range_slider(n_clicks, children, units)
+    
+    #@app.callback(Output())
+
+analysis_options_callbacks(app)
+
+## METRICS TABLE ##
+# Layout
+@app.callback(Output('metrics-store', 'data'),
+        #Output('metrics-tbl', 'children')],
+        Input('calculate-metrics', 'n_clicks'),
+        State('raw-data-store', 'data'),
+        prevent_initial_call=True)
+def calculate_metrics(n_clicks, raw_data):
+    if n_clicks is None or raw_data is None:
+        # prevent the None callbacks is important with the store component.
+        # you don't want to update the store for nothing.
+        raise PreventUpdate
+    all_results = section_metrics_tbl.calculate_metrics(raw_data)
+    #metrics = pd.DataFrame.from_dict(all_results).round(2) # this is stupid - already a dict
+    
+    return all_results#, collapse_table
+# Update
+@app.callback(
+    Output('test-table', 'children'),
+    #Input('unit-type', 'value'),
+    #Input('period-type', 'value'),
+    Input('metrics-store', 'data'),
+    prevent_initial_call=True
+    )
+def update_metrics_table(metrics_data): #period, 
+    df = pd.DataFrame.from_dict(metrics_data)
+    #sub_df = df[df['period']==period].round(2)
+    sub_df = df
+    metrics_table = section_metrics_tbl.create_metrics_table(sub_df)
+    return metrics_table
 
 if __name__ == '__main__':
     app.run_server(debug=True)#, dev_tools_ui=False)

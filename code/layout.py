@@ -64,8 +64,8 @@ def create_tabs_layout():
                     [
                         dbc.Tab(section_upload_content.get_upload_layout(), label="1. Upload files", tab_id="upload-tab", id='upload-tab', active_label_style={"color": "#FB79B3"}),
                         dbc.Tab(section_data_tbl.get_datatable_layout(), label="2. Check data", tab_id="data-tab",id="data-tab", disabled=True, active_label_style={"color": "#FB79B3"}),
-                        dbc.Tab(section_analysis_options.get_analysis_options_layout(), label="3. Analysis options", tab_id="other-metrics-tab", id='other-metrics-tab', disabled=False, active_label_style={"color": "#FB79B3"}),
-                        dbc.Tab(section_metrics_tbl.get_metrics_layout(), label="4. Standard metrics", tab_id="metrics-tab", id='metrics-tab', disabled=False, active_label_style={"color": "#FB79B3"}),
+                        dbc.Tab(section_analysis_options.get_analysis_options_layout(), label="3. Analysis options", tab_id="other-metrics-tab", id='other-metrics-tab', disabled=True, active_label_style={"color": "#FB79B3"}),
+                        dbc.Tab(section_metrics_tbl.get_metrics_layout(), label="4. Standard metrics", tab_id="metrics-tab", id='metrics-tab', disabled=True, active_label_style={"color": "#FB79B3"}),
                         dbc.Tab(label="5. Incorporating external factors", tab_id="poi-tab", id='poi-tab', disabled=True, active_label_style={"color": "#FB79B3"}),
                     ],
                     id="card-tabs",

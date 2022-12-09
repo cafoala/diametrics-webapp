@@ -25,7 +25,7 @@ def get_metrics_layout():
                     dbc.Col(time_period),
         ]),
         dbc.Row([
-                dbc.Col(id='test-table'),
+                dbc.Col(dbc.Spinner(spinner_style={"width": "3rem", "height": "3rem"}), id='test-table'),
                 ]),
     ])
     return metrics_layout
