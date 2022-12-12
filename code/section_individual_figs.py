@@ -3,6 +3,22 @@ import plotly.express as px
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
+import dash_bootstrap_components as dbc
+
+def create_indiv_layout():
+    figs_layout = html.Div([
+        dbc.Row([
+                    dbc.Col(html.H2('Closer look at individual participants')),
+                    dbc.Col(id='subject-id-div'),
+        ]),
+        dbc.Row([
+                dbc.Col(id='amb-glc-profile',),
+        ]),
+        dbc.Row([
+                dbc.Col(id='glc-trace'),
+        ])
+    ])
+    return figs_layout
 
 def create_glucose_trace(df): 
     fig = px.line(df, x='time', y='glc')

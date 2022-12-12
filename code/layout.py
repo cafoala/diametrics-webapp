@@ -62,13 +62,13 @@ def create_tabs_layout():
         dbc.CardBody([
             dbc.Tabs(
                     [
-                        dbc.Tab(section_upload_content.get_upload_layout(), label="1. Upload files", tab_id="upload-tab", id='upload-tab', active_label_style={"color": "#FB79B3"}),
-                        dbc.Tab(section_data_tbl.get_datatable_layout(), label="2. Check data", tab_id="data-tab",id="data-tab", disabled=True, active_label_style={"color": "#FB79B3"}),
-                        dbc.Tab(section_analysis_options.get_analysis_options_layout(), label="3. Analysis options", tab_id="other-metrics-tab", id='other-metrics-tab', disabled=True, active_label_style={"color": "#FB79B3"}),
-                        dbc.Tab(section_metrics_tbl.get_metrics_layout(), label="4. Standard metrics", tab_id="metrics-tab", id='metrics-tab', disabled=True, active_label_style={"color": "#FB79B3"}),
-                        dbc.Tab(label="5. Ambulatory glucose profile", tab_id="poi-tab", id='poi-tab', disabled=False, active_label_style={"color": "#FB79B3"}),
-                        dbc.Tab(label="6. Overview visualisations", tab_id="poi-tab", id='poi-tab', disabled=False, active_label_style={"color": "#FB79B3"}),
-                        dbc.Tab(label="7. Incorporating external factors", tab_id="poi-tab", id='poi-tab', disabled=False, active_label_style={"color": "#FB79B3"}),
+                        dbc.Tab(dbc.Card(dbc.CardBody([section_upload_content.get_upload_layout()])), label="1. Upload files", tab_id="upload-tab", id='upload-tab', active_label_style={"color": "#FB79B3"}),
+                        dbc.Tab(dbc.Card(dbc.CardBody([section_data_tbl.get_datatable_layout()])), label="2. Check data", tab_id="data-tab",id="data-tab", disabled=True, active_label_style={"color": "#FB79B3"}),
+                        dbc.Tab(dbc.Card(dbc.CardBody([section_analysis_options.get_analysis_options_layout()])), label="3. Analysis options", tab_id="other-metrics-tab", id='other-metrics-tab', disabled=True, active_label_style={"color": "#FB79B3"}),
+                        dbc.Tab(dbc.Card(dbc.CardBody([section_metrics_tbl.get_metrics_layout()])), label="4. Standard metrics", tab_id="metrics-tab", id='metrics-tab', disabled=True, active_label_style={"color": "#FB79B3"}),
+                        dbc.Tab(dbc.Card(dbc.CardBody(section_individual_figs.create_indiv_layout())), label="5. Ambulatory glucose profile", tab_id="indiv-vis", id='indiv-vis', disabled=True, active_label_style={"color": "#FB79B3"}),
+                        #dbc.Tab(label="6. Overview visualisations", tab_id="overview-vis", id='overview-vis', disabled=False, active_label_style={"color": "#FB79B3"}),
+                        dbc.Tab(label="6. Incorporating external factors", tab_id="poi-tab", id='poi-tab', disabled=False, active_label_style={"color": "#FB79B3"}),
                     ],
                     id="card-tabs",
                     active_tab="upload-tab",

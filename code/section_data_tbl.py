@@ -42,9 +42,6 @@ def get_datatable_layout():
                               please press the reprocess button to get an updated table'),
                 dbc.Row([
                     dbc.Col([                
-                        dbc.Button('Reprocess data', id='reprocess-data-button', color='secondary')   
-                        ]),
-                    dbc.Col([                
                         dbc.Button('Choose analysis options', id='analysis-options-button', color='secondary')   
                     ])
                 ])

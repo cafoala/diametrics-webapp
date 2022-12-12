@@ -11,22 +11,47 @@ def get_metrics_layout():
                 id='unit-type',
                 inline=True
             ),
-    time_period = dcc.RadioItems(
+
+    time_period = dbc.RadioItems(
+            id="period-type",
+            className="btn-group",
+            inputClassName="btn-check",
+            labelClassName="btn btn-outline-primary",
+            labelCheckedClassName="active",
+            options=[
+                {"label": "All", "value": 'All'},
+                {"label": "Day", "value": 'Day'},
+                {"label": "Night", "value": 'Night'},
+            ],
+            value='All',
+        ),
+
+    '''time_period = dcc.RadioItems(
                 ['All', 'Day', 'Night'],
                 'All',
                 id='period-type',
                 inline=True
-            )
-    
+            )'''
+    options = ['Time in range', 'Average glucose', 'SD', 'CV', 'eA1c', 
+    'Hypoglycemic episodes', 'AUC', 'MAGE', 'LBGI/HBGI']
+
     metrics_layout = html.Div([
         dbc.Row([
                     dbc.Col(html.H2('Metrics of Glycemic Control')),
-                    dbc.Col(units),
+                    #dbc.Col(units),
                     dbc.Col(time_period),
         ]),
         dbc.Row([
                 dbc.Col(dbc.Spinner(spinner_style={"width": "3rem", "height": "3rem"}), id='test-table'),
-                ]),
+        ]),
+        dbc.Row([dbc.Col(dcc.Dropdown(options,
+                'Time in range',
+                id='yaxis-column'),)
+        ]),
+        dbc.Row([
+            dbc.Col(id='bar-graph'),
+            dbc.Col(id='box-plot')
+        ])
     ])
     return metrics_layout
     

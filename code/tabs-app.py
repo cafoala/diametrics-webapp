@@ -54,7 +54,8 @@ def switch_tabs(n1, n2, n3):
         return 'metrics-tab'
 
 
-for i in [['data-tab', 'preprocess-button'],['other-metrics-tab', 'analysis-options-button'], ['metrics-tab', 'calculate-metrics']]:
+for i in [['data-tab', 'preprocess-button'],['other-metrics-tab', 'analysis-options-button'], 
+                ['metrics-tab', 'calculate-metrics'], ['indiv-vis', 'calculate-metrics']]:
     @app.callback(Output(i[0], 'disabled'),
     Input(i[1], 'n_clicks'),
     prevent_initial_call=True)
@@ -144,6 +145,63 @@ def update_metrics_table(metrics_data, period):
     #sub_df = df
     metrics_table = section_metrics_tbl.create_metrics_table(sub_df)
     return metrics_table
+
+
+## INDIVIDUAL FIGS ##
+@app.callback(
+    #Output('individual-figs', 'children'),
+    #Input('calculate-metrics', 'n_clicks'),
+    Output('subject-id-div', 'children'),
+    Input('metrics-store', 'modified_timestamp'),
+    State('metrics-store', 'data'),
+    prevent_initial_call=True
+)
+def create_individual_figs(ts, metrics):
+    if ts is None:
+        raise PreventUpdate
+    df = pd.DataFrame.from_dict(metrics)
+    subject_id = dcc.Dropdown(
+                df['ID'].unique(),
+                df['ID'].unique()[0],
+                id='subject-id'
+            ),
+    return subject_id
+
+@app.callback(
+    Output('amb-glc-profile', 'children'),
+    Output('glc-trace', 'children'),
+    Input('subject-id', 'value'),
+    State('raw-data-store', 'data'),
+    #prevent_initial_call=True
+)
+def update_indiv_figs(subject_id, data):
+    subject_data = next(item for item in data if item["ID"] == subject_id)
+    df = pd.DataFrame.from_dict(subject_data['data'])
+    agp = section_individual_figs.create_amb_glc_profile(df)
+    glc_trace = section_individual_figs.create_glucose_trace(df)
+    return agp, glc_trace
+
+## GROUP FIGS ##
+@app.callback(
+    Output('bar-graph', 'children'),
+    Output('box-plot', 'children'),
+    #Output('scatter-plot', 'children'),
+    #Output('summary-stats', 'children'),
+    Input('yaxis-column', 'value'),
+    Input('period-type', 'value'),
+    State('metrics-store', 'data'),
+    #prevent_initital_call=True
+)
+def update_group_figs(yaxis, period, data):
+    if yaxis is None or period is None or data is None:
+        raise PreventUpdate
+    df = pd.DataFrame.from_dict(data)
+    sub_df = df[df['period']==period]
+    bargraph = section_overview_figs.create_bargraph(sub_df, yaxis)
+    boxplot = section_overview_figs.create_boxplot(sub_df, yaxis)
+    #scatterplot, stats = section_overview_figs.create_scatter(sub_df, 'eA1c', 'TIR normal')
+    return bargraph, boxplot, #scatterplot, stats
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)#, dev_tools_ui=False)
