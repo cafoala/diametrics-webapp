@@ -9,6 +9,8 @@ import dash_bootstrap_components as dbc
 
 from dash.exceptions import PreventUpdate
 import layout
+import warnings
+warnings.filterwarnings('ignore')
 
 # Import modules with section contents
 import section_upload_content
@@ -29,16 +31,6 @@ app.config.suppress_callback_exceptions = True
 
 app.layout = layout.create_tabs_layout()
 
-'''@app.callback(Output('other-metrics-tab', 'disabled'),
-        Output('poi-tab', 'disabled'),
-        Output('metrics-tab', 'disabled'),
-        #Output('card-tabs', 'active_tab'),
-        Input('calculate-metrics-button', 'n_clicks'))
-def show_all_tabs(n_clicks):
-    if n_clicks is None:
-        raise PreventUpdate
-    return False, #'metrics-tab'
-'''
 
 @app.callback(Output('card-tabs', 'active_tab'),
     Input('preprocess-button', 'n_clicks'),
@@ -47,6 +39,7 @@ def show_all_tabs(n_clicks):
     prevent_initial_call=True)
 def switch_tabs(n1, n2, n3):
     triggered_id = ctx.triggered_id
+    print(triggered_id)
     if triggered_id=='preprocess-button':
         if n1 is None:
             raise PreventUpdate
@@ -58,26 +51,19 @@ def switch_tabs(n1, n2, n3):
     elif triggered_id == 'calculate-metrics':
         if n3 is None:
             raise PreventUpdate
-        'metrics-tab'
+        return 'metrics-tab'
 
-'''@app.callback(Output('data_tab', 'disabled'),
-    Input('preprocess-button', 'n_clicks'),
-    prevent_initial_call=True)
-def show_next_tab(n_clicks):
-    if n_clicks is None:
-        raise PreventUpdate
-    print('clicked')
-    return False
-'''
 
-for i in [['data_tab', 'preprocess-button'],['other-metrics-tab', 'analysis-options-button'], ['metrics-tab', 'calculate-metrics']]:
+for i in [['data-tab', 'preprocess-button'],['other-metrics-tab', 'analysis-options-button'], ['metrics-tab', 'calculate-metrics']]:
     @app.callback(Output(i[0], 'disabled'),
-    Input(i[1], 'n_clicks'),)
+    Input(i[1], 'n_clicks'),
+    prevent_initial_call=True)
     def show_next_tab(n_clicks):
+        print('disable tabs')
         print(i[1])
         if n_clicks is None:
             raise PreventUpdate
-        print(i[1])
+        print('ran')
         return False
 
 
@@ -148,14 +134,14 @@ def calculate_metrics(n_clicks, raw_data):
 @app.callback(
     Output('test-table', 'children'),
     #Input('unit-type', 'value'),
-    #Input('period-type', 'value'),
     Input('metrics-store', 'data'),
+    Input('period-type', 'value'),
     prevent_initial_call=True
     )
-def update_metrics_table(metrics_data): #period, 
+def update_metrics_table(metrics_data, period): 
     df = pd.DataFrame.from_dict(metrics_data)
-    #sub_df = df[df['period']==period].round(2)
-    sub_df = df
+    sub_df = df[df['period']==period].round(2)
+    #sub_df = df
     metrics_table = section_metrics_tbl.create_metrics_table(sub_df)
     return metrics_table
 

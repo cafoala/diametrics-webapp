@@ -35,7 +35,19 @@ def get_datatable_layout():
     return html.Div([
                 html.H2('Data details'),
 
-                html.Div(dbc.Spinner(spinner_style={"width": "3rem", "height": "3rem"}), id='data-tbl-div'), 
+                html.Div(dbc.Spinner(spinner_style={"width": "3rem", "height": "3rem"}), id='data-tbl-div'),
+                html.P('The table shows your preprocessed data. Please make sure to check that the data is \
+                        what you want for your files and edit accordingly. Most importantly, the ID, the start and \
+                            end dates as these will be used for the rest of your data analysis. If you do edit, \
+                              please press the reprocess button to get an updated table'),
+                dbc.Row([
+                    dbc.Col([                
+                        dbc.Button('Reprocess data', id='reprocess-data-button', color='secondary')   
+                        ]),
+                    dbc.Col([                
+                        dbc.Button('Choose analysis options', id='analysis-options-button', color='secondary')   
+                    ])
+                ])
             ])
 
 def create_data_table(children):
@@ -69,9 +81,6 @@ def create_data_table(children):
                     export_format="csv",
                     export_headers="display",
                     ),
-                    html.P('The table shows your preprocessed data. Please make sure to check that the data is \
-                        what you want for your files and edit accordingly. Most importantly, the ID, the start and \
-                            end dates as these will be used for the rest of your data analysis. If you do edit, \
-                              please press the reprocess button to get an updated table'),
-                    dbc.Button('Choose analysis options', id='analysis-options-button', color='secondary')    
+                    
+                     
             ])

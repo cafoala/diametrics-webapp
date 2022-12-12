@@ -35,5 +35,5 @@ def create_file_list(list_of_names):
                     'margin': '10px',
                     'justify': "center",}),
             html.P('If you\'re happy with these files, click the button below to process your data'),
-            dbc.Button('Preprocess data', id='preprocess-button', color='secondary')
+            dbc.Button('Preprocess data', id='preprocess-button', color='secondary'),
             ])
