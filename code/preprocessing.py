@@ -46,7 +46,7 @@ def preprocess_df(df, filename):
             df_transformed.interval = calculate_time_interval(df_transformed.data)
         
         data_stats = metrics_helper.helper_missing(df_transformed.data, df_transformed.interval)
-
+        days = str(pd.to_datetime(data_stats['End DateTime']) - pd.to_datetime(data_stats['Start DateTime']))
         
         data_dictionary['Usable'] = df_transformed.usable
         data_dictionary['Filename'] = filename
@@ -55,6 +55,7 @@ def preprocess_df(df, filename):
         data_dictionary['data'] = df_transformed.data.to_dict('records')
         data_dictionary['ID'] = df_transformed.id
         data_dictionary.update(data_stats)
+        data_dictionary['Days'] = days
         return data_dictionary
     else:
         # Log the errors?

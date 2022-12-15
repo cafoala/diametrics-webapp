@@ -44,14 +44,6 @@ def get_metrics_layout():
         dbc.Row([
                 dbc.Col(dbc.Spinner(spinner_style={"width": "3rem", "height": "3rem"}), id='test-table'),
         ]),
-        dbc.Row([dbc.Col(dcc.Dropdown(options,
-                'Time in range',
-                id='yaxis-column'),)
-        ]),
-        dbc.Row([
-            dbc.Col(id='bar-graph'),
-            dbc.Col(id='box-plot')
-        ])
     ])
     return metrics_layout
     
@@ -86,8 +78,11 @@ def calculate_metrics(raw_data):
             all_results.append(night)
     return all_results
         
-def create_metrics_table(df):    
-    return dash_table.DataTable(
+def create_metrics_table(df):
+    options = ['Time in range', 'Average glucose', 'SD', 'CV', 'eA1c', 
+        'Hypoglycemic episodes', 'AUC', 'MAGE', 'LBGI', 'HBGI']    
+    
+    data_table= dash_table.DataTable(
                 #id='metrics_tbl',
                 columns=[
                             {"name": i, "id": i, "deletable": False, "selectable": True, "hideable": False}
@@ -115,5 +110,24 @@ def create_metrics_table(df):
                 export_format="csv",
                 export_headers="display",
                 column_selectable='multi',
-                fill_width=False
+                fill_width=False,
+                tooltip_header={
+                        'LBGI':'Low blood glucose index',
+                        'HBGI': 'High blood glucose index'
+
+                    },
                 )
+    return html.Div([
+            dbc.Row(data_table),
+            dbc.Row([
+                dbc.Col(html.H4('Overview figures')),
+                dbc.Col(dcc.Dropdown(options,
+                    'Time in range',
+                    id='yaxis-column')
+                ),
+            ]),
+            dbc.Row([
+                dbc.Col(id='bar-graph'),
+                dbc.Col(id='box-plot')
+            ])
+        ])

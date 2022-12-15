@@ -23,15 +23,15 @@ def get_upload_layout():
 def create_file_list(list_of_names):
     return html.Div([
             html.H5('Selected files:'),
-            html.Div([i for i in list_of_names], 
+            html.Div([i +' ' for i in list_of_names], 
             style={"overflow": "scroll",
-                    'width': '70%',
+                    'width': '80%',
                     'height': '100px',
                     'lineHeight': '60px',
                     'borderWidth': '1px',
                     'borderStyle': 'dashed',
                     'borderRadius': '5px',
-                    'textAlign': 'center',
+                    'textAlign': 'left',
                     'margin': '10px',
                     'justify': "center",}),
             html.P('If you\'re happy with these files, click the button below to process your data'),

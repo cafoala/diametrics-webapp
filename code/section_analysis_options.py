@@ -8,12 +8,21 @@ def get_analysis_options_layout():
         dbc.Accordion(
             [dbc.AccordionItem(
                     [
-                        html.P("Choose your units"),
-                        dcc.RadioItems(
-                            ['mmol/L', 'mg/dL'],#, 'Both'],
-                            value='mmol/L ',
-                            id='unit-type-options',
-                            inline=True)
+                        #html.P("Choose your units"),
+                        dbc.RadioItems(
+                            id="unit-type-options",
+                            className="btn-group",
+                            inputClassName="btn-check",
+                            labelClassName="btn btn-outline-primary",
+                            labelCheckedClassName="active",
+                            options=[
+                                {"label": 'mmol/L', "value": 'mmol/L'},
+                                {"label": "mg/dL", "value": 'mg/dL'},
+                                {"label": "Both", "value": 'both'},
+                            ],
+                            value='mmol/L',
+                            style={'textAlign': 'center'}
+                        ),
                     ],
                     title="Units",
                 ),
@@ -22,6 +31,9 @@ def get_analysis_options_layout():
                         html.P("Use the slider below to select threshold that you're interested in. This will be added to the standard thresholds for time in range, it won't replace them"),
                         #create_range_slider(),
                         html.Div(id='tir-sliders'),
+                        html.Div(id='tir-slider-1'),
+                        html.Div(id='tir-slider-2'),
+                        html.Div(id='tir-slider-3'),
                         dbc.Button("Add another threshold", id='add-tir-slider', color='secondary'),
                     ],
                     title="Time in range thresholds",
@@ -29,34 +41,63 @@ def get_analysis_options_layout():
                 dbc.AccordionItem(
                     [
                         html.P("Use the sliders below to select the thresholds for level 1 and level 2 hypoglycemic episodes"),
-                        html.H5('Level 1'),
-                        dcc.Slider(2.2, 22.2, step=0.1, value=3.9, 
-                                    id='lv1-hypo-slider',
-                                    tooltip={"placement": "bottom", "always_visible": True},
-                                    marks={
-                                        2.2:{'label': 'Min.'},
-                                        22.2:{'label': 'Max.'}
-                                }),
-                        html.H5('Level 2'),
-                        dcc.Slider(2.2, 22.2, step=0.1, value=3.0,
-                                    id='lv2-hypo-slider',
-                                    tooltip={"placement": "bottom", "always_visible": True},
-                                    marks={
-                                        2.2:{'label': 'Min.'},
-                                        22.2:{'label': 'Max.'}
-                                })
+                        dbc.Row([
+                            
+                                dbc.Col([dbc.Card(dbc.CardBody([
+                                    html.H5('Hypoyglycemia'),
+                                    html.H6('Level 1', style={'textAlign': 'right'}),
+                                    dcc.Slider(2.2, 22.2, step=0.1, value=3.9, 
+                                                id='lv1-hypo-slider',
+                                                tooltip={"placement": "bottom", "always_visible": True},
+                                                marks={
+                                                    2.2:{'label': 'Min.'},
+                                                    22.2:{'label': 'Max.'}
+                                            }),
+
+                                    html.H6('Level 2', style={'textAlign': 'right'}),
+                                    dcc.Slider(2.2, 22.2, step=0.1, value=3.0,
+                                                id='lv2-hypo-slider',
+                                                tooltip={"placement": "bottom", "always_visible": True},
+                                                marks={
+                                                    2.2:{'label': 'Min.'},
+                                                    22.2:{'label': 'Max.'}
+                                            })
+                                        ])),
+                                ]),
+                            
+                            
+                                dbc.Col([dbc.Card(dbc.CardBody([
+                                    html.H5('Hyperyglycemia',style={'textAlign': 'right'}),
+
+                                    html.H6('Level 1'),
+                                    dcc.Slider(2.2, 22.2, step=0.1, value=10.0, 
+                                                id='lv1-hyper-slider',
+                                                tooltip={"placement": "bottom", "always_visible": True},
+                                                marks={
+                                                    2.2:{'label': 'Min.'},
+                                                    22.2:{'label': 'Max.'}
+                                            }),
+
+                                    html.H6('Level 2'),
+                                    dcc.Slider(2.2, 22.2, step=0.1, value=13.9,
+                                                id='lv2-hyper-slider',
+                                                tooltip={"placement": "bottom", "always_visible": True},
+                                                marks={
+                                                    2.2:{'label': 'Min.'},
+                                                    22.2:{'label': 'Max.'}
+                                            })
+                                ]))
+                            ]),
+                        ])
                     ],
                     title="Hypoglycemic episodes",
                 ),
                 dbc.AccordionItem(
-                    "This is the content of the third section",
+                    "Some kind of grouping shenanigans",
                     title="Grouping your data",
                 ),
-                dbc.AccordionItem(create_period_of_interest(),
-                    id='poi-section',
-                    title="Period of interest",
-                ),
             ],
+            start_collapsed=True,
         )
     )
 
@@ -81,7 +122,9 @@ def get_analysis_options_layout():
 def create_range_slider(n_clicks, children, units):
         id = 'tir_slider_'+str(n_clicks)
         if units=='mmol/L':
-            new_slider = dcc.RangeSlider(2.2, 22.2, step=0.1, value=[3.9, 10],
+            
+            new_slider = html.Div([html.H4(id=id+'title'),
+                        dcc.RangeSlider(2.2, 22.2, step=0.1, value=[3.9, 10],
                                     tooltip={"placement": "bottom", "always_visible": True},
                                     marks={
                                             2.2:{'label': 'Min.'},
@@ -89,6 +132,7 @@ def create_range_slider(n_clicks, children, units):
                                     },
                                     id=id
                                 ),
+            ])
         else:
             new_slider = dcc.RangeSlider(39, 399, step=1, value=[70, 180],
                                     tooltip={"placement": "bottom", "always_visible": True},
@@ -103,39 +147,3 @@ def create_range_slider(n_clicks, children, units):
         else:
             children = new_slider               
         return children
-
-def create_period_of_interest():
-    
-    poi_template = pd.DataFrame([['ID must match your IDs in the webapp',	'dd/mm/yy/ HH:MM',	'dd/mm/yy/ HH:MM',	'This can be used to label repeating periods']], columns= ['ID', 'startDateTime', 'endDateTime', 'label'])
-    return html.Div([
-        html.P('This section enables you to take a more in depth look at different periods of interest in your data. \
-            For this to work you\'ll need to upload a file that includes the ID of the participant, the start and end times of the period \
-            of interest and an optional label. From there, you\'ll get a breakdown of the metrics of glycemic control\
-            for all of the periods you\'ve entered.\
-            For this part you need to pay close attention to the instruction because there\'s lots of ways to mess this up. Good luck brave warrior.'),
-       
-        dbc.Row([
-            dbc.Col([html.H5('Instructions'),
-                html.P('1. Create an excel or csv file with headers shown in the template below or download the template using the export button'),
-                    html.P('2. Fill in the IDs, must match with the ones in your processed data (table in above section)'),
-                    html.P('3. The start and end time of the period must be in the format DD/MM/YY HH:MM'),
-                    html.P('4. Add a label if you\'d like to'),
-                    html.P('5 Add an optional set period to look at the window after your period of interest'),
-            ]),
-            dbc.Col([html.H5('File template'),
-                    dash_table.DataTable(data=poi_template.to_dict('records'),
-                                columns=[{"name": i, "id": i} for i in poi_template.columns],
-                                export_format="csv",
-                                export_headers="display",
-                                style_table={'overflowX': 'auto',},
-                                style_cell={'whiteSpace': 'normal',},),
-                    dcc.Upload(dbc.Button('Upload periods file', color="secondary"),
-                                multiple=False,
-                                id='upload-poi-data',),
-            ], width=5),
-        html.Div(id='poi-datafile'),
-        html.H5('Time after period'),
-        dcc.Checklist(['1 hour', '2 hours', '3 hours', '4 hours'], id='time-after-checklist', inline=False),
-
-    ])
-])

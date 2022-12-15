@@ -48,8 +48,8 @@ def get_datatable_layout():
             ])
 
 def create_data_table(children):
-    data_details = pd.DataFrame.from_dict(children)[['Filename', 'ID', 'Usable', 'Device', 'Interval', 'Data Sufficiency', 'Start Time', 'End Time']]
-    
+    data_details = pd.DataFrame.from_dict(children)[['Filename', 'ID', 'Usable', 'Interval', 'Data Sufficiency', 'Units', 'Days','Start DateTime', 'End DateTime']] #'Device', 'Interval',
+    data_details.columns = ['Filename', 'ID', 'Usable', 'Interval (mins)', 'Data Sufficiency (%)', 'Units', 'Days','Start DateTime', 'End DateTime']
     return html.Div([
                 #html.H2('Data details'),
 
@@ -67,7 +67,9 @@ def create_data_table(children):
                                 'height': 'auto',
                                 #'width':'200px'
                             },
-                    
+                    style_cell={
+                            'whiteSpace': 'normal',
+                },
                     style_table={
                         'overflowX': 'auto',
                         'height': 300,
@@ -77,6 +79,14 @@ def create_data_table(children):
                     sort_action="native",       # enables data to be sorted per-column by user or not ('none')
                     export_format="csv",
                     export_headers="display",
+                    tooltip_header={
+                        'Data Sufficiency (%)': 'The percentage of available CGM readings compared to the number of readings that should be present',
+                        'Usable': 'Whether or not the CGM data can be used by the program (True/False)',
+                        'Units': 'mmol/L or mg/dL',
+                        'ID': 'How you will identify your CGM files, it comes from the filename but you can change this within the file',
+                        'Start DateTime': 'The first reading from your CGM data. You can change this to adjust the period of interest.',
+                        'End DateTime': 'The last reading from your CGM data. You can change this to adjust the period of interest.'
+                    },
                     ),
                     
                      

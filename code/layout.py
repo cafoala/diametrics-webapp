@@ -6,6 +6,7 @@ import section_analysis_options
 import section_metrics_tbl
 import section_overview_figs
 import section_individual_figs
+import section_external_factors
 
 navbar = dbc.NavbarSimple(
     children=[
@@ -68,7 +69,7 @@ def create_tabs_layout():
                         dbc.Tab(dbc.Card(dbc.CardBody([section_metrics_tbl.get_metrics_layout()])), label="4. Standard metrics", tab_id="metrics-tab", id='metrics-tab', disabled=True, active_label_style={"color": "#FB79B3"}),
                         dbc.Tab(dbc.Card(dbc.CardBody(section_individual_figs.create_indiv_layout())), label="5. Ambulatory glucose profile", tab_id="indiv-vis", id='indiv-vis', disabled=True, active_label_style={"color": "#FB79B3"}),
                         #dbc.Tab(label="6. Overview visualisations", tab_id="overview-vis", id='overview-vis', disabled=False, active_label_style={"color": "#FB79B3"}),
-                        dbc.Tab(label="6. Incorporating external factors", tab_id="poi-tab", id='poi-tab', disabled=False, active_label_style={"color": "#FB79B3"}),
+                        dbc.Tab(dbc.Card(dbc.CardBody(section_external_factors.create_period_of_interest())),label="6. Incorporating external factors", tab_id="external-tab", id='external-tab', disabled=True, active_label_style={"color": "#FB79B3"}),
                     ],
                     id="card-tabs",
                     active_tab="upload-tab",

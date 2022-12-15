@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 import dash_bootstrap_components as dbc
-
+colors = ['blue', 'purple', 'grey', 'pink', 'red']
 def create_indiv_layout():
     figs_layout = html.Div([
         dbc.Row([
@@ -16,12 +16,52 @@ def create_indiv_layout():
         ]),
         dbc.Row([
                 dbc.Col(id='glc-trace'),
+        ]),
+        dbc.Row([
+                dbc.Col(id='pie-chart'),
         ])
     ])
     return figs_layout
 
-def create_glucose_trace(df): 
-    fig = px.line(df, x='time', y='glc')
+def create_glucose_trace(df):
+    fig = go.Figure()
+    # Create and style traces
+    fig.add_trace(go.Scatter(x=df.time, y=df.glc,
+                            line=dict(color='black', ), showlegend=False, name='Glucose trace'),
+                            #row=1, col=1
+                            )
+    # Add shape regions
+    fig.add_hrect(
+        y0="0", y1="3",
+        fillcolor=colors[0], opacity=0.2,
+        layer="below", line_width=0,
+        #row=1, col=1
+    ),
+    fig.add_hrect(
+        y0="3", y1="3.9",
+        fillcolor=colors[1], opacity=0.2,
+        layer="below", line_width=0,
+        #row=1, col=1
+    ),
+    fig.add_hrect(
+        y0="3.9", y1="10",
+        fillcolor=colors[2], opacity=0.2,
+        layer="below", line_width=0,
+        #row=1, col=1
+    ),
+    fig.add_hrect(
+        y0="10", y1="13.9",
+        fillcolor=colors[3], opacity=0.2,
+        layer="below", line_width=0,#annotation_text='Level 1 hyperglycemia (10-13.9)', annotation_position="top left",
+        #row=1, col=1
+    ),
+    fig.add_hrect(
+        y0="13.9", y1="23",
+        fillcolor=colors[4], opacity=0.2,
+        layer="below", line_width=0,#annotation_text='Level 2 hyperglycemia (>13.9)', annotation_position="top left",
+        #row=1, col=1
+    )
+
     fig.update_layout(
         title = 'Overall glucose trace',
         yaxis_title = 'Glucose (mmol/L)',
@@ -34,8 +74,31 @@ def create_glucose_trace(df):
             )
     ])
 
+def get_pie(glc):
+    hypo2 = (glc<3).sum()
+    hypo1 = ((glc>=3) & (glc<3.9)).sum()
+    norm = ((glc>=3.9 )& (glc<=10)).sum()
+    hyper1 = ((glc>10) & (glc<=13.9)).sum()
+    hyper2 = (glc>13.9).sum()
+    return [hypo2, hypo1, norm, hyper1, hyper2]
+    
+
+
+def create_pie_chart(df):
+    values = get_pie(df.glc)
+    labels = ['Level 2 hypoglycemia (<3mmol/L)', 'Level 1 hypoglycemia (3-3.9mmol/L)', 'Normal range (3.9-10mmol/L)', 'Level 1 hyperglycemia (10-13.9mmol/L)','Level 2 hyperglycemia (>13.9mmol/L)',]
+    
+    fig = go.Figure()
+    fig.add_trace(go.Pie(values=values, labels=labels, marker_colors=colors, opacity=0.5),)
+
+    return html.Div([
+            dcc.Graph(
+                        id='pie-chart',
+                        figure=fig
+            )
+    ])
+
 def create_amb_glc_profile(df):
-    print(df.head())
     df.time = pd.to_datetime(df.time)
     grouped = df.set_index('time').groupby(pd.Grouper(freq='15min')).mean()['glc']
     group_frame = grouped.reset_index().dropna()
@@ -96,8 +159,8 @@ def create_amb_glc_profile(df):
     ))
 
     #fig.add_hrect(y0=3.9, y1=10, line_width=0, fillcolor="grey", opacity=0.2, name='Target range')
-    fig.update_xaxes(showgrid=False, zeroline=False)
-    fig.update_yaxes(showgrid=False, zeroline=False)
+    #fig.update_xaxes(showgrid=False, zeroline=False)
+    #fig.update_yaxes(showgrid=False, zeroline=False)
     fig.update_layout(
         title = 'Ambulatory glucose profile',
         yaxis_title = 'Glucose (mmol/L)',

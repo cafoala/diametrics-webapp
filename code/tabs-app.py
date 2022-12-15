@@ -55,16 +55,14 @@ def switch_tabs(n1, n2, n3):
 
 
 for i in [['data-tab', 'preprocess-button'],['other-metrics-tab', 'analysis-options-button'], 
-                ['metrics-tab', 'calculate-metrics'], ['indiv-vis', 'calculate-metrics']]:
+                ['metrics-tab', 'calculate-metrics'], ['indiv-vis', 'calculate-metrics'],
+                ['external-tab', 'calculate-metrics']]:
     @app.callback(Output(i[0], 'disabled'),
-    Input(i[1], 'n_clicks'),
-    prevent_initial_call=True)
+                Input(i[1], 'n_clicks'),
+                prevent_initial_call=True)
     def show_next_tab(n_clicks):
-        print('disable tabs')
-        print(i[1])
         if n_clicks is None:
             raise PreventUpdate
-        print('ran')
         return False
 
 
@@ -98,7 +96,6 @@ def preprocess_data(n_clicks, list_of_dates, list_of_contents, list_of_names):
         zip(list_of_contents, list_of_names, list_of_dates)]
     
     data_table = section_data_tbl.create_data_table(children)
-    print('preprocess clicked')
     return (children, data_table)
 
 
@@ -114,6 +111,7 @@ def analysis_options_callbacks(app):
     #@app.callback(Output())
 
 analysis_options_callbacks(app)
+
 
 ## METRICS TABLE ##
 # Layout
@@ -170,6 +168,7 @@ def create_individual_figs(ts, metrics):
 @app.callback(
     Output('amb-glc-profile', 'children'),
     Output('glc-trace', 'children'),
+    Output('pie-chart', 'children'),
     Input('subject-id', 'value'),
     State('raw-data-store', 'data'),
     #prevent_initial_call=True
@@ -179,7 +178,10 @@ def update_indiv_figs(subject_id, data):
     df = pd.DataFrame.from_dict(subject_data['data'])
     agp = section_individual_figs.create_amb_glc_profile(df)
     glc_trace = section_individual_figs.create_glucose_trace(df)
-    return agp, glc_trace
+    pie = section_individual_figs.create_pie_chart(df)
+    return agp, glc_trace, pie
+
+
 
 ## GROUP FIGS ##
 @app.callback(
