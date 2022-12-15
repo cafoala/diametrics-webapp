@@ -18,7 +18,6 @@ def create_bargraph(df, y_axis):
     )
     ])
 
-
 def create_boxplot(df, y_axis):
     if y_axis=='Time in range':
         y_value=['TIR level 2 hypoglycemia', 'TIR level 1 hypoglycemia', 'TIR normal', 'TIR level 1 hyperglycemia', 'TIR level 2 hyperglycemia']
