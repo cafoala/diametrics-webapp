@@ -31,7 +31,7 @@ def create_file_list(list_of_names):
                     'borderWidth': '1px',
                     'borderStyle': 'dashed',
                     'borderRadius': '5px',
-                    'textAlign': 'left',
+                    'textAlign': 'center',
                     'margin': '10px',
                     'justify': "center",}),
             html.P('If you\'re happy with these files, click the button below to process your data'),
