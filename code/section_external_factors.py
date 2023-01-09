@@ -49,15 +49,33 @@ def create_period_of_interest():
             of interest and an optional label. From there, you\'ll get a breakdown of the metrics of glycemic control\
             for all of the periods you\'ve entered.\
             For this part you need to pay close attention to the instruction because there\'s lots of ways to mess this up. Good luck brave warrior.'),
-       
         dbc.Row([
-            dbc.Col([html.H5('Instructions'),
-                html.P('1. Create an excel or csv file with headers shown in the template below or download the template using the export button'),
-                    html.P('2. Fill in the IDs, must match with the ones in your processed data (table in above section)'),
-                    html.P('3. The start and end time of the period must be in the format DD/MM/YY HH:MM'),
-                    html.P('4. Add a label if you\'d like to'),
-                    html.P('5 Add an optional set period to look at the window after your period of interest'),
+            dbc.Col([
+                dbc.Button('Instructions', id='instruction-button'),
+                dbc.Collapse(dbc.Card(dbc.CardBody([
+                    html.P('1. Create an excel or csv file with headers shown in the template below or download the template using the export button'),
+                        html.P('2. Fill in the IDs, must match with the ones in your processed data (table in above section)'),
+                        html.P('3. The start and end time of the period must be in the format DD/MM/YY HH:MM'),
+                        html.P('4. Add a label if you\'d like to'),
+                        html.P('5 Add an optional set period to look at the window after your period of interest'),
+                ])), id='instructions-collapse'),
             ]),
-        ]),
-        dbc.Row(accordion)
-])
+            dbc.Col([
+                html.H5('File template'),
+                dash_table.DataTable(data=poi_template.to_dict('records'),
+                                columns=[{"name": i, "id": i} for i in poi_template.columns],
+                                export_format="csv",
+                                export_headers="display",
+                                style_table={'overflowX': 'auto',},
+                                style_cell={'whiteSpace': 'normal',},),
+                dcc.Upload(dbc.Button('Upload periods file', color="secondary"),
+                                multiple=False,
+                                id='upload-poi-data',),
+                html.Div(id='poi-datafile'),
+                html.H5('Time after period'),
+                dcc.Checklist(['1 hour', '2 hours', '3 hours', '4 hours'], 
+                        id='time-after-checklist', inline=False),
+            ])
+         ])
+    ]),
+

@@ -12,7 +12,7 @@ def create_indiv_layout():
                     dbc.Col(id='subject-id-div'),
         ]),
         dbc.Row([
-                dbc.Col(id='amb-glc-profile',),
+                dbc.Col(dbc.Spinner(spinner_style={"width": "3rem", "height": "3rem"}), id='amb-glc-profile',),
         ]),
         dbc.Row([
                 dbc.Col(id='glc-trace'),
@@ -27,7 +27,9 @@ def create_glucose_trace(df):
     fig = go.Figure()
     # Create and style traces
     fig.add_trace(go.Scatter(x=df.time, y=df.glc,
-                            line=dict(color='black', ), showlegend=False, name='Glucose trace'),
+                            line=dict(color='black', ), 
+                            opacity=0.5,
+                            showlegend=False, name='Glucose trace'),
                             #row=1, col=1
                             )
     # Add shape regions

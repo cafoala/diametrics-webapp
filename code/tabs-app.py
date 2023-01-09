@@ -19,6 +19,7 @@ import section_analysis_options
 import section_metrics_tbl
 import section_overview_figs
 import section_individual_figs
+import dash_uploader as du
 logging.basicConfig(level=logging.DEBUG)
 
 external_stylesheets = [dbc.themes.BOOTSTRAP]
@@ -28,6 +29,7 @@ colors = {
 }
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)#, suppress_callback_exceptions=True)
 app.config.suppress_callback_exceptions = True
+du.configure_upload(app, r"C:/tmp/Uploads")
 
 app.layout = layout.create_tabs_layout()
 
@@ -204,6 +206,16 @@ def update_group_figs(yaxis, period, data):
     #scatterplot, stats = section_overview_figs.create_scatter(sub_df, 'eA1c', 'TIR normal')
     return bargraph, boxplot, #scatterplot, stats
 
+## ETERNAL FACTORS ##
+@app.callback(
+    Output("instructions-collapse", "is_open"),
+    [Input("instructions-button", "n_clicks")],
+    [State("instructions-collapse", "is_open")],
+)
+def toggle_collapse(n, is_open):
+    if n:
+        return not is_open
+    return is_open
 
 if __name__ == '__main__':
     app.run_server(debug=True)#, dev_tools_ui=False)

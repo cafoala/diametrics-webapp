@@ -33,30 +33,31 @@ def parse_contents(contents, filename, date):
 
 def get_datatable_layout():
     return html.Div([
-                html.H2('Data details'),
+                html.H2('Data overview'),
 
                 html.Div(dbc.Spinner(spinner_style={"width": "3rem", "height": "3rem"}), id='data-tbl-div'),
                 html.P('The table shows your preprocessed data. Please make sure to check that the data is \
-                        what you want for your files and edit accordingly. Most importantly, the ID, the start and \
-                            end dates as these will be used for the rest of your data analysis. If you do edit, \
-                              please press the reprocess button to get an updated table'),
+                        what you want for your files. You can edit the IDs'),
                 dbc.Row([
                     dbc.Col([                
-                        dbc.Button('Choose analysis options', id='analysis-options-button', color='secondary')   
-                    ])
+                        dbc.Button('Back', id='analysis-options-back-button', color='secondary')   
+                    ]),
+                    dbc.Col([                
+                        dbc.Button('Next', id='analysis-options-button', color='secondary')   
+                    ], style={'text-align': 'right'})
                 ])
             ])
 
 def create_data_table(children):
-    data_details = pd.DataFrame.from_dict(children)[['Filename', 'ID', 'Usable', 'Interval', 'Data Sufficiency', 'Units', 'Days','Start DateTime', 'End DateTime']] #'Device', 'Interval',
-    data_details.columns = ['Filename', 'ID', 'Usable', 'Interval (mins)', 'Data Sufficiency (%)', 'Units', 'Days','Start DateTime', 'End DateTime']
+    data_details = pd.DataFrame.from_dict(children)[['Filename', 'ID', 'Usable','Data Sufficiency', 'Units', 'Days','Start DateTime', 'End DateTime']] #'Device', 'Interval',
+    data_details.columns = ['Filename', 'ID', 'Usable',  'Data Sufficiency (%)', 'Units', 'Days','Start DateTime', 'End DateTime'] #'Interval (mins)',
     return html.Div([
                 #html.H2('Data details'),
 
         dash_table.DataTable(
                     id='data-tbl',
                     columns=[
-                                {"name": i, "id": i, "deletable": False, "selectable": True, "hideable": False}
+                                {"name": i, "id": i, "deletable": False, "selectable": False, "hideable": False}
                                 if i == "iso_alpha3" or i == "Filename" or i == "id"
                                 else {"name": i, "id": i, "hideable": True, "selectable": True}
                                 for i in data_details.columns
@@ -74,18 +75,18 @@ def create_data_table(children):
                         'overflowX': 'auto',
                         'height': 300,
                         },
-                    editable=True,              # allow editing of data inside all cells
+                    #editable=True,              # allow editing of data inside all cells
                     filter_action="native",     # allow filtering of data by user ('native') or not ('none')
                     sort_action="native",       # enables data to be sorted per-column by user or not ('none')
                     export_format="csv",
                     export_headers="display",
                     tooltip_header={
-                        'Data Sufficiency (%)': 'The percentage of available CGM readings compared to the number of readings that should be present',
+                        'Data Sufficiency (%)': 'The percentage of available CGM readings divided by the number of readings that should be present',
                         'Usable': 'Whether or not the CGM data can be used by the program (True/False)',
                         'Units': 'mmol/L or mg/dL',
-                        'ID': 'How you will identify your CGM files, it comes from the filename but you can change this within the file',
-                        'Start DateTime': 'The first reading from your CGM data. You can change this to adjust the period of interest.',
-                        'End DateTime': 'The last reading from your CGM data. You can change this to adjust the period of interest.'
+                        'ID': 'How you will identify your CGM files, it comes from the filename',
+                        'Start DateTime': 'The first reading from your CGM data',
+                        'End DateTime': 'The last reading from your CGM data.'
                     },
                     ),
                     

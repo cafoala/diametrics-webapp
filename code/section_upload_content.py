@@ -1,5 +1,6 @@
 from dash import dcc, html, dash_table
 import dash_bootstrap_components as dbc
+import dash_uploader as du
 
 def get_upload_layout():
         return dbc.Card(
@@ -11,9 +12,13 @@ def get_upload_layout():
                                         ]
                                         #style={'textAlign': 'left'}
                                         ), width=8),
-                                        dbc.Col(dcc.Upload(dbc.Button('Select Files', color="secondary"),
+
+                                        dbc.Col([
+                                                # du.Upload(),
+                                                dcc.Upload(dbc.Button('Select Files', color="secondary"),
                                                         multiple=True,
-                                                        id='upload-data',))
+                                                        id='upload-data',)
+                                        ])
                                 ]),
                                 dbc.Row([
                                         dbc.Col(html.Div(id='filelist'))
@@ -34,6 +39,6 @@ def create_file_list(list_of_names):
                     'textAlign': 'center',
                     'margin': '10px',
                     'justify': "center",}),
-            html.P('If you\'re happy with these files, click the button below to process your data'),
-            dbc.Button('Preprocess data', id='preprocess-button', color='secondary'),
+            html.P('If you\'re happy with these files, click next to process your data'),
+            dbc.Row(dbc.Col([dbc.Button('Next', id='preprocess-button', color='secondary')], style={'text-align': 'right'})),
             ])
