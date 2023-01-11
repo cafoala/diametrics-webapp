@@ -40,6 +40,7 @@ def get_metrics_layout():
                     dbc.Col(html.H2('Metrics of Glycemic Control')),
                     #dbc.Col(units),
                     dbc.Col(time_period),
+                    dbc.Col(id='asterix-day-time')
         ]),
         dbc.Row([
                 dbc.Col(dbc.Spinner(spinner_style={"width": "3rem", "height": "3rem"}), id='test-table'),
@@ -47,7 +48,7 @@ def get_metrics_layout():
     ])
     return metrics_layout
     
-def calculate_metrics(raw_data):
+def calculate_metrics(raw_data): #, day_start, day_end, night_start, night_end
     all_results = []
     #day_results = []
     #night_results = []

@@ -1,13 +1,13 @@
 import pandas as pd
 from dash import dcc, html, dash_table
 import dash_bootstrap_components as dbc
-
+import dash_mantine_components as dmc
+import datetime
 
 def get_analysis_options_layout():
     accordion = html.Div(
-        dbc.Accordion(
-            [dbc.AccordionItem(
-                    [
+        dbc.Accordion([
+            dbc.AccordionItem([
                         #html.P("Choose your units"),
                         dbc.RadioItems(
                             id="unit-type-options",
@@ -18,13 +18,56 @@ def get_analysis_options_layout():
                             options=[
                                 {"label": 'mmol/L', "value": 'mmol/L'},
                                 {"label": "mg/dL", "value": 'mg/dL'},
-                                {"label": "Both", "value": 'both'},
+                                #{"label": "Both", "value": 'both'},
                             ],
                             value='mmol/L',
                             style={'textAlign': 'center'}
                         ),
                     ],
                     title="Units",
+                ),
+                dbc.AccordionItem([
+                    html.P('Edit the times below to adjust the wake/sleep period. The defaults are taken from the international consensus'),
+                    dbc.Row([
+                        dbc.Col([
+                            dbc.Card([
+                                html.H5('Day time'),
+                                html.Div(
+                                    dmc.Group(
+                                        spacing=50,
+                                        children=[
+                                            dmc.TimeInput(
+                                                id='start-day-time', label="Start", format="24", value=datetime.datetime(year=1, month=1, day=1, hour=6, minute=0)
+                                            ),
+                                            dmc.TimeInput(
+                                                id='end-day-time', label="End", format="24", value=datetime.datetime(year=1, month=1, day=1, hour=0, minute=0)
+                                            ),
+                                        ],
+                                    ), style={'textAlign': 'center'}),
+                            ]),
+                        ],style={'text-align': 'center'}),
+    
+                        dbc.Col([
+                            dbc.Card([
+                                html.H5('Night time', style={'textAlign': 'center'}),
+                                #create_range_slider(),
+                                html.Div(
+                                    dmc.Group(
+                                        spacing=50,
+                                        children=[
+                                            dmc.TimeInput(
+                                                id='start-night-time', label="Start", format="24", value=datetime.datetime(year=1, month=1, day=1, hour=0, minute=0)
+                                            ),
+                                            dmc.TimeInput(
+                                                id='end-night-time', label="End", format="24", value=datetime.datetime(year=1, month=1, day=1, hour=6, minute=0)
+                                            ),
+                                        ]
+                                    ), style={'textAlign': 'center'})
+                            ])
+                        ]),
+                    ])
+                    ],
+                    title="Day/night time",
                 ),
                 dbc.AccordionItem(
                     [
@@ -44,7 +87,7 @@ def get_analysis_options_layout():
                         dbc.Row([
                             
                                 dbc.Col([dbc.Card(dbc.CardBody([
-                                    html.H5('Hypoyglycemia'),
+                                    html.H5('Hypoglycemia'),
                                     html.H6('Level 1', style={'textAlign': 'right'}),
                                     dcc.Slider(2.2, 22.2, step=0.1, value=3.9, 
                                                 id='lv1-hypo-slider',
@@ -67,7 +110,7 @@ def get_analysis_options_layout():
                             
                             
                                 dbc.Col([dbc.Card(dbc.CardBody([
-                                    html.H5('Hyperyglycemia',style={'textAlign': 'right'}),
+                                    html.H5('Hyperglycemia',style={'textAlign': 'right'}),
 
                                     html.H6('Level 1'),
                                     dcc.Slider(2.2, 22.2, step=0.1, value=10.0, 
@@ -92,10 +135,7 @@ def get_analysis_options_layout():
                     ],
                     title="Hypoglycemic episodes",
                 ),
-                dbc.AccordionItem(
-                    "Some kind of grouping shenanigans",
-                    title="Grouping your data",
-                ),
+                
             ],
             start_collapsed=True,
         )

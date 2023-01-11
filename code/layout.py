@@ -77,7 +77,7 @@ def create_tabs_layout():
                             dbc.Card(dbc.CardBody(
                                 [section_analysis_options.get_analysis_options_layout()])), 
                                 label="3. Analysis options", tab_id="other-metrics-tab", 
-                                id='other-metrics-tab', disabled=True, 
+                                id='other-metrics-tab', disabled=False, 
                                 active_label_style={"color": "#FB79B3"}),
                         dbc.Tab(
                             dbc.Card(dbc.CardBody(
