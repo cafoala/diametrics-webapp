@@ -26,118 +26,147 @@ def get_analysis_options_layout():
                     ],
                     title="Units",
                 ),
-                dbc.AccordionItem([
-                    html.P('Edit the times below to adjust the wake/sleep period. The defaults are taken from the international consensus'),
-                    dbc.Row([
-                        dbc.Col([
-                            dbc.Card([
-                                html.H5('Day time'),
-                                html.Div(
-                                    dmc.Group(
-                                        spacing=50,
-                                        children=[
-                                            dmc.TimeInput(
-                                                id='start-day-time', label="Start", format="24", value=datetime.datetime(year=1, month=1, day=1, hour=6, minute=0)
-                                            ),
-                                            dmc.TimeInput(
-                                                id='end-day-time', label="End", format="24", value=datetime.datetime(year=1, month=1, day=1, hour=0, minute=0)
-                                            ),
-                                        ],
-                                    ), style={'textAlign': 'center'}),
-                            ]),
-                        ],style={'text-align': 'center'}),
-    
-                        dbc.Col([
-                            dbc.Card([
-                                html.H5('Night time', style={'textAlign': 'center'}),
-                                #create_range_slider(),
-                                html.Div(
-                                    dmc.Group(
-                                        spacing=50,
-                                        children=[
-                                            dmc.TimeInput(
-                                                id='start-night-time', label="Start", format="24", value=datetime.datetime(year=1, month=1, day=1, hour=0, minute=0)
-                                            ),
-                                            dmc.TimeInput(
-                                                id='end-night-time', label="End", format="24", value=datetime.datetime(year=1, month=1, day=1, hour=6, minute=0)
-                                            ),
-                                        ]
-                                    ), style={'textAlign': 'center'})
-                            ])
+            dbc.AccordionItem([
+                html.P('Edit the times below to adjust the wake/sleep period. The defaults are taken from the international consensus'),
+                dbc.Row([
+                    dbc.Col([
+                        dbc.Card([
+                            html.H5('Day time'),
+                            html.Div(
+                                dmc.Group(
+                                    spacing=50,
+                                    children=[
+                                        dmc.TimeInput(
+                                            id='start-day-time', label="Start", format="24", value=datetime.datetime(year=1, month=1, day=1, hour=6, minute=0)
+                                        ),
+                                        dmc.TimeInput(
+                                            id='end-day-time', label="End", format="24", value=datetime.datetime(year=1, month=1, day=1, hour=0, minute=0)
+                                        ),
+                                    ],
+                                ), style={'textAlign': 'center'}),
                         ]),
-                    ])
-                    ],
-                    title="Day/night time",
-                ),
-                dbc.AccordionItem(
-                    [
-                        html.P("Use the slider below to select threshold that you're interested in. This will be added to the standard thresholds for time in range, it won't replace them"),
-                        #create_range_slider(),
-                        html.Div(id='tir-sliders'),
+                    ],style={'text-align': 'center'}),
+
+                    dbc.Col([
+                        dbc.Card([
+                            html.H5('Night time', style={'textAlign': 'center'}),
+                            #create_range_slider(),
+                            html.Div(
+                                dmc.Group(
+                                    spacing=50,
+                                    children=[
+                                        dmc.TimeInput(
+                                            id='start-night-time', label="Start", format="24", value=datetime.datetime(year=1, month=1, day=1, hour=0, minute=0)
+                                        ),
+                                        dmc.TimeInput(
+                                            id='end-night-time', label="End", format="24", value=datetime.datetime(year=1, month=1, day=1, hour=6, minute=0)
+                                        ),
+                                    ]
+                                ), style={'textAlign': 'center'})
+                        ])
+                    ]),
+                ])
+                ],
+                title="Day/night time",
+            ),
+            dbc.AccordionItem(
+                [
+                    html.P("Use the slider below to select threshold that you're interested in. \
+                            This will be added to the standard thresholds for time in range, it \
+                                won't replace them. To see the standard ranges see the THEORY SECTION"),
+                    #create_range_slider(),
+                    dbc.Card([
+                        html.H6('Time in range 5-7 mmol/L'),
+                        dbc.Row([
+                            dbc.Col([
+                                html.Div(id='tir-sliders'),
+                            ]),
+                            dbc.Col([
+                                dbc.Button('Remove', color="danger"),
+                            ], width=2)
+                        ]),
+                    ]),
+                    dbc.Card([
+                        html.H6('Time in range 5-7 mmol/L'),
+                        dbc.Row([
+                            dbc.Col([
+                                dcc.RangeSlider(39, 399, step=1, value=[70, 180],
+                                    tooltip={"placement": "bottom", "always_visible": True},
+                                    marks={
+                                            39:{'label': 'Min.'},
+                                            399:{'label': 'Max.'}
+                                    },
+                                ),
+                            ]),
+                            dbc.Col([
+                                dbc.Button('Add', color="success"),
+                            ], width=2)
+                        ]),
                         html.Div(id='tir-slider-1'),
                         html.Div(id='tir-slider-2'),
                         html.Div(id='tir-slider-3'),
                         dbc.Button("Add another threshold", id='add-tir-slider', color='secondary'),
-                    ],
-                    title="Time in range thresholds",
-                ),
-                dbc.AccordionItem(
-                    [
-                        html.P("Use the sliders below to select the thresholds for level 1 and level 2 hypoglycemic episodes"),
-                        dbc.Row([
-                            
-                                dbc.Col([dbc.Card(dbc.CardBody([
-                                    html.H5('Hypoglycemia'),
-                                    html.H6('Level 1', style={'textAlign': 'right'}),
-                                    dcc.Slider(2.2, 22.2, step=0.1, value=3.9, 
-                                                id='lv1-hypo-slider',
-                                                tooltip={"placement": "bottom", "always_visible": True},
-                                                marks={
-                                                    2.2:{'label': 'Min.'},
-                                                    22.2:{'label': 'Max.'}
-                                            }),
+                    ])
+                ],
+                title="Time in range thresholds",
+            ),
+            dbc.AccordionItem(
+                [
+                    html.P("Use the sliders below to select the thresholds for level 1 and level 2 hypoglycemic episodes"),
+                    dbc.Row([
+                        
+                            dbc.Col([dbc.Card(dbc.CardBody([
+                                html.H5('Hypoglycemia'),
+                                html.H6('Level 1', style={'textAlign': 'right'}),
+                                dcc.Slider(2.2, 22.2, step=0.1, value=3.9, 
+                                            id='lv1-hypo-slider',
+                                            tooltip={"placement": "bottom", "always_visible": True},
+                                            marks={
+                                                2.2:{'label': 'Min.'},
+                                                22.2:{'label': 'Max.'}
+                                        }),
 
-                                    html.H6('Level 2', style={'textAlign': 'right'}),
-                                    dcc.Slider(2.2, 22.2, step=0.1, value=3.0,
-                                                id='lv2-hypo-slider',
-                                                tooltip={"placement": "bottom", "always_visible": True},
-                                                marks={
-                                                    2.2:{'label': 'Min.'},
-                                                    22.2:{'label': 'Max.'}
-                                            })
-                                        ])),
-                                ]),
-                            
-                            
-                                dbc.Col([dbc.Card(dbc.CardBody([
-                                    html.H5('Hyperglycemia',style={'textAlign': 'right'}),
-
-                                    html.H6('Level 1'),
-                                    dcc.Slider(2.2, 22.2, step=0.1, value=10.0, 
-                                                id='lv1-hyper-slider',
-                                                tooltip={"placement": "bottom", "always_visible": True},
-                                                marks={
-                                                    2.2:{'label': 'Min.'},
-                                                    22.2:{'label': 'Max.'}
-                                            }),
-
-                                    html.H6('Level 2'),
-                                    dcc.Slider(2.2, 22.2, step=0.1, value=13.9,
-                                                id='lv2-hyper-slider',
-                                                tooltip={"placement": "bottom", "always_visible": True},
-                                                marks={
-                                                    2.2:{'label': 'Min.'},
-                                                    22.2:{'label': 'Max.'}
-                                            })
-                                ]))
+                                html.H6('Level 2', style={'textAlign': 'right'}),
+                                dcc.Slider(2.2, 22.2, step=0.1, value=3.0,
+                                            id='lv2-hypo-slider',
+                                            tooltip={"placement": "bottom", "always_visible": True},
+                                            marks={
+                                                2.2:{'label': 'Min.'},
+                                                22.2:{'label': 'Max.'}
+                                        })
+                                    ])),
                             ]),
-                        ])
-                    ],
-                    title="Hypoglycemic episodes",
-                ),
-                
-            ],
-            start_collapsed=True,
+                        
+                        
+                            dbc.Col([dbc.Card(dbc.CardBody([
+                                html.H5('Hyperglycemia',style={'textAlign': 'right'}),
+
+                                html.H6('Level 1'),
+                                dcc.Slider(2.2, 22.2, step=0.1, value=10.0, 
+                                            id='lv1-hyper-slider',
+                                            tooltip={"placement": "bottom", "always_visible": True},
+                                            marks={
+                                                2.2:{'label': 'Min.'},
+                                                22.2:{'label': 'Max.'}
+                                        }),
+
+                                html.H6('Level 2'),
+                                dcc.Slider(2.2, 22.2, step=0.1, value=13.9,
+                                            id='lv2-hyper-slider',
+                                            tooltip={"placement": "bottom", "always_visible": True},
+                                            marks={
+                                                2.2:{'label': 'Min.'},
+                                                22.2:{'label': 'Max.'}
+                                        })
+                            ]))
+                        ]),
+                    ])
+                ],
+                title="Hypoglycemic episodes",
+            ),
+            
+        ],
+        start_collapsed=True,
         )
     )
 
@@ -183,7 +212,9 @@ def create_range_slider(n_clicks, children, units):
                                     id=id
                                 ),
         if children is not None:
-            children.append(new_slider[0])
+            children['props']['children'].append(new_slider)
+            #children.append(new_slider)
         else:
+            print(children)
             children = new_slider               
         return children

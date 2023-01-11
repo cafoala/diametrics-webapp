@@ -103,9 +103,9 @@ def preprocess_data(n_clicks, list_of_dates, list_of_contents, list_of_names):
 
 ## ANALYSIS OPTIONS ##
 def analysis_options_callbacks(app):
-    @app.callback(Output('tir-sliders', 'children'),
+    @app.callback(Output('tir-slider-1', 'children'),
             Input('add-tir-slider', 'n_clicks'),
-            State('tir-sliders', 'children'),
+            State('tir-slider-1', 'children'),
             State('unit-type-options', 'value'))
     def create_range_slider(n_clicks, children, units):
         return section_analysis_options.create_range_slider(n_clicks, children, units)
@@ -117,17 +117,32 @@ analysis_options_callbacks(app)
 
 ## METRICS TABLE ##
 # Layout
+@app.callback(Output('asterix-day-time', 'children'),
+        Input('start-day-time', 'value'),
+        Input('end-day-time', 'value'),
+        Input('start-night-time', 'value'),
+        Input('end-night-time', 'value'),
+)
+def display_day_time(day_start, day_end, night_start, night_end):
+    times = [i[11:16] for i in [day_start, day_end, night_start, night_end]]
+    return html.P(f'* Day {times[0]}-{times[1]}, Night {times[2]}-{times[3]}')
+
 @app.callback(Output('metrics-store', 'data'),
         #Output('metrics-tbl', 'children')],
         Input('calculate-metrics', 'n_clicks'),
         State('raw-data-store', 'data'),
+        State('start-day-time', 'value'),
+        State('end-day-time', 'value'),
+        State('start-night-time', 'value'),
+        State('end-night-time', 'value'),
         prevent_initial_call=True)
-def calculate_metrics(n_clicks, raw_data):
+def calculate_metrics(n_clicks, raw_data, day_start, day_end, night_start, night_end):
     if n_clicks is None or raw_data is None:
         # prevent the None callbacks is important with the store component.
         # you don't want to update the store for nothing.
         raise PreventUpdate
-    all_results = section_metrics_tbl.calculate_metrics(raw_data)
+    times = [i[11:16] for i in [day_start, day_end, night_start, night_end]]
+    all_results = section_metrics_tbl.calculate_metrics(raw_data, times[0], times[1], times[2], times[3])
     #metrics = pd.DataFrame.from_dict(all_results).round(2) # this is stupid - already a dict
     
     return all_results#, collapse_table

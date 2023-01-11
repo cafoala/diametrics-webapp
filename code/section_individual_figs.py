@@ -15,11 +15,9 @@ def create_indiv_layout():
                 dbc.Col(dbc.Spinner(spinner_style={"width": "3rem", "height": "3rem"}), id='amb-glc-profile',),
         ]),
         dbc.Row([
-                dbc.Col(id='glc-trace'),
-        ]),
-        dbc.Row([
+                dbc.Col(id='glc-trace', width=7),
                 dbc.Col(id='pie-chart'),
-        ])
+        ]),
     ])
     return figs_layout
 

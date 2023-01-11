@@ -37,7 +37,7 @@ def get_metrics_layout():
 
     metrics_layout = html.Div([
         dbc.Row([
-                    dbc.Col(html.H2('Metrics of Glycemic Control')),
+                    dbc.Col(html.H2('Metrics of Glycemic Control'), width=6),
                     #dbc.Col(units),
                     dbc.Col(time_period),
                     dbc.Col(id='asterix-day-time')
@@ -48,7 +48,7 @@ def get_metrics_layout():
     ])
     return metrics_layout
     
-def calculate_metrics(raw_data): #, day_start, day_end, night_start, night_end
+def calculate_metrics(raw_data, day_start, day_end, night_start, night_end): #
     all_results = []
     #day_results = []
     #night_results = []
@@ -63,7 +63,7 @@ def calculate_metrics(raw_data): #, day_start, day_end, night_start, night_end
             all_results.append(all)
 
             # Breakdown df into night and day
-            df_day, df_night = periods.get_day_night_breakdown(df_id)
+            df_day, df_night = periods.get_day_night_breakdown(df_id, day_start, day_end, night_start, night_end)
             
             # Daytime breakdown metrics 
             day= metrics_experiment.calculate_all_metrics(df_day, ID=i['ID'], unit=i['Units'], interval=i['Interval'])

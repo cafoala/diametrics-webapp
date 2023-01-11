@@ -31,6 +31,28 @@ intro = html.Div(
                 ),
     ]
 )
+jumbotron = html.Div(
+    dbc.Container(
+        [
+            html.H1("Welcome to Diametrics", className="display-3"),
+            html.P(
+                "A no-code webtool for calculating the metrics of glycemic control and exploring continuous glucose monitoring (CGM) data",
+                className="lead",
+            ),
+            html.Hr(className="my-2"),
+            html.P(
+                "Use utility classes for typography and spacing to suit the "
+                "larger container."
+            ),
+            html.P(
+                dbc.Button("Learn more", color="primary"), className="lead"
+            ),
+        ],
+        fluid=True,
+        className="py-3",
+    ),
+    className="p-3 bg-light rounded-3",
+)
 
 upload_section= html.Div([
         dbc.Row([
@@ -59,6 +81,7 @@ def create_tabs_layout():
     dcc.Store(storage_type='memory', id='metrics-store'),
     navbar,
     intro,
+    #jumbotron,
     dbc.Card(
         dbc.CardBody([
             dbc.Tabs(
