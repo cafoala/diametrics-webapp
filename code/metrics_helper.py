@@ -111,7 +111,30 @@ def tir_helper(series):
     return {'TIR normal': tir_norm, 'TIR hypoglycemia':tir_hypo, 'TIR level 1 hypoglycemia':tir_lv1_hypo, 'TIR level 2 hypoglycemia':tir_lv2_hypo, #'TIR normal (3.9-7.8)': tir_norm_1, 'TIR normal (7.8-10)': tir_norm_2, 
             'TIR hyperglycemia':tir_hyper, 'TIR level 1 hyperglycemia':tir_lv1_hyper, 'TIR level 2 hyperglycemia':tir_lv2_hyper}
 
+def unique_tir(glc_series, lower_thresh, upper_thresh):
+    print(lower_thresh)
+    print(upper_thresh)
+    df_len = glc_series.size
+    if lower_thresh==2.2:
+        tir = convert_to_rounded_percent(glc_series.loc[glc_series <= upper_thresh].size, df_len)
+    elif upper_thresh==22.2:
+        tir = convert_to_rounded_percent(glc_series.loc[glc_series >= lower_thresh].size, df_len)
+    else:
+        tir = convert_to_rounded_percent(glc_series.loc[(glc_series <= upper_thresh) & (glc_series >= lower_thresh)].size, df_len)
+    return tir
 
+def calculate_unique_tirs(glc_series, thresholds, units):
+    print(thresholds)
+    if thresholds is None:
+        return {}
+    results_dict = {}
+    for i in thresholds:
+        name = f'TIR {i[0]}-{i[1]}{units}'
+        tir = unique_tir(glc_series, i[0], i[1])
+        results_dict[name] = tir
+    return results_dict
+        
+        
 def number_of_hypos(df):
     '''
     Replacement helper for number of hypos
@@ -412,8 +435,8 @@ def helper_missing(df, gap_size): #, start_time, end_time
     return {'Start DateTime': str(start_time.round('min')), 'End DateTime':str(end_time.round('min')), 'Data Sufficiency':np.round(data_sufficiency, 1)}
 
 # LBGI and HBGI
-def calc_bgi(glucose, mmol=True):
-    if mmol:
+def calc_bgi(glucose, units):
+    if units=='mmol/L':
         num1=1.794
         num2=1.026
         num3=1.861
@@ -424,13 +447,13 @@ def calc_bgi(glucose, mmol=True):
     bgi = num1*(np.log(glucose)**num2 - num3)
     return bgi
     
-def calc_lbgi(glucose, mmol=True):
-    bgi = calc_bgi(glucose, mmol)
+def calc_lbgi(glucose, units):
+    bgi = calc_bgi(glucose, units)
     lbgi = 10*(min(bgi, 0)**2)
     return lbgi
 
-def calc_hbgi(glucose, mmol=True):
-    bgi = calc_bgi(glucose, mmol)
+def calc_hbgi(glucose, units):
+    bgi = calc_bgi(glucose, units)
     hbgi = 10*(max(bgi, 0)**2)
     return hbgi
 

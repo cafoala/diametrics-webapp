@@ -74,39 +74,9 @@ def get_analysis_options_layout():
                     html.P("Use the slider below to select threshold that you're interested in. \
                             This will be added to the standard thresholds for time in range, it \
                                 won't replace them. To see the standard ranges see the THEORY SECTION"),
-                    #create_range_slider(),
-                    dbc.Card([
-                        html.H6('Time in range 5-7 mmol/L'),
-                        dbc.Row([
-                            dbc.Col([
-                                html.Div(id='tir-sliders'),
-                            ]),
-                            dbc.Col([
-                                dbc.Button('Remove', color="danger"),
-                            ], width=2)
-                        ]),
-                    ]),
-                    dbc.Card([
-                        html.H6('Time in range 5-7 mmol/L'),
-                        dbc.Row([
-                            dbc.Col([
-                                dcc.RangeSlider(39, 399, step=1, value=[70, 180],
-                                    tooltip={"placement": "bottom", "always_visible": True},
-                                    marks={
-                                            39:{'label': 'Min.'},
-                                            399:{'label': 'Max.'}
-                                    },
-                                ),
-                            ]),
-                            dbc.Col([
-                                dbc.Button('Add', color="success"),
-                            ], width=2)
-                        ]),
-                        html.Div(id='tir-slider-1'),
-                        html.Div(id='tir-slider-2'),
-                        html.Div(id='tir-slider-3'),
-                        dbc.Button("Add another threshold", id='add-tir-slider', color='secondary'),
-                    ])
+                    #html.Div(id='tir-sliders'),
+                    html.Div(id='tir-sliders'),
+                    dbc.Button("Add another threshold", id='add-tir-slider', color='primary'),
                 ],
                 title="Time in range thresholds",
             ),
@@ -189,32 +159,46 @@ def get_analysis_options_layout():
     return analysis_layout
 
 def create_range_slider(n_clicks, children, units):
-        id = 'tir_slider_'+str(n_clicks)
-        if units=='mmol/L':
-            
-            new_slider = html.Div([html.H4(id=id+'title'),
-                        dcc.RangeSlider(2.2, 22.2, step=0.1, value=[3.9, 10],
-                                    tooltip={"placement": "bottom", "always_visible": True},
-                                    marks={
-                                            2.2:{'label': 'Min.'},
-                                            22.2:{'label': 'Max.'}
-                                    },
-                                    id=id
-                                ),
-            ])
-        else:
-            new_slider = dcc.RangeSlider(39, 399, step=1, value=[70, 180],
-                                    tooltip={"placement": "bottom", "always_visible": True},
-                                    marks={
-                                            39:{'label': 'Min.'},
-                                            399:{'label': 'Max.'}
-                                    },
-                                    id=id
-                                ),
-        if children is not None:
-            children['props']['children'].append(new_slider)
-            #children.append(new_slider)
-        else:
-            print(children)
-            children = new_slider               
+    id = 'tir-'+str(n_clicks)
+    slider_id = id+'-slider'
+    heading_id = id+'-heading'
+    button_id = id+'-button'
+
+    if units=='mmol/L':
+        
+        new_slider = html.Div([html.H6(id=heading_id),
+                    dcc.RangeSlider(2.2, 22.2, step=0.1, value=[3.9, 10],
+                                tooltip={"placement": "bottom", "always_visible": True},
+                                marks={
+                                        2.2:{'label': 'Min.'},
+                                        22.2:{'label': 'Max.'}
+                                },
+                                id=slider_id
+                            ),
+        ])
+    else:
+        new_slider = dcc.RangeSlider(39, 399, step=1, value=[70, 180],
+                                tooltip={"placement": "bottom", "always_visible": True},
+                                marks={
+                                        39:{'label': 'Min.'},
+                                        399:{'label': 'Max.'}
+                                },
+                                id=slider_id
+                            ),
+    section = html.Div(dbc.Card([
+                    html.H6(id=heading_id),
+                    dbc.Row([
+                        dbc.Col([
+                            new_slider
+                        ]),
+                        dbc.Col([
+                            dbc.Button('Remove', color="danger", id=button_id),
+                        ], width=2)
+                    ]),
+                ]), id=id)
+    if children is not None:
+        children.append(section)
         return children
+    else:
+        return [section]         
+        

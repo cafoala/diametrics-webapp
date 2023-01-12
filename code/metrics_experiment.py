@@ -2,7 +2,7 @@ import pandas as pd
 import metrics_helper
 import numpy as np
 
-def calculate_all_metrics(df, ID, interval, unit='mmol'):
+def calculate_all_metrics(df, ID, interval, additional_tirs=None, units='mmol/L'):
     if metrics_helper.check_df(df):
         
         # create a list to add the results to
@@ -23,7 +23,7 @@ def calculate_all_metrics(df, ID, interval, unit='mmol'):
         results.update(glyc_var)
 
         # LBGI and HBGI
-        bgi = metrics_helper.helper_bgi(df)
+        bgi = metrics_helper.helper_bgi(df, units)
         results.update(bgi)
         
         # MAGE
@@ -34,6 +34,8 @@ def calculate_all_metrics(df, ID, interval, unit='mmol'):
         ranges = metrics_helper.tir_helper(df.glc)
         results.update(ranges)
 
+        unique_ranges = metrics_helper.calculate_unique_tirs(df.glc, additional_tirs, units)
+        results.update(unique_ranges)
         # New method
         #hypos = metrics_helper.number_of_hypos(df)
         #results.update(hypos)

@@ -48,7 +48,7 @@ def get_metrics_layout():
     ])
     return metrics_layout
     
-def calculate_metrics(raw_data, day_start, day_end, night_start, night_end): #
+def calculate_metrics(raw_data, day_start, day_end, night_start, night_end, additional_tirs): #
     all_results = []
     #day_results = []
     #night_results = []
@@ -58,7 +58,7 @@ def calculate_metrics(raw_data, day_start, day_end, night_start, night_end): #
             df_id = pd.DataFrame.from_dict(i['data'])
             df_id.time = pd.to_datetime(df_id.time)
             # Total df
-            all = metrics_experiment.calculate_all_metrics(df_id, ID=i['ID'], unit=i['Units'], interval=i['Interval'])
+            all = metrics_experiment.calculate_all_metrics(df_id, ID=i['ID'], unit=i['Units'], interval=i['Interval'], additional_tirs=additional_tirs)
             all['period'] = 'All'
             all_results.append(all)
 
@@ -66,14 +66,14 @@ def calculate_metrics(raw_data, day_start, day_end, night_start, night_end): #
             df_day, df_night = periods.get_day_night_breakdown(df_id, day_start, day_end, night_start, night_end)
             
             # Daytime breakdown metrics 
-            day= metrics_experiment.calculate_all_metrics(df_day, ID=i['ID'], unit=i['Units'], interval=i['Interval'])
+            day= metrics_experiment.calculate_all_metrics(df_day, ID=i['ID'], unit=i['Units'], interval=i['Interval'], additional_tirs=additional_tirs)
             day['period'] = 'Day'
             #day_results.append(day)
             all_results.append(day)
 
             
             # Night breakdown metrics
-            night= metrics_experiment.calculate_all_metrics(df_night, ID=i['ID'], unit=i['Units'], interval=i['Interval'])
+            night= metrics_experiment.calculate_all_metrics(df_night, ID=i['ID'], unit=i['Units'], interval=i['Interval'], additional_tirs=additional_tirs)
             night['period'] = 'Night'
             #night_results.append(night)
             all_results.append(night)

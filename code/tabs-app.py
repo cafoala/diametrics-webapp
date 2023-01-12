@@ -20,6 +20,7 @@ import section_metrics_tbl
 import section_overview_figs
 import section_individual_figs
 import dash_uploader as du
+from dash_extensions.enrich import Output, DashProxy, Input, MultiplexerTransform
 logging.basicConfig(level=logging.DEBUG)
 
 external_stylesheets = [dbc.themes.BOOTSTRAP]
@@ -27,9 +28,10 @@ colors = {
     'background': '#111111',
     'text': '#7FDBFF'
 }
+#app = DashProxy(transforms=[MultiplexerTransform()])
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)#, suppress_callback_exceptions=True)
 app.config.suppress_callback_exceptions = True
-du.configure_upload(app, r"C:/tmp/Uploads")
+#du.configure_upload(app, r"C:/tmp/Uploads")
 
 app.layout = layout.create_tabs_layout()
 
@@ -41,7 +43,6 @@ app.layout = layout.create_tabs_layout()
     prevent_initial_call=True)
 def switch_tabs(n1, n2, n3):
     triggered_id = ctx.triggered_id
-    print(triggered_id)
     if triggered_id=='preprocess-button':
         if n1 is None:
             raise PreventUpdate
@@ -103,14 +104,48 @@ def preprocess_data(n_clicks, list_of_dates, list_of_contents, list_of_names):
 
 ## ANALYSIS OPTIONS ##
 def analysis_options_callbacks(app):
-    @app.callback(Output('tir-slider-1', 'children'),
+    @app.callback(Output('tir-sliders', 'children'),
             Input('add-tir-slider', 'n_clicks'),
-            State('tir-slider-1', 'children'),
-            State('unit-type-options', 'value'))
+            State('tir-sliders', 'children'),
+            State('unit-type-options', 'value'),
+            )
     def create_range_slider(n_clicks, children, units):
+        if n_clicks is None:
+            raise PreventUpdate
         return section_analysis_options.create_range_slider(n_clicks, children, units)
     
-    #@app.callback(Output())
+#all_sliders = ['tir_None', 'tir_1', 'tir_2', 'tir_3', 'tir_4', 'tir_5']   
+all_sliders = ['tir-'+ str(i) for i in range(1, 50)]
+
+for id in all_sliders:
+    @app.callback(Output((id+'-heading'), 'children'),
+        Input((id+'-slider'), 'drag_value'),
+        )
+    def print_heading(drag):
+        drag_heading =f'Time in range {drag[0]}-{drag[1]} mmol/L'
+        return drag_heading
+
+    @app.callback(Output(id, 'children'),
+            Input((id+'-button'), 'n_clicks'),
+            )
+    def remove_tir(n_clicks_remove):
+        if n_clicks_remove is None:
+            raise PreventUpdate
+        return None
+
+
+@app.callback(Output('tir-store', 'data'),
+        Input('calculate-metrics', 'n_clicks'),
+        State('tir-sliders', 'children')
+        )
+def update_store(clicks, children):
+    if clicks is None:
+        raise PreventUpdate
+    if children is None:
+        return None
+    ranges = [i['props']['children']['props']['children'][1]['props']['children'][0]['props']['children'][0]['props']['children'][1]['props']['drag_value'] for i in children if i['props']['children']!=None]
+    print(ranges)
+    return ranges
 
 analysis_options_callbacks(app)
 
@@ -129,20 +164,21 @@ def display_day_time(day_start, day_end, night_start, night_end):
 
 @app.callback(Output('metrics-store', 'data'),
         #Output('metrics-tbl', 'children')],
-        Input('calculate-metrics', 'n_clicks'),
+        Input('tir-store', 'data'),
+        State('calculate-metrics', 'n_clicks'),
         State('raw-data-store', 'data'),
         State('start-day-time', 'value'),
         State('end-day-time', 'value'),
         State('start-night-time', 'value'),
         State('end-night-time', 'value'),
         prevent_initial_call=True)
-def calculate_metrics(n_clicks, raw_data, day_start, day_end, night_start, night_end):
+def calculate_metrics(additional_tirs, n_clicks, raw_data, day_start, day_end, night_start, night_end):
     if n_clicks is None or raw_data is None:
         # prevent the None callbacks is important with the store component.
         # you don't want to update the store for nothing.
         raise PreventUpdate
     times = [i[11:16] for i in [day_start, day_end, night_start, night_end]]
-    all_results = section_metrics_tbl.calculate_metrics(raw_data, times[0], times[1], times[2], times[3])
+    all_results = section_metrics_tbl.calculate_metrics(raw_data, times[0], times[1], times[2], times[3], additional_tirs)
     #metrics = pd.DataFrame.from_dict(all_results).round(2) # this is stupid - already a dict
     
     return all_results#, collapse_table
