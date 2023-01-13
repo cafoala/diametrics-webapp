@@ -124,7 +124,6 @@ def unique_tir(glc_series, lower_thresh, upper_thresh):
     return tir
 
 def calculate_unique_tirs(glc_series, thresholds, units):
-    print(thresholds)
     if thresholds is None:
         return {}
     results_dict = {}

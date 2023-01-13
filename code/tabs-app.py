@@ -144,7 +144,6 @@ def update_store(clicks, children):
     if children is None:
         return None
     ranges = [i['props']['children']['props']['children'][1]['props']['children'][0]['props']['children'][0]['props']['children'][1]['props']['drag_value'] for i in children if i['props']['children']!=None]
-    print(ranges)
     return ranges
 
 analysis_options_callbacks(app)
@@ -193,8 +192,8 @@ def calculate_metrics(additional_tirs, n_clicks, raw_data, day_start, day_end, n
     )
 def update_metrics_table(metrics_data, units, period): 
     df = pd.DataFrame.from_dict(metrics_data)
-    sub_df = df[(df['period']==period)&(df['units']==units)].round(2)
-    #sub_df = df
+    sub_df = np.round(df[(df['period']==period)&(df['units']==units)], 2)
+    sub_df = sub_df.drop(columns=['period', 'units'])
     metrics_table = section_metrics_tbl.create_metrics_table(sub_df)
     return metrics_table
 

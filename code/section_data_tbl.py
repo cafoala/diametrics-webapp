@@ -49,8 +49,9 @@ def get_datatable_layout():
             ])
 
 def create_data_table(children):
-    data_details = pd.DataFrame.from_dict(children)[['Filename', 'ID', 'Usable','Data Sufficiency', 'Units', 'Days','Start DateTime', 'End DateTime']] #'Device', 'Interval',
-    data_details.columns = ['Filename', 'ID', 'Usable',  'Data Sufficiency (%)', 'Units', 'Days','Start DateTime', 'End DateTime'] #'Interval (mins)',
+    data_details = pd.DataFrame.from_dict(children)[['Filename', 'ID', 'Usable','Data Sufficiency',  'Days','Start DateTime', 'End DateTime']] #'Device', 'Interval', 'Units',
+    data_details.columns = ['Filename', 'ID', 'Usable',  'Data Sufficiency (%)', 'Days','Start DateTime', 'End DateTime'] #'Interval (mins)', 'Units',
+    data_details['Usable'] = data_details['Usable'].replace({'true':'Yes', 'false':'No'})
     return html.Div([
                 #html.H2('Data details'),
 
