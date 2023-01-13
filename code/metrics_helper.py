@@ -134,7 +134,7 @@ def calculate_unique_tirs(glc_series, thresholds, units):
     return results_dict
         
         
-def number_of_hypos(df):
+def number_of_hypos(df, lv1_thresh, lv2_thresh):
     '''
     Replacement helper for number of hypos
     '''
@@ -144,7 +144,7 @@ def number_of_hypos(df):
 
     # Gives a consecutive unique number to each set of consecutive readings below
     # 3.9mmol/L
-    bool_array = df['glc'] < 3.9
+    bool_array = df['glc'] < lv1_thresh
     unique_num = bool_array.ne(bool_array.shift()).cumsum()
     number_consec = unique_num.map(unique_num.value_counts()).where(bool_array)
     df_unique = pd.DataFrame({'time_rep': df['time'], 'glc_rep':
@@ -199,7 +199,7 @@ def number_of_hypos(df):
                                       timedelta(minutes=15)]
 
     # Create new column identifying if the hypo is level 2 (<3mmol/L)
-    final_results['lv2'] = final_results['min_glc'] < 3
+    final_results['lv2'] = final_results['min_glc'] < lv2_thresh
     
     # Reset index
     final_results.reset_index(drop=True, inplace=True)
@@ -250,6 +250,7 @@ def helper_hypo_episodes(df, gap_size, interpolate=False, interp_method='pchip',
         gap_size = 1
 
     # set a boolean array where glc goes below 3.9, unless exercise thresholds are set then it's 7
+    ### HERE ###
     bool_array = df['glc'] < lv1_threshold
     # gives a consecutive unique number to every bout below 3.9
     unique_consec_number = bool_array.ne(bool_array.shift()).cumsum()
@@ -384,6 +385,8 @@ def lv2_calc(df, time, glc, lv2_threshold):
     # lv2 is false unless proven otherwise
     lv2 = False
     # gives a unique number to all episodes where glc drops below 3
+    
+    ### HERE ###
     bool_array = df[glc] < lv2_threshold
     unique_consec_number = bool_array.ne(bool_array.shift()).cumsum()
     number_consec_values = unique_consec_number.map(unique_consec_number.value_counts()).where(bool_array)
