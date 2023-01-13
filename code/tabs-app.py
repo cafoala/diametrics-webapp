@@ -160,7 +160,7 @@ analysis_options_callbacks(app)
 )
 def display_day_time(day_start, day_end, night_start, night_end):
     times = [i[11:16] for i in [day_start, day_end, night_start, night_end]]
-    return html.P(f'* Day {times[0]}-{times[1]}, Night {times[2]}-{times[3]}')
+    return html.P(f'* Day {times[0]}-{times[1]}, night {times[2]}-{times[3]}')
 
 @app.callback(Output('metrics-store', 'data'),
         #Output('metrics-tbl', 'children')],
@@ -182,17 +182,18 @@ def calculate_metrics(additional_tirs, n_clicks, raw_data, day_start, day_end, n
     #metrics = pd.DataFrame.from_dict(all_results).round(2) # this is stupid - already a dict
     
     return all_results#, collapse_table
+
 # Update
 @app.callback(
     Output('test-table', 'children'),
-    #Input('unit-type', 'value'),
     Input('metrics-store', 'data'),
+    Input('unit-type-options', 'value'),
     Input('period-type', 'value'),
     prevent_initial_call=True
     )
-def update_metrics_table(metrics_data, period): 
+def update_metrics_table(metrics_data, units, period): 
     df = pd.DataFrame.from_dict(metrics_data)
-    sub_df = df[df['period']==period].round(2)
+    sub_df = df[(df['period']==period)&(df['units']==units)].round(2)
     #sub_df = df
     metrics_table = section_metrics_tbl.create_metrics_table(sub_df)
     return metrics_table

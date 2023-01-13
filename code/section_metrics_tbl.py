@@ -5,16 +5,24 @@ import metrics_experiment
 import periods
 
 def get_metrics_layout():
-    units = dcc.RadioItems(
-                ['mmol/L', 'mg/dL'],
-                'mmol/L ',
-                id='unit-type',
-                inline=True
+    units = dbc.RadioItems(
+                id="unit-type-options",
+                className="btn-group",
+                inputClassName="btn-check",
+                labelClassName="btn btn-outline-primary",
+                labelCheckedClassName="active",
+                options=[
+                    {"label": 'mmol/L', "value": 'mmol/L'},
+                    {"label": "mg/dL", "value": 'mg/dL'},
+                    #{"label": "Both", "value": 'both'},
+                ],
+                value='mmol/L',
+                style={'textAlign': 'center'}
             ),
 
     time_period = dbc.RadioItems(
             id="period-type",
-            className="btn-group",
+            class_name="btn-group",
             inputClassName="btn-check",
             labelClassName="btn btn-outline-primary",
             labelCheckedClassName="active",
@@ -26,22 +34,17 @@ def get_metrics_layout():
             value='All',
         ),
 
-    '''time_period = dcc.RadioItems(
-                ['All', 'Day', 'Night'],
-                'All',
-                id='period-type',
-                inline=True
-            )'''
+    
     options = ['Time in range', 'Average glucose', 'SD', 'CV', 'eA1c', 
     'Hypoglycemic episodes', 'AUC', 'MAGE', 'LBGI/HBGI']
 
     metrics_layout = html.Div([
         dbc.Row([
                     dbc.Col(html.H2('Metrics of Glycemic Control'), width=6),
-                    #dbc.Col(units),
+                    dbc.Col(units),
                     dbc.Col(time_period),
-                    dbc.Col(id='asterix-day-time')
         ]),
+        html.Div(id='asterix-day-time', style={'textAlign': 'right'}),
         dbc.Row([
                 dbc.Col(dbc.Spinner(spinner_style={"width": "3rem", "height": "3rem"}), id='test-table'),
         ]),
@@ -50,33 +53,47 @@ def get_metrics_layout():
     
 def calculate_metrics(raw_data, day_start, day_end, night_start, night_end, additional_tirs): #
     all_results = []
-    #day_results = []
-    #night_results = []
 
     for i in raw_data:
         if i['Usable']==True:
             df_id = pd.DataFrame.from_dict(i['data'])
             df_id.time = pd.to_datetime(df_id.time)
             # Total df
-            all = metrics_experiment.calculate_all_metrics(df_id, ID=i['ID'], unit=i['Units'], interval=i['Interval'], additional_tirs=additional_tirs)
+            all, all_mg = metrics_experiment.calculate_all_metrics(df_id, ID=i['ID'], units=i['Units'], interval=i['Interval'], additional_tirs=additional_tirs)
+            # mmol
             all['period'] = 'All'
+            all['units'] = 'mmol/L'
             all_results.append(all)
+            # mg
+            all_mg['period'] = 'All'
+            all_mg['units'] = 'mg/dL'
+            all_results.append(all_mg)
 
             # Breakdown df into night and day
             df_day, df_night = periods.get_day_night_breakdown(df_id, day_start, day_end, night_start, night_end)
             
             # Daytime breakdown metrics 
-            day= metrics_experiment.calculate_all_metrics(df_day, ID=i['ID'], unit=i['Units'], interval=i['Interval'], additional_tirs=additional_tirs)
+            day, day_mg= metrics_experiment.calculate_all_metrics(df_day, ID=i['ID'], units=i['Units'], interval=i['Interval'], additional_tirs=additional_tirs)
+            # mmol
             day['period'] = 'Day'
-            #day_results.append(day)
+            day['units'] = 'mmol/L'
             all_results.append(day)
-
+            # mg
+            day_mg['period'] = 'Day'
+            day_mg['units'] = 'mg/dL'
+            all_results.append(day_mg)
             
             # Night breakdown metrics
-            night= metrics_experiment.calculate_all_metrics(df_night, ID=i['ID'], unit=i['Units'], interval=i['Interval'], additional_tirs=additional_tirs)
+            night, night_mg= metrics_experiment.calculate_all_metrics(df_night, ID=i['ID'], units=i['Units'], interval=i['Interval'], additional_tirs=additional_tirs)
+            # mmol
             night['period'] = 'Night'
-            #night_results.append(night)
+            night['units'] = 'mmol/L'
             all_results.append(night)
+            # mg
+            night_mg['period'] = 'Night'
+            night_mg['units'] = 'mg/dL'
+            all_results.append(night_mg)
+
     return all_results
         
 def create_metrics_table(df):

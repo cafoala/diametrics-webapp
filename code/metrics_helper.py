@@ -457,7 +457,7 @@ def calc_hbgi(glucose, units):
     hbgi = 10*(max(bgi, 0)**2)
     return hbgi
 
-def helper_bgi(df):
-    lbgi = df['glc'].apply(lambda x: calc_lbgi(x)).mean()
-    hbgi = df['glc'].apply(lambda x: calc_hbgi(x)).mean()
+def helper_bgi(glc_series, units):
+    lbgi = glc_series.apply(lambda x: calc_lbgi(x, units)).mean()
+    hbgi = glc_series.apply(lambda x: calc_hbgi(x, units)).mean()
     return {'LBGI': lbgi, 'HBGI':hbgi}

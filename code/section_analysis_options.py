@@ -10,7 +10,7 @@ def get_analysis_options_layout():
             dbc.AccordionItem([
                         #html.P("Choose your units"),
                         dbc.RadioItems(
-                            id="unit-type-options",
+                            id="unit-type",
                             className="btn-group",
                             inputClassName="btn-check",
                             labelClassName="btn btn-outline-primary",

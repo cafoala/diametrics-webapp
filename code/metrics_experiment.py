@@ -3,12 +3,15 @@ import metrics_helper
 import numpy as np
 
 def calculate_all_metrics(df, ID, interval, additional_tirs=None, units='mmol/L'):
+    factor = 0.0557
     if metrics_helper.check_df(df):
-        
         # create a list to add the results to
         results = {'ID': ID}
+        results_mg = {'ID': ID}
         df = df.dropna(subset=['glc']).reset_index(drop=True)
-
+        # Convert to mmol/L
+        if units == 'mg/dL':
+            df['glc'] = df['glc']*factor
         # Basic metrics
         avg_glc = df.glc.mean()
         sd = df.glc.std()
@@ -21,21 +24,31 @@ def calculate_all_metrics(df, ID, interval, additional_tirs=None, units='mmol/L'
         glyc_var = {'Average glucose':avg_glc, 'SD':sd, 'CV':cv, 'eA1c':ea1c, 
                     'Min. glucose':min_glc, 'Max. glucose':max_glc, 'AUC': auc}
         results.update(glyc_var)
+        glyc_var_mg =  {}
+        for i in glyc_var:
+            glyc_var_mg[i] = glyc_var[i]/factor         
+        results_mg.update(glyc_var_mg)
 
         # LBGI and HBGI
-        bgi = metrics_helper.helper_bgi(df, units)
+        bgi = metrics_helper.helper_bgi(df['glc'], 'mmol/L')
         results.update(bgi)
+        bgi_mg = metrics_helper.helper_bgi(df['glc'], 'mg/dL')
+        results_mg.update(bgi_mg)
         
         # MAGE
         mage_results = metrics_helper.mage_helper(df)
         results.update(mage_results)
+        mage_mg = {'MAGE':mage_results['MAGE']/factor}
+        results_mg.update(mage_mg)
 
         # Time in ranges
         ranges = metrics_helper.tir_helper(df.glc)
         results.update(ranges)
+        results_mg.update(ranges)
 
         unique_ranges = metrics_helper.calculate_unique_tirs(df.glc, additional_tirs, units)
         results.update(unique_ranges)
+        results_mg.update(unique_ranges)
         # New method
         #hypos = metrics_helper.number_of_hypos(df)
         #results.update(hypos)
@@ -43,12 +56,13 @@ def calculate_all_metrics(df, ID, interval, additional_tirs=None, units='mmol/L'
         # Old method 
         old_hypos, breakdown = metrics_helper.helper_hypo_episodes(df, gap_size=interval)
         results.update(old_hypos)
+        results_mg.update(old_hypos)
         
         # Amount of data available
         #data_sufficiency = metrics_helper.helper_missing(df,  gap_size=interval)
         #results.update(data_sufficiency)                        
 
-        return results
+        return results, results_mg
     
         
         
