@@ -1,6 +1,7 @@
 #import base64
 #import datetime
 #import io
+import os
 import plotly.express as px
 import dash
 from dash.dependencies import Input, Output, State
@@ -344,6 +345,7 @@ def update_group_figs(subject_id, data):
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True)#, dev_tools_ui=False)
+    # DASH_PORT is set to 80 in Dockerfile
+    port = os.environ.get('DASH_PORT', 8050)
+    app.run_server(debug=True,host='0.0.0.0',port=port)
 
-### Run with pytest don't ask why
