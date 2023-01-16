@@ -2,7 +2,7 @@ import pandas as pd
 import metrics_helper
 import numpy as np
 
-def calculate_all_metrics(df, ID, interval, additional_tirs=None, units='mmol/L'):
+def calculate_all_metrics(df, ID, interval, additional_tirs=None, additional_episodes=None, lv1_hypo=3.9, lv2_hypo=3.0, units='mmol/L'):
     factor = 0.0557
     if metrics_helper.check_df(df):
         # create a list to add the results to
@@ -32,8 +32,8 @@ def calculate_all_metrics(df, ID, interval, additional_tirs=None, units='mmol/L'
         # LBGI and HBGI
         bgi = metrics_helper.helper_bgi(df['glc'], 'mmol/L')
         results.update(bgi)
-        bgi_mg = metrics_helper.helper_bgi(df['glc'], 'mg/dL')
-        results_mg.update(bgi_mg)
+        #bgi_mg = metrics_helper.helper_bgi(df['glc'], 'mg/dL')
+        results_mg.update(bgi)
         
         # MAGE
         mage_results = metrics_helper.mage_helper(df)
@@ -49,23 +49,21 @@ def calculate_all_metrics(df, ID, interval, additional_tirs=None, units='mmol/L'
         unique_ranges = metrics_helper.calculate_unique_tirs(df.glc, additional_tirs, units)
         results.update(unique_ranges)
         results_mg.update(unique_ranges)
+        
         # New method
         #hypos = metrics_helper.number_of_hypos(df)
         #results.update(hypos)
 
-        # Old method 
-        old_hypos, breakdown = metrics_helper.helper_hypo_episodes(df, gap_size=interval)
+        # Old method
+        old_hypos, breakdown = metrics_helper.helper_hypo_episodes(df, gap_size=interval, lv1_threshold=lv1_hypo, lv2_threshold=lv2_hypo)
         results.update(old_hypos)
         results_mg.update(old_hypos)
         
         # Amount of data available
         #data_sufficiency = metrics_helper.helper_missing(df,  gap_size=interval)
         #results.update(data_sufficiency)                        
-
         return results, results_mg
     
-        
-        
     else:
         print('EXPLODE THE PROGRAM')
 

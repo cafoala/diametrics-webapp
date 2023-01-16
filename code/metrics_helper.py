@@ -134,7 +134,7 @@ def calculate_unique_tirs(glc_series, thresholds, units):
     return results_dict
         
         
-def number_of_hypos(df, lv1_thresh, lv2_thresh):
+def number_of_hypos(df, mins, lv1_thresh, lv2_thresh):
     '''
     Replacement helper for number of hypos
     '''

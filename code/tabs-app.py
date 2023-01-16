@@ -164,6 +164,8 @@ def display_day_time(day_start, day_end, night_start, night_end):
 @app.callback(Output('metrics-store', 'data'),
         #Output('metrics-tbl', 'children')],
         Input('tir-store', 'data'),
+        State('lv1-hypo-slider', 'value'),
+        State('lv2-hypo-slider', 'value'),
         State('calculate-metrics', 'n_clicks'),
         State('raw-data-store', 'data'),
         State('start-day-time', 'value'),
@@ -171,13 +173,13 @@ def display_day_time(day_start, day_end, night_start, night_end):
         State('start-night-time', 'value'),
         State('end-night-time', 'value'),
         prevent_initial_call=True)
-def calculate_metrics(additional_tirs, n_clicks, raw_data, day_start, day_end, night_start, night_end):
+def calculate_metrics(additional_tirs, lv1_hypo, lv2_hypo, n_clicks, raw_data, day_start, day_end, night_start, night_end):
     if n_clicks is None or raw_data is None:
         # prevent the None callbacks is important with the store component.
         # you don't want to update the store for nothing.
         raise PreventUpdate
     times = [i[11:16] for i in [day_start, day_end, night_start, night_end]]
-    all_results = section_metrics_tbl.calculate_metrics(raw_data, times[0], times[1], times[2], times[3], additional_tirs)
+    all_results = section_metrics_tbl.calculate_metrics(raw_data, times[0], times[1], times[2], times[3], additional_tirs, lv1_hypo, lv2_hypo)
     #metrics = pd.DataFrame.from_dict(all_results).round(2) # this is stupid - already a dict
     
     return all_results#, collapse_table

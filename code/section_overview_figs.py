@@ -7,8 +7,6 @@ def create_bargraph(df, y_axis):
         fig = px.bar(df, x='ID', y=['TIR level 2 hypoglycemia', 'TIR level 1 hypoglycemia', 'TIR normal', 'TIR level 1 hyperglycemia', 'TIR level 2 hyperglycemia'])
     elif y_axis =='Hypoglycemic episodes':
         fig = px.bar(df, x='ID', y=['Level 1 hypoglycemic episodes', 'Level 2 hypoglycemic episodes'])
-    elif y_axis == 'LBGI/HBGI':
-        fig = px.bar(df, x='ID', y=['LBGI', 'HBGI'])
     else:
         fig = px.bar(df, x='ID', y=y_axis)
     return html.Div([
@@ -23,8 +21,6 @@ def create_boxplot(df, y_axis):
         y_value=['TIR level 2 hypoglycemia', 'TIR level 1 hypoglycemia', 'TIR normal', 'TIR level 1 hyperglycemia', 'TIR level 2 hyperglycemia']
     elif y_axis =='Hypoglycemic episodes':
         y_value=['Hypoglycemic episodes', 'Level 1 hypoglycemic episodes', 'Level 2 hypoglycemic episodes']
-    elif y_axis == 'LBGI/HBGI':
-        y_value=['LBGI', 'HBGI']
     else:
         y_value=y_axis
 

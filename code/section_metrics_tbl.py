@@ -51,7 +51,7 @@ def get_metrics_layout():
     ])
     return metrics_layout
     
-def calculate_metrics(raw_data, day_start, day_end, night_start, night_end, additional_tirs): #
+def calculate_metrics(raw_data, day_start, day_end, night_start, night_end, additional_tirs, lv1_hypo, lv2_hypo): #
     all_results = []
 
     for i in raw_data:
@@ -59,7 +59,10 @@ def calculate_metrics(raw_data, day_start, day_end, night_start, night_end, addi
             df_id = pd.DataFrame.from_dict(i['data'])
             df_id.time = pd.to_datetime(df_id.time)
             # Total df
-            all, all_mg = metrics_experiment.calculate_all_metrics(df_id, ID=i['ID'], units=i['Units'], interval=i['Interval'], additional_tirs=additional_tirs)
+            all, all_mg = metrics_experiment.calculate_all_metrics(df_id, ID=i['ID'], 
+                                units=i['Units'], interval=i['Interval'], 
+                                additional_tirs=additional_tirs, lv1_hypo=lv1_hypo, 
+                                lv2_hypo=lv2_hypo)
             # mmol
             all['period'] = 'All'
             all['units'] = 'mmol/L'
@@ -73,7 +76,7 @@ def calculate_metrics(raw_data, day_start, day_end, night_start, night_end, addi
             df_day, df_night = periods.get_day_night_breakdown(df_id, day_start, day_end, night_start, night_end)
             
             # Daytime breakdown metrics 
-            day, day_mg= metrics_experiment.calculate_all_metrics(df_day, ID=i['ID'], units=i['Units'], interval=i['Interval'], additional_tirs=additional_tirs)
+            day, day_mg= metrics_experiment.calculate_all_metrics(df_day, ID=i['ID'], units=i['Units'], interval=i['Interval'], additional_tirs=additional_tirs, lv1_hypo=lv1_hypo, lv2_hypo=lv2_hypo)
             # mmol
             day['period'] = 'Day'
             day['units'] = 'mmol/L'
@@ -84,7 +87,7 @@ def calculate_metrics(raw_data, day_start, day_end, night_start, night_end, addi
             all_results.append(day_mg)
             
             # Night breakdown metrics
-            night, night_mg= metrics_experiment.calculate_all_metrics(df_night, ID=i['ID'], units=i['Units'], interval=i['Interval'], additional_tirs=additional_tirs)
+            night, night_mg= metrics_experiment.calculate_all_metrics(df_night, ID=i['ID'], units=i['Units'], interval=i['Interval'], additional_tirs=additional_tirs, lv1_hypo=lv1_hypo, lv2_hypo=lv2_hypo)
             # mmol
             night['period'] = 'Night'
             night['units'] = 'mmol/L'

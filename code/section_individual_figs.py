@@ -16,7 +16,7 @@ def create_indiv_layout():
         ]),
         dbc.Row([
                 dbc.Col(id='glc-trace', width=7),
-                dbc.Col(id='pie-chart'),
+                dbc.Col(id='pie-chart', width=3),
         ]),
     ])
     return figs_layout
