@@ -19,6 +19,7 @@ import section_analysis_options
 import section_metrics_tbl
 import section_overview_figs
 import section_individual_figs
+import section_external_factors
 import dash_uploader as du
 from dash_extensions.enrich import Output, DashProxy, Input, MultiplexerTransform
 logging.basicConfig(level=logging.DEBUG)
@@ -269,6 +270,36 @@ def toggle_collapse(n, is_open):
     if n:
         return not is_open
     return is_open
+
+@app.callback(Output('poi-datafile', 'children'),
+    Output('poi-store', 'data'),
+    Input('upload-poi-data', 'last_modified'),
+    State('upload-poi-data', 'contents'),
+    State('upload-poi-data', 'filename'),
+    prevent_initial_call=True)
+def poi(date, contents, filename):
+    data = section_external_factors.parse_file(contents, filename, date)#.round(2)
+    df = pd.DataFrame.from_dict(data)
+    df['startDatetime'] = pd.to_datetime(df['startDatetime']).round('S').astype(str)
+    df['endDatetime'] = pd.to_datetime(df['endDatetime']).round('S').astype(str)
+    table = dash_table.DataTable(id='poi-data', data=df.to_dict('records'), 
+            style_table={
+                        'overflowX': 'auto',
+                        'height': 300,
+                        },)
+    return table, data
+
+@app.callback(Output('poi-metrics', 'children'),
+    Input('periodic-metrics-button', 'n_clicks'),
+    State('poi-store', 'data'),
+    State('raw-data-store', 'data'),
+    prevent_initial_call=True)
+def metrics(n_clicks, poi_data, raw_data):
+    if n_clicks is None:
+        raise PreventUpdate
+    metrics = section_external_factors.calculate_periodic_metrics(poi_data, raw_data)
+    table = section_external_factors.create_data_table(metrics)
+    return table
 
 if __name__ == '__main__':
     app.run_server(debug=True)#, dev_tools_ui=False)

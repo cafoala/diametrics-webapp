@@ -7,6 +7,7 @@ Babel==2.11.0
 backcall==0.2.0
 beautifulsoup4==4.11.1
 bleach==5.0.1
+cachelib==0.10.0
 certifi @ file:///C:/b/abs_ac29jvt43w/croot/certifi_1665076682579/work/certifi
 cffi==1.15.1
 charset-normalizer==2.1.1
@@ -17,18 +18,22 @@ cycler==0.11.0
 dash==2.7.0
 dash-bootstrap-components==1.2.1
 dash-core-components==2.0.0
+dash-extensions==0.1.10
 dash-html-components==2.0.0
+dash-mantine-components==0.11.1
 dash-table==5.0.0
 dash-uploader==0.6.0
 debugpy==1.6.3
 decorator==5.1.1
 defusedxml==0.7.1
 docutils==0.19
+EditorConfig==0.12.3
 entrypoints==0.4
 et-xmlfile==1.1.0
 executing==1.2.0
 fastjsonschema==2.16.2
 Flask==2.2.2
+Flask-Caching==2.0.1
 fonttools==4.38.0
 idna==3.4
 iniconfig==1.1.1
@@ -39,6 +44,7 @@ itsdangerous==2.1.2
 jedi==0.18.2
 Jinja2==3.1.2
 joblib==1.2.0
+jsbeautifier==1.14.7
 json5==0.9.10
 jsonschema==4.17.1
 jupyter-server==1.23.3
@@ -53,6 +59,7 @@ MarkupSafe==2.1.1
 matplotlib==3.6.2
 matplotlib-inline==0.1.6
 mistune==2.0.4
+more-itertools==8.14.0
 nbclassic==0.4.8
 nbclient==0.7.0
 nbconvert==7.2.5
