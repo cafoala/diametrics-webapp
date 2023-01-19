@@ -3,6 +3,7 @@ import dash
 from dash.dependencies import Input, Output, State
 from dash import dcc, html, dash_table, ctx
 import logging
+import os
 import pandas as pd
 import numpy as np
 import dash_bootstrap_components as dbc
@@ -302,4 +303,6 @@ def metrics(n_clicks, poi_data, raw_data):
     return table
 
 if __name__ == '__main__':
-    app.run_server(debug=True)#, dev_tools_ui=False)
+    # DASH_PORT is set to 80 in Dockerfile
+    port = os.environ.get('DASH_PORT', 8050)
+    app.run_server(debug=True, host='0.0.0.0', port=port) #, dev_tools_ui=False)
