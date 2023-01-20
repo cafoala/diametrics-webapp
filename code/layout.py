@@ -73,17 +73,101 @@ upload_section= html.Div([
        
     ],    
 ),
+# the style arguments for the sidebar. We use position:fixed and a fixed width
+SIDEBAR_STYLE = {
+    "position": "fixed",
+    "top": 0,
+    "left": 0,
+    "bottom": 0,
+    "width": "14rem",
+    "padding": "2rem 1rem",
+    "background-color": "#f8f9fa",
+}
 
-def create_tabs_layout():
-    return html.Div([
+# the styles for the main content position it to the right of the sidebar and
+# add some padding.
+CONTENT_STYLE = {
+    "margin-left": "16rem",
+    "margin-right": "2rem",
+    "padding": "2rem 1rem",
+}
+
+sidebar = html.Div(
+    [
+        html.H3("Diametrics", className="display-6"),
+        html.Hr(),
+        html.P("Calculate the metrics of glycemic control",
+            className="lead"
+        ),
+        dbc.Nav(
+            [
+                dbc.NavLink("Home", href="/", active="exact"),
+                dbc.NavLink("WebApp", href="/page-1", active="exact"),
+                dbc.NavLink("Instructions", href="/page-2", active="exact"),
+                dbc.NavLink("About Us", href="/page-3", active="exact"),
+                dbc.NavLink("Contact", href="/contact", active="exact"),
+            ],
+            vertical=True,
+            pills=True,
+        ),
+    ],
+    style=SIDEBAR_STYLE,
+    className="h-100 p-4 text-white bg-dark",
+)
+accordion = dbc.Card(
+        dbc.CardBody([
+            dbc.Tabs(
+                    [
+                        dbc.Tab(
+                            dbc.Card(dbc.CardBody(
+                                [section_upload_content.get_upload_layout()])), 
+                                label="1. Upload files", tab_id="upload-tab", 
+                                id='upload-tab', active_label_style={"color": "#FB79B3"}),
+                        dbc.Tab(
+                            dbc.Card(dbc.CardBody(
+                                [section_data_tbl.get_datatable_layout()])), 
+                                label="2. Check data", tab_id="data-tab",id="data-tab", 
+                                disabled=True, active_label_style={"color": "#FB79B3"}),
+                        dbc.Tab(
+                            dbc.Card(dbc.CardBody(
+                                [section_analysis_options.get_analysis_options_layout()])), 
+                                label="3. Analysis options", tab_id="other-metrics-tab", 
+                                id='other-metrics-tab', disabled=False, 
+                                active_label_style={"color": "#FB79B3"}),
+                        dbc.Tab(
+                            dbc.Card(dbc.CardBody(
+                                [section_metrics_tbl.get_metrics_layout()])), 
+                                label="4. Standard metrics", tab_id="metrics-tab", 
+                                id='metrics-tab', disabled=True, 
+                                active_label_style={"color": "#FB79B3"}),
+                        dbc.Tab(
+                            dbc.Card(dbc.CardBody(
+                                section_individual_figs.create_indiv_layout())), 
+                                label="Visualisations", 
+                                tab_id="indiv-vis", id='indiv-vis', disabled=True, 
+                                active_label_style={"color": "#FB79B3"}),
+                        dbc.Tab(
+                            dbc.Card(dbc.CardBody(
+                                section_external_factors.create_period_of_interest())),
+                                label="Advanced options", 
+                                tab_id="external-tab", id='external-tab', 
+                                disabled=False, active_label_style={"color": "#FB79B3"}),
+                    ],
+                    id="card-tabs",
+                    active_tab="upload-tab",
+            )
+        ])
+    ),
+content = html.Div([
     dcc.Store(storage_type='memory', id='raw-data-store'),
     dcc.Store(storage_type='memory', id='tir-store'),
     dcc.Store(storage_type='memory', id='poi-data-store'),
     dcc.Store(storage_type='memory', id='metrics-store'),
     dcc.Store(storage_type='memory', id='poi-store'),
-    navbar,
+    #navbar,
     #intro,
-    jumbotron,
+    #jumbotron,
+    #html.H1(['WebApp'], style={'textAlign':'center'}),
     dbc.Card(
         dbc.CardBody([
             dbc.Tabs(
@@ -128,7 +212,10 @@ def create_tabs_layout():
             )
         ])
     ),
-])
+], style=CONTENT_STYLE)
+
+def create_tabs_layout():
+    return html.Div([dcc.Location(id="url"), sidebar, content])
 
 def create_layout():
     return html.Div([

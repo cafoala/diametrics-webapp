@@ -7,17 +7,12 @@ import dash_bootstrap_components as dbc
 colors = ['blue', 'purple', 'grey', 'pink', 'red']
 def create_indiv_layout():
     figs_layout = html.Div([
-        dbc.Row([
-                    dbc.Col(html.H2('Closer look at individual participants')),
-                    dbc.Col(id='subject-id-div'),
-        ]),
-        dbc.Row([
-                dbc.Col(dbc.Spinner(spinner_style={"width": "3rem", "height": "3rem"}), id='amb-glc-profile',),
-        ]),
-        dbc.Row([
-                dbc.Col(id='glc-trace', width=7),
-                dbc.Col(id='pie-chart', width=5),       
-        ], className="g-0",),
+        html.H2('Closer look at individual participants'),
+        html.Div(id='subject-id-div'),
+        html.Div(dbc.Spinner(spinner_style={"width": "3rem", "height": "3rem"}), id='amb-glc-profile'),
+        html.Div(id='pie-chart'),
+        html.Div(id='glc-trace'),
+        
     ])
     return figs_layout
 
@@ -82,7 +77,6 @@ def get_pie(glc):
     hyper2 = (glc>13.9).sum()
     return [hypo2, hypo1, norm, hyper1, hyper2]
     
-
 
 def create_pie_chart(df):
     values = get_pie(df.glc)

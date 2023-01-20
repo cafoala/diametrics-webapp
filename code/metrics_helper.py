@@ -356,6 +356,9 @@ def helper_hypo_episodes(df, gap_size, interpolate=False, interp_method='pchip',
     number_hypos = results.shape[0]
     avg_length = duration.mean()
     total_time_hypo = duration.sum()
+    #print(duration)
+    #print(timedelta(minutes=120))
+    #number_long_hypos = duration[duration>timedelta(minutes=120)].shape[0]
     if pd.notnull(avg_length):
         avg_length = str(avg_length.round('1s')) # .total_seconds() / 60
         total_time_hypo = str(total_time_hypo.round('1s')) #.total_seconds() / 60
@@ -370,7 +373,7 @@ def helper_hypo_episodes(df, gap_size, interpolate=False, interp_method='pchip',
     number_lv1_hypos = number_hypos - number_lv2_hypos
 
     overview = {'Total hypoglycemic episodes':number_hypos, 'Level 1 hypoglycemic episodes':number_lv1_hypos, 'Level 2 hypoglycemic episodes':number_lv2_hypos,
-                           'Average length of hypoglycemic episodes':avg_length, 'Total time in hypoglycemia':total_time_hypo}
+                    'Average length of hypoglycemic episodes':avg_length, 'Total time in hypoglycemia':total_time_hypo}
 
     return overview, results
 
