@@ -60,7 +60,7 @@ def create_data_table(children):
                     columns=[
                                 {"name": i, "id": i, "deletable": False, "selectable": False, "hideable": False}
                                 if i == "iso_alpha3" or i == "Filename" or i == "id"
-                                else {"name": i, "id": i, "hideable": True, "selectable": True}
+                                else {"name": i, "id": i, "hideable": False, "selectable": False}
                                 for i in data_details.columns
                     ],
                     data=data_details.to_dict('records'),
@@ -77,10 +77,11 @@ def create_data_table(children):
                         'height': 300,
                         },
                     #editable=True,              # allow editing of data inside all cells
-                    filter_action="native",     # allow filtering of data by user ('native') or not ('none')
-                    sort_action="native",       # enables data to be sorted per-column by user or not ('none')
-                    export_format="csv",
-                    export_headers="display",
+                    #filter_action="native",     # allow filtering of data by user ('native') or not ('none')
+                    #sort_action="native",       # enables data to be sorted per-column by user or not ('none')
+                    #export_format="csv",
+                    #export_headers="display",
+                    #fixed_rows={'headers':True},
                     tooltip_header={
                         'Data Sufficiency (%)': 'The percentage of available CGM readings divided by the number of readings that should be present',
                         'Usable': 'Whether or not the CGM data can be used by the program (True/False)',

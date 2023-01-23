@@ -5,9 +5,9 @@ import warnings
 warnings.filterwarnings('ignore')
 
 def calc_diff(group):
-    row1 = group.iloc[-1]
-    endtime = row1['time_rep']
-    starttime = group.iloc[0]['time_rep']
+    row1 = group.iloc[0]
+    endtime = group.iloc[-1]['time_rep']
+    starttime = row1['time_rep']
     diff = endtime-starttime
     row1['diff'] = diff
     return row1
@@ -27,7 +27,6 @@ def collapse_bool_array(df, bool_array):
     return diff
 
 def calc_duration(unique_min, mins):
-    #unique_min['diff'] = df_unique.groupby('unique_number_low').apply(lambda group: calc_diff(group))
     # Only keep hypos that are 15 mins or longer (smaller than this doesn't count)
     results = unique_min[unique_min['diff'] >= timedelta(minutes=mins)]
 

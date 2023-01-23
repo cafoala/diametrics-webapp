@@ -37,13 +37,15 @@ def get_metrics_layout():
     
     options = ['Time in range', 'Average glucose', 'SD', 'CV', 'eA1c', 
     'Hypoglycemic episodes', 'AUC', 'MAGE', 'LBGI/HBGI']
-
+    
     metrics_layout = html.Div([
+        html.H2('Metrics of Glycemic Control'),
         dbc.Row([
-                    dbc.Col(html.H2('Metrics of Glycemic Control'), width=6),
-                    dbc.Col(units),
-                    dbc.Col(time_period),
+                dbc.Col(width=5),
+                dbc.Col(units, width=3),
+                dbc.Col(time_period, width=3),
         ]),
+
         html.Div(id='asterix-day-time', style={'textAlign': 'right'}),
         dbc.Row([
                 dbc.Col(dbc.Spinner(spinner_style={"width": "3rem", "height": "3rem"}), id='test-table'),
@@ -51,7 +53,7 @@ def get_metrics_layout():
     ])
     return metrics_layout
     
-def calculate_metrics(raw_data, day_start, day_end, night_start, night_end, additional_tirs, lv1_hypo, lv2_hypo): #
+def calculate_metrics(raw_data, day_start, day_end, night_start, night_end, additional_tirs, lv1_hypo, lv2_hypo, lv1_hyper, lv2_hyper): #
     all_results = []
 
     for i in raw_data:
@@ -60,9 +62,10 @@ def calculate_metrics(raw_data, day_start, day_end, night_start, night_end, addi
             df_id.time = pd.to_datetime(df_id.time)
             # Total df
             all, all_mg = metrics_experiment.calculate_all_metrics(df_id, ID=i['ID'], 
-                                units=i['Units'], interval=i['Interval'], 
+                                units=i['Units'], 
                                 additional_tirs=additional_tirs, lv1_hypo=lv1_hypo, 
-                                lv2_hypo=lv2_hypo)
+                                lv2_hypo=lv2_hypo, lv1_hyper=lv1_hyper, 
+                                lv2_hyper=lv2_hyper)
             # mmol
             all['period'] = 'All'
             all['units'] = 'mmol/L'
@@ -76,7 +79,11 @@ def calculate_metrics(raw_data, day_start, day_end, night_start, night_end, addi
             df_day, df_night = periods.get_day_night_breakdown(df_id, day_start, day_end, night_start, night_end)
             
             # Daytime breakdown metrics 
-            day, day_mg= metrics_experiment.calculate_all_metrics(df_day, ID=i['ID'], units=i['Units'], interval=i['Interval'], additional_tirs=additional_tirs, lv1_hypo=lv1_hypo, lv2_hypo=lv2_hypo)
+            day, day_mg= metrics_experiment.calculate_all_metrics(df_day, ID=i['ID'], 
+                                units=i['Units'], 
+                                additional_tirs=additional_tirs, lv1_hypo=lv1_hypo, 
+                                lv2_hypo=lv2_hypo, lv1_hyper=lv1_hyper, 
+                                lv2_hyper=lv2_hyper)
             # mmol
             day['period'] = 'Day'
             day['units'] = 'mmol/L'
@@ -87,7 +94,11 @@ def calculate_metrics(raw_data, day_start, day_end, night_start, night_end, addi
             all_results.append(day_mg)
             
             # Night breakdown metrics
-            night, night_mg= metrics_experiment.calculate_all_metrics(df_night, ID=i['ID'], units=i['Units'], interval=i['Interval'], additional_tirs=additional_tirs, lv1_hypo=lv1_hypo, lv2_hypo=lv2_hypo)
+            night, night_mg= metrics_experiment.calculate_all_metrics(df_night, ID=i['ID'], 
+                                units=i['Units'], 
+                                additional_tirs=additional_tirs, lv1_hypo=lv1_hypo, 
+                                lv2_hypo=lv2_hypo, lv1_hyper=lv1_hyper, 
+                                lv2_hyper=lv2_hyper)
             # mmol
             night['period'] = 'Night'
             night['units'] = 'mmol/L'
@@ -128,6 +139,8 @@ def create_metrics_table(df):
                 #editable=True,              # allow editing of data inside all cells                        
                 filter_action="native",     # allow filtering of data by user ('native') or not ('none')
                 sort_action="native",       # enables data to be sorted per-column by user or not ('none')
+                fixed_rows={'headers':True},
+                #fixed_columns={'headers': True, 'data': 1},
                 export_format="csv",
                 export_headers="display",
                 column_selectable='multi',
