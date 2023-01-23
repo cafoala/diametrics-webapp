@@ -1,3 +1,4 @@
+wheel
 pandas
 dash
 dash-bootstrap-components
@@ -5,4 +6,5 @@ dash-uploader
 packaging
 scipy
 scikit-learn
-
+dash_extensions
+dash_mantine_components
