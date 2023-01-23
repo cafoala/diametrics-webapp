@@ -51,13 +51,14 @@ def calculate_all_metrics(df, ID, interval, additional_tirs=None, additional_epi
         results_mg.update(unique_ranges)
         
         # New method
-        #hypos = metrics_helper.number_of_hypos(df)
-        #results.update(hypos)
-
+        hypos = metrics_helper.calculate_glycemic_episodes(df)
+        results.update(hypos)
+        results_mg.update(hypos)
+        
         # Old method
-        old_hypos, breakdown = metrics_helper.helper_hypo_episodes(df, gap_size=interval, lv1_threshold=lv1_hypo, lv2_threshold=lv2_hypo)
-        results.update(old_hypos)
-        results_mg.update(old_hypos)
+        #old_hypos, breakdown = metrics_helper.helper_hypo_episodes(df, gap_size=interval, lv1_threshold=lv1_hypo, lv2_threshold=lv2_hypo)
+        #results.update(old_hypos)
+        #results_mg.update(old_hypos)
         
         # Amount of data available
         #data_sufficiency = metrics_helper.helper_missing(df,  gap_size=interval)
