@@ -326,14 +326,19 @@ def lv2_calc(df, time, glc, lv2_threshold):
     return lv2
 
 
-def helper_missing(df, gap_size): #, start_time, end_time
+def helper_missing(df, gap_size, start_time=None, end_time=None):
     """
     Helper for percent_missing function
     """
     # Calculate start and end time from dataframe
-    start_time = df['time'].iloc[0]
-    end_time = df['time'].iloc[-1]
+    if start_time is None:
+        start_time = df['time'].iloc[0]
+    if end_time is None:
+        end_time = df['time'].iloc[-1]
     
+    # Subsection of df with start and end times provided
+    df = df.loc[(df['time']>=start_time)&(df['time']<=end_time)]
+
     if gap_size == 5:
         freq = '5min'
     elif gap_size==15:

@@ -53,15 +53,22 @@ def get_metrics_layout():
     ])
     return metrics_layout
     
-def calculate_metrics(raw_data, day_start, day_end, night_start, night_end, additional_tirs, lv1_hypo, lv2_hypo, lv1_hyper, lv2_hyper): #
+def calculate_metrics(raw_data, edited_data, day_start, day_end, night_start, night_end, additional_tirs, lv1_hypo, lv2_hypo, lv1_hyper, lv2_hyper): #
     all_results = []
-
+    #edited_data = pd.DataFrame(edited_data)
+    print(edited_data)
     for i in raw_data:
         if i['Usable']==True:
+            edited_row = [j for j in edited_data if j['Filename']==i['Filename']][0]
+            ID = edited_row['ID']#.values[0]
+            start = edited_row['Start DateTime']#.values[0]
+            end = edited_row['End DateTime']#.values[0]
+            print(start)
             df_id = pd.DataFrame.from_dict(i['data'])
             df_id.time = pd.to_datetime(df_id.time)
+            df_id = df_id[(df_id['time']>=start)&(df_id['time']<=end)]
             # Total df
-            all, all_mg = metrics_experiment.calculate_all_metrics(df_id, ID=i['ID'], 
+            all, all_mg = metrics_experiment.calculate_all_metrics(df_id, ID=ID, 
                                 units=i['Units'], 
                                 additional_tirs=additional_tirs, lv1_hypo=lv1_hypo, 
                                 lv2_hypo=lv2_hypo, lv1_hyper=lv1_hyper, 
@@ -79,7 +86,7 @@ def calculate_metrics(raw_data, day_start, day_end, night_start, night_end, addi
             df_day, df_night = periods.get_day_night_breakdown(df_id, day_start, day_end, night_start, night_end)
             
             # Daytime breakdown metrics 
-            day, day_mg= metrics_experiment.calculate_all_metrics(df_day, ID=i['ID'], 
+            day, day_mg= metrics_experiment.calculate_all_metrics(df_day, ID=ID, 
                                 units=i['Units'], 
                                 additional_tirs=additional_tirs, lv1_hypo=lv1_hypo, 
                                 lv2_hypo=lv2_hypo, lv1_hyper=lv1_hyper, 
@@ -94,7 +101,7 @@ def calculate_metrics(raw_data, day_start, day_end, night_start, night_end, addi
             all_results.append(day_mg)
             
             # Night breakdown metrics
-            night, night_mg= metrics_experiment.calculate_all_metrics(df_night, ID=i['ID'], 
+            night, night_mg= metrics_experiment.calculate_all_metrics(df_night, ID=ID, 
                                 units=i['Units'], 
                                 additional_tirs=additional_tirs, lv1_hypo=lv1_hypo, 
                                 lv2_hypo=lv2_hypo, lv1_hyper=lv1_hyper, 

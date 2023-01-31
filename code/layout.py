@@ -1,7 +1,7 @@
 import dash_bootstrap_components as dbc
 from dash import dcc, html, dash_table
 import section_upload_content
-import section_data_tbl
+import section_data_overview
 import section_analysis_options
 import section_metrics_tbl
 import section_overview_figs
@@ -102,7 +102,7 @@ sidebar = html.Div(
         dbc.Nav(
             [
                 dbc.NavLink("Home", href="/", active="exact"),
-                dbc.NavLink("WebApp", href="/page-1", active="exact"),
+                dbc.NavLink("Dashboard", href="/page-1", active="exact"),
                 dbc.NavLink("Instructions", href="/page-2", active="exact"),
                 dbc.NavLink("About Us", href="/page-3", active="exact"),
                 dbc.NavLink("Contact", href="/contact", active="exact"),
@@ -125,7 +125,7 @@ accordion = dbc.Card(
                                 id='upload-tab', active_label_style={"color": "#FB79B3"}),
                         dbc.Tab(
                             dbc.Card(dbc.CardBody(
-                                [section_data_tbl.get_datatable_layout()])), 
+                                [section_data_overview.get_datatable_layout()])), 
                                 label="2. Check data", tab_id="data-tab",id="data-tab", 
                                 disabled=True, active_label_style={"color": "#FB79B3"}),
                         dbc.Tab(
@@ -179,7 +179,7 @@ content = html.Div([
                                 id='upload-tab', active_label_style={"color": "#FB79B3"}),
                         dbc.Tab(
                             dbc.Card(dbc.CardBody(
-                                [section_data_tbl.get_datatable_layout()])), 
+                                [section_data_overview.get_datatable_layout()])), 
                                 label="2. Check data", tab_id="data-tab",id="data-tab", 
                                 disabled=True, active_label_style={"color": "#FB79B3"}),
                         dbc.Tab(

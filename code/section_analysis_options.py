@@ -153,8 +153,14 @@ def get_analysis_options_layout():
         dbc.Row([
                 dbc.Col(html.Div(accordion,id='options-accordion'))
             ]),
-        dbc.Button('Calculate metrics', id='calculate-metrics', color='secondary')
-
+        dbc.Row([
+                    dbc.Col([                
+                        dbc.Button('Back', id='calculate-metrics-back-button', color='secondary')   
+                    ]),
+                    dbc.Col([                
+                        dbc.Button('Next', id='calculate-metrics', color='secondary')   
+                    ], style={'text-align': 'right'})
+                ])
     ])
     return analysis_layout
 
