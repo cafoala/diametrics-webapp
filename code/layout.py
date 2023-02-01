@@ -160,6 +160,7 @@ accordion = dbc.Card(
     ),
 content = html.Div([
     dcc.Store(storage_type='memory', id='raw-data-store'),
+    dcc.Store(storage_type='memory', id='processed-data-store'),
     dcc.Store(storage_type='memory', id='tir-store'),
     dcc.Store(storage_type='memory', id='poi-data-store'),
     dcc.Store(storage_type='memory', id='metrics-store'),
@@ -186,7 +187,7 @@ content = html.Div([
                             dbc.Card(dbc.CardBody(
                                 [section_analysis_options.get_analysis_options_layout()])), 
                                 label="3. Analysis options", tab_id="other-metrics-tab", 
-                                id='other-metrics-tab', disabled=False, 
+                                id='other-metrics-tab', disabled=True, 
                                 active_label_style={"color": "#FB79B3"}),
                         dbc.Tab(
                             dbc.Card(dbc.CardBody(

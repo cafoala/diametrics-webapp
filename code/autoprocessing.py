@@ -1,5 +1,7 @@
 from datetime import datetime
 import pandas as pd
+from pandarallel import pandarallel
+pandarallel.initialize()
 
 def find_header(df):
     dropped = df.dropna()
@@ -56,7 +58,7 @@ def test_col(col):
         
     except Exception:
         # this is so slow
-        datetime_bool = col.apply(lambda x: assert_datetime(x))
+        datetime_bool = col.parallel_apply(lambda x: assert_datetime(x))
         if datetime_bool.all():
             return 'dt'
         # maybe could add an elif for a str dtype

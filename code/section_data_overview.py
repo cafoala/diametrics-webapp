@@ -90,9 +90,7 @@ def create_data_table(children):
                         'Start DateTime': 'The first reading from your CGM data (YYYY-MM-DD HH:MM:SS)',
                         'End DateTime': 'The last reading from your CGM data (YYYY-MM-DD HH:MM:SS)'
                     },
-                    ),
-                    
-                     
+                    ), 
             ])
 
 def calculate_data_sufficiency(filename, start, end, raw_data):
@@ -102,8 +100,26 @@ def calculate_data_sufficiency(filename, start, end, raw_data):
     interval = subject['Interval']
     data = pd.DataFrame(subject['data'])
     data['time'] = pd.to_datetime(data['time'])
-    #data_sub = data.loc[(data['time']>=start)&(data['time']<=end)]
     results = metrics_helper.helper_missing(data, interval, start, end)
     ds = results['Data Sufficiency']
-    #print(ds)
     return ds
+
+def merge_glc_data(table_data, raw_data):
+    results = pd.DataFrame()
+    for row in table_data:
+        if row['Days'] == 'NA':
+            continue
+        subject = [i for i in raw_data if i['Filename']==row['Filename']][0]
+        data = pd.DataFrame(subject['data'])
+        start = row['Start DateTime']
+        end = row['End DateTime']
+        data_sub = data.loc[(data['time']>=start)&(data['time']<=end)]
+        if subject['Units']=='mg/dL':
+            data_sub['glc'] = data_sub['glc']*0.0557
+        data_sub['ID'] = row['ID']
+        data_sub = data_sub#.to_dict('records')
+        results = results.append(data_sub)
+
+    results = results.to_dict('records')
+    return results
+

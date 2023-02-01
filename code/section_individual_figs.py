@@ -12,7 +12,6 @@ def create_indiv_layout():
         html.Div(dbc.Spinner(spinner_style={"width": "3rem", "height": "3rem"}), id='amb-glc-profile'),
         html.Div(id='pie-chart'),
         html.Div(id='glc-trace'),
-        
     ])
     return figs_layout
 
