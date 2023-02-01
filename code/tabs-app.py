@@ -7,15 +7,14 @@ import os
 import pandas as pd
 import numpy as np
 import dash_bootstrap_components as dbc
-
 from dash.exceptions import PreventUpdate
 import layout
 import warnings
 warnings.filterwarnings('ignore')
-
+import metrics_helper
 # Import modules with section contents
 import section_upload_content
-import section_data_tbl
+import section_data_overview
 import section_analysis_options
 import section_metrics_tbl
 import section_overview_figs
@@ -97,12 +96,41 @@ def preprocess_data(n_clicks, list_of_dates, list_of_contents, list_of_names):
     if n_clicks is None or list_of_dates is None:
         raise PreventUpdate
     children = [
-        section_data_tbl.parse_contents(c, n, d) for c, n, d in
+        section_data_overview.parse_contents(c, n, d) for c, n, d in
         zip(list_of_contents, list_of_names, list_of_dates)]
-    
-    data_table = section_data_tbl.create_data_table(children)
+    data_table = section_data_overview.create_data_table(children)
     return (children, data_table)
 
+
+@app.callback(
+    Output('data-tbl', 'data'),
+    Input('data-tbl', 'data_timestamp'),
+    State('data-tbl', 'data'),
+    State('raw-data-store', 'data'),
+    #prevent_initial_call=True
+    )
+def update_columns(timestamp, rows, raw_data):
+    for row in rows:
+        # Calculate number of days
+        try:
+            row['Days'] = str(pd.to_datetime(row['End DateTime']) - pd.to_datetime(row['Start DateTime']))
+        except:
+            row['Days'] = 'NA'
+        # Calculate data sufficiency
+        #section_data_overview.calculate_data_sufficiency(row['Filename'], row['Start DateTime'], row['End DateTime'], raw_data)
+        try:
+            row['Data Sufficiency (%)'] = section_data_overview.calculate_data_sufficiency(row['Filename'], row['Start DateTime'], row['End DateTime'], raw_data)
+        except: 
+            row['Data Sufficiency (%)'] = 'NA'
+    return rows
+
+@app.callback(Output('processed-data-store', 'data'),
+        Input('data-tbl', 'data_timestamp'),
+        State('data-tbl', 'data'),
+        State('raw-data-store', 'data'),
+        )
+def store_processed_data(time, table_data, raw_data):
+    return section_data_overview.merge_glc_data(table_data, raw_data)
 
 ## ANALYSIS OPTIONS ##
 def analysis_options_callbacks(app):
@@ -166,6 +194,8 @@ def display_day_time(day_start, day_end, night_start, night_end):
 @app.callback(Output('metrics-store', 'data'),
         #Output('metrics-tbl', 'children')],
         Input('tir-store', 'data'),
+        State('processed-data-store', 'data'),
+        State('data-tbl','data'),
         State('lv1-hypo-slider', 'value'),
         State('lv2-hypo-slider', 'value'),
         State('lv1-hyper-slider', 'value'),
@@ -177,13 +207,16 @@ def display_day_time(day_start, day_end, night_start, night_end):
         State('start-night-time', 'value'),
         State('end-night-time', 'value'),
         prevent_initial_call=True)
-def calculate_metrics(additional_tirs, lv1_hypo, lv2_hypo, lv1_hyper, lv2_hyper, n_clicks, raw_data, day_start, day_end, night_start, night_end):
+def calculate_metrics(additional_tirs, processed_data, edited_data, lv1_hypo, lv2_hypo, lv1_hyper, lv2_hyper, n_clicks, raw_data, day_start, day_end, night_start, night_end):
     if n_clicks is None or raw_data is None:
         # prevent the None callbacks is important with the store component.
         # you don't want to update the store for nothing.
         raise PreventUpdate
     times = [i[11:16] for i in [day_start, day_end, night_start, night_end]]
-    all_results = section_metrics_tbl.calculate_metrics(raw_data, times[0], times[1], times[2], times[3], additional_tirs, lv1_hypo, lv2_hypo,  lv1_hyper, lv2_hyper)
+    #all_results = section_metrics_tbl.calculate_metrics(raw_data, edited_data, times[0], times[1], times[2], times[3], additional_tirs, lv1_hypo, lv2_hypo,  lv1_hyper, lv2_hyper)
+        
+    all_results = section_metrics_tbl.calculate_metrics(processed_data, times[0], times[1], times[2], times[3], additional_tirs, lv1_hypo, lv2_hypo,  lv1_hyper, lv2_hyper)
+
     #metrics = pd.DataFrame.from_dict(all_results).round(2) # this is stupid - already a dict
     
     return all_results#, collapse_table
@@ -229,17 +262,19 @@ def create_individual_figs(ts, metrics):
     Output('glc-trace', 'children'),
     Output('pie-chart', 'children'),
     Input('subject-id', 'value'),
-    State('raw-data-store', 'data'),
+    #State('raw-data-store', 'data'),
+    State('processed-data-store', 'data'),
     #prevent_initial_call=True
 )
 def update_indiv_figs(subject_id, data):
-    subject_data = next(item for item in data if item["ID"] == subject_id)
-    df = pd.DataFrame.from_dict(subject_data['data'])
+    #subject_data = next(item for item in data if item["ID"] == subject_id)
+    subject_data = pd.DataFrame(data)
+    df = subject_data.loc[subject_data['ID']==subject_id]
+    #df = pd.DataFrame.from_dict(subject_data['data'])
     agp = section_individual_figs.create_amb_glc_profile(df)
     glc_trace = section_individual_figs.create_glucose_trace(df)
     pie = section_individual_figs.create_pie_chart(df)
     return agp, glc_trace, pie
-
 
 
 ## GROUP FIGS ##
@@ -296,6 +331,7 @@ def poi(date, contents, filename):
     Input('periodic-metrics-button', 'n_clicks'),
     State('poi-store', 'data'),
     State('raw-data-store', 'data'),
+    #State('processed-data-store', 'data'),
     prevent_initial_call=True)
 def metrics(n_clicks, poi_data, raw_data):
     if n_clicks is None:

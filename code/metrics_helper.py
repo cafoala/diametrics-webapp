@@ -8,6 +8,8 @@ from datetime import timedelta
 import statistics
 from sklearn.metrics import auc
 import glycemic_events_helper
+from pandarallel import pandarallel
+pandarallel.initialize()
 
 fift_mins = timedelta(minutes=15)
 thirt_mins = timedelta(minutes=30)
@@ -33,8 +35,8 @@ def check_df(df):
 def calculate_auc(df):
     if df.shape[0]>1:
         start_time = df.time.iloc[0]
-        mins_from_start = df.time.apply(lambda x: x-start_time)
-        df['hours_from_start'] = mins_from_start.apply(lambda x: (x.total_seconds()/60)/60)
+        mins_from_start = df.time.parallel_apply(lambda x: x-start_time)
+        df['hours_from_start'] = mins_from_start.parallel_apply(lambda x: (x.total_seconds()/60)/60)
         avg_auc = auc(df['hours_from_start'], df['glc'])#/24
         return avg_auc
     else:
@@ -43,7 +45,7 @@ def calculate_auc(df):
 def auc_helper(df):
     df['date'] = df['time'].dt.date
     df['hour'] = df['time'].dt.hour
-    hourly_breakdown = df.groupby([df.date, df.hour]).apply(lambda group: calculate_auc(group)).reset_index()
+    hourly_breakdown = df.groupby([df.date, df.hour]).parallel_apply(lambda group: calculate_auc(group)).reset_index()
     hourly_breakdown.columns = ['date', 'hour', 'auc']
     daily_breakdown = hourly_breakdown.groupby('date').auc.mean()
     hourly_avg = hourly_breakdown.auc.mean()
@@ -113,8 +115,6 @@ def tir_helper(series):
             'TIR hyperglycemia':tir_hyper, 'TIR level 1 hyperglycemia':tir_lv1_hyper, 'TIR level 2 hyperglycemia':tir_lv2_hyper}
 
 def unique_tir(glc_series, lower_thresh, upper_thresh):
-    print(lower_thresh)
-    print(upper_thresh)
     df_len = glc_series.size
     if lower_thresh==2.2:
         tir = convert_to_rounded_percent(glc_series.loc[glc_series <= upper_thresh].size, df_len)
@@ -326,14 +326,19 @@ def lv2_calc(df, time, glc, lv2_threshold):
     return lv2
 
 
-def helper_missing(df, gap_size): #, start_time, end_time
+def helper_missing(df, gap_size, start_time=None, end_time=None):
     """
     Helper for percent_missing function
     """
     # Calculate start and end time from dataframe
-    start_time = df['time'].iloc[0]
-    end_time = df['time'].iloc[-1]
+    if start_time is None:
+        start_time = df['time'].iloc[0]
+    if end_time is None:
+        end_time = df['time'].iloc[-1]
     
+    # Subsection of df with start and end times provided
+    df = df.loc[(df['time']>=start_time)&(df['time']<=end_time)]
+
     if gap_size == 5:
         freq = '5min'
     elif gap_size==15:
@@ -378,6 +383,6 @@ def calc_hbgi(glucose, units):
     return hbgi
 
 def helper_bgi(glc_series, units):
-    lbgi = glc_series.apply(lambda x: calc_lbgi(x, units)).mean()
-    hbgi = glc_series.apply(lambda x: calc_hbgi(x, units)).mean()
+    lbgi = glc_series.parallel_apply(lambda x: calc_lbgi(x, units)).mean()
+    hbgi = glc_series.parallel_apply(lambda x: calc_hbgi(x, units)).mean()
     return {'LBGI': lbgi, 'HBGI':hbgi}

@@ -2,12 +2,12 @@ import pandas as pd
 import metrics_helper
 import numpy as np
 
-def calculate_all_metrics(df, ID, units='mmol/L', additional_tirs=None, lv1_hypo=3.9, lv2_hypo=3.0, lv1_hyper=10, lv2_hyper=13.9,  event_mins=15, event_long_mins=120):
+def calculate_all_metrics(df, units='mmol/L', additional_tirs=None, lv1_hypo=3.9, lv2_hypo=3.0, lv1_hyper=10, lv2_hyper=13.9,  event_mins=15, event_long_mins=120):
     factor = 0.0557
     if metrics_helper.check_df(df):
         # create a list to add the results to
-        results = {'ID': ID}
-        results_mg = {'ID': ID}
+        results = {}#{'ID': ID}
+        results_mg = {}#{'ID': ID}
         df = df.dropna(subset=['glc']).reset_index(drop=True)
         # Convert to mmol/L
         if units == 'mg/dL':
@@ -62,7 +62,11 @@ def calculate_all_metrics(df, ID, units='mmol/L', additional_tirs=None, lv1_hypo
         
         # Amount of data available
         #data_sufficiency = metrics_helper.helper_missing(df,  gap_size=interval)
-        #results.update(data_sufficiency)                        
+        #results.update(data_sufficiency)   
+        # Convert to df
+        results = pd.DataFrame.from_dict([results])
+        results_mg = pd.DataFrame.from_dict([results_mg])
+
         return results, results_mg
     
     else:

@@ -3,6 +3,8 @@ from datetime import timedelta
 import numpy as np
 import warnings
 warnings.filterwarnings('ignore')
+from pandarallel import pandarallel
+pandarallel.initialize()
 
 def calc_diff(group):
     row1 = group.iloc[0]
@@ -22,7 +24,7 @@ def collapse_bool_array(df, bool_array):
     # Drop any null glucose readings and reset index
     df_unique.dropna(subset=['glc_rep'], inplace=True)
     df_unique.reset_index(inplace=True, drop=True)
-    diff = df_unique.groupby('unique_number').apply(lambda group: calc_diff(group))
+    diff = df_unique.groupby('unique_number').parallel_apply(lambda group: calc_diff(group))
     diff = diff.drop(columns=['glc_rep'])#.reset_index()
     return diff
 
@@ -89,7 +91,7 @@ def calculate_episodes(df, hypo, thresh, thresh_lv2, mins, long_mins):
     lv2_events = unique_min_lv2.dropna(subset=['consec_readings'])
     lv2_events = lv2_events[lv2_events['diff']>=timedelta(minutes=mins)]
     lv2_events['prolonged'] = lv2_events['diff']>=timedelta(minutes=long_mins)
-    final_results[['lv2', 'prolonged']] = final_results.apply(lambda row: overlap(row, lv2_events), axis=1, result_type ='expand')
+    final_results[['lv2', 'prolonged']] = final_results.parallel_apply(lambda row: overlap(row, lv2_events), axis=1, result_type ='expand')
 
     number_of_episodes = final_results.shape[0]
     number_of_lv2 = final_results.lv2.sum()
