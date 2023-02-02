@@ -231,9 +231,35 @@ def calculate_metrics(additional_tirs, processed_data, edited_data, lv1_hypo, lv
     )
 def update_metrics_table(metrics_data, units, period): 
     df = pd.DataFrame.from_dict(metrics_data)
-    sub_df = np.round(df[(df['period']==period)&(df['units']==units)], 2)
+    print(df.columns)
+    if units == 'mmol/L':
+        sub_df = np.round(df[(df['period']==period)&(df['units']==units)], 2)
+        '''sub_df.columns = ['ID', 'Average glucose (mmol/L)', 'SD (mmol/L)', 
+        'CV (mmol/L)', 'eA1c (%)', 'Min. glucose (mmol/L)',
+       'Max. glucose (mmol/L)', 'AUC (mmol h/L)', 'LBGI', 'HBGI', 'MAGE (mmol/L)', 
+       'TIR normal (%)', 'TIR hypoglycemia (%)', 'TIR level 1 hypoglycemia (%)',
+       'TIR level 2 hypoglycemia (%)', 'TIR hyperglycemia (%)',
+       'TIR level 1 hyperglycemia (%)', 'TIR level 2 hyperglycemia (%)', 
+       'Total hypos (#)', 'LV1 hypos (#)', 'LV2 hypos (#)', 'Prolonged hypos (#)', 
+       'Avg. length hypos','Total length hypos', 'Total hypers (#)', 
+       'LV1 hypers (#)', 'LV2 hypers (#)',
+       'Prolonged hypers (#)', 'Avg. length hypers', 'Total length hypers',
+       'period', 'units']'''
+    else:
+        sub_df = np.round(df[(df['period']==period)&(df['units']==units)], 1)
+        '''sub_df.columns = ['ID', 'Average glucose (mg/dL)', 'SD (mg/dL)', 
+        'CV (mg/dL)', 'eA1c (%)', 'Min. glucose (mg/dL)',
+       'Max. glucose (mg/dL)', 'AUC (mg h/dL)', 'LBGI', 'HBGI', 'MAGE (mg/dL)', 
+       'TIR normal (%)', 'TIR hypoglycemia (%)', 'TIR level 1 hypoglycemia (%)',
+       'TIR level 2 hypoglycemia (%)', 'TIR hyperglycemia (%)',
+       'TIR level 1 hyperglycemia (%)', 'TIR level 2 hyperglycemia (%)', 
+       'Total hypos (#)', 'LV1 hypos (#)', 'LV2 hypos (#)', 'Prolonged hypos (#)', 
+       'Avg. length hypos','Total length hypos', 'Total hypers (#)', 
+       'LV1 hypers (#)', 'LV2 hypers (#)', 'Prolonged hypers (#)', 
+       'Avg. length hypers', 'Total length hypers',
+       'period', 'units']'''
     sub_df = sub_df.drop(columns=['period', 'units'])
-    metrics_table = section_metrics_tbl.create_metrics_table(sub_df)
+    metrics_table = section_metrics_tbl.create_metrics_table(sub_df, units)
     return metrics_table
 
 

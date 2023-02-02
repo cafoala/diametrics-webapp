@@ -180,7 +180,7 @@ def get_metrics_breakdown(df_id, day_start, day_end, night_start, night_end,
 def calculate_metrics(processed_data, day_start, day_end, night_start, night_end, additional_tirs, lv1_hypo, lv2_hypo, lv1_hyper, lv2_hyper): #
     # Breakdown df into night and day
     processed_data = pd.DataFrame(processed_data)
-    all_results = processed_data.groupby('ID').parallel_apply(lambda group: 
+    all_results = processed_data.groupby('ID').apply(lambda group: 
                                 get_metrics_breakdown(group, day_start, 
                                 day_end, night_start, night_end, additional_tirs, 
                                 lv1_hypo, lv2_hypo, lv1_hyper, lv2_hyper))
@@ -188,10 +188,36 @@ def calculate_metrics(processed_data, day_start, day_end, night_start, night_end
     all_results = all_results.to_dict('records')
     return all_results
         
-def create_metrics_table(df):
-    options = ['Time in range', 'Average glucose', 'SD', 'CV', 'eA1c', 
-        'Hypoglycemic episodes', 'AUC', 'MAGE', 'LBGI', 'HBGI']    
-    
+def create_metrics_table(df, units):
+     
+    if units == 'mmol/L':
+        df.columns = ['ID', 'Average glucose (mmol/L)', 'SD (mmol/L)', 
+        'CV (mmol/L)', 'eA1c (%)', 'Min. glucose (mmol/L)',
+       'Max. glucose (mmol/L)', 'AUC (mmol h/L)', 'LBGI', 'HBGI', 'MAGE (mmol/L)', 
+       'Time in range 3.9-10 mmol/L (%)', 
+       'Time in range hypoglycemia (<3.9 mmol/L) (%)', 
+       'Time in range LV1 hypoglycemia (3.0-3.9 mmol/L) (%)',
+       'Time in range LV2 hypoglycemia (<3.0 mmol/L) (%)', 'Time in range hyperglycemia (>10 mmol/L) (%)',
+       'Time in range LV1 hyperglycemia (10-13.9 mmol/L) (%)', 'Time in range LV2 hyperglycemia (>13.9 mmol/L) (%)', 
+       'Total hypos (#)', 'LV1 hypos (#)', 'LV2 hypos (#)', 'Prolonged hypos (#)', 
+       'Avg. length hypos','Total length hypos', 'Total hypers (#)', 
+       'LV1 hypers (#)', 'LV2 hypers (#)', 'Prolonged hypers (#)',
+       'Avg. length hypers', 'Total length hypers',
+       ]
+    else:
+        df.columns = ['ID', 'Average glucose (mg/dL)', 'SD (mg/dL)', 
+        'CV (mg/dL)', 'eA1c (%)', 'Min. glucose (mg/dL)',
+       'Max. glucose (mg/dL)', 'AUC (mg h/dL)', 'LBGI', 'HBGI', 'MAGE (mg/dL)', 
+       'TIR normal (%)', 'TIR hypoglycemia (%)', 'TIR level 1 hypoglycemia (%)',
+       'TIR level 2 hypoglycemia (%)', 'TIR hyperglycemia (%)',
+       'TIR level 1 hyperglycemia (%)', 'TIR level 2 hyperglycemia (%)', 
+       'Total number of hypoglycemic episodes', 'Number LV1 hypoglycemic episodes (#)', 
+       'Number LV2 hypoglycemic episodes (#)', 'Number of prolonged hypoglycemic episodes (#)', 
+       'Avg. length of hypoglycemic episodes', 'Total time spent in hyperglycemic episodes', 
+       'Total hyperglycemic episodes (#)', 'LV1 hyperglycemic episodes (#)', 
+       'LV2 hyperglycemic episodes (#)', 'Prolonged hyperglycemic episodes (#)', 
+       'Avg. length of hyperglycemic episodes', 'Total time spent in hyperglycemic episodes',
+       ]
     data_table= dash_table.DataTable(
                 #id='metrics_tbl',
                 columns=[
@@ -229,6 +255,9 @@ def create_metrics_table(df):
 
                     },
                 )
+        
+    options = ['Time in range', 'Average glucose', 'SD', 'CV', 'eA1c', 
+        'Hypoglycemic episodes', 'AUC', 'MAGE', 'LBGI', 'HBGI']   
     return html.Div([
             dbc.Row(data_table),
             dbc.Row([
