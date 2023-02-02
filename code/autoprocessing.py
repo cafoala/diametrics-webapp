@@ -1,7 +1,6 @@
 from datetime import datetime
 import pandas as pd
-from pandarallel import pandarallel
-pandarallel.initialize()
+
 
 def find_header(df):
     dropped = df.dropna()

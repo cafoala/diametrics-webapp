@@ -8,8 +8,7 @@ from datetime import timedelta
 import statistics
 from sklearn.metrics import auc
 import glycemic_events_helper
-from pandarallel import pandarallel
-pandarallel.initialize()
+
 
 fift_mins = timedelta(minutes=15)
 thirt_mins = timedelta(minutes=30)

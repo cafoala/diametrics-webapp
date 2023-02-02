@@ -3,8 +3,7 @@ import dash_bootstrap_components as dbc
 import pandas as pd
 import metrics_experiment
 import periods
-from pandarallel import pandarallel
-pandarallel.initialize()
+
 
 def get_metrics_layout():
     units = dbc.RadioItems(

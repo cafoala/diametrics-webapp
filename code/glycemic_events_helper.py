@@ -3,8 +3,6 @@ from datetime import timedelta
 import numpy as np
 import warnings
 warnings.filterwarnings('ignore')
-from pandarallel import pandarallel
-pandarallel.initialize()
 
 def calc_diff(group):
     row1 = group.iloc[0]
