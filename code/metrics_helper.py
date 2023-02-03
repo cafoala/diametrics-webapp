@@ -86,7 +86,7 @@ def tir_helper(series):
     each threshold by divSiding number of readings within range by total length of series
     """
     df_len = series.size
-    tir_hypo = convert_to_rounded_percent(series.loc[series < 3.9].size, df_len)
+    #tir_hypo = convert_to_rounded_percent(series.loc[series < 3.9].size, df_len)
 
     tir_lv1_hypo = convert_to_rounded_percent(series.loc[(series < 3.9) & (series >= 3)].size, df_len)
 
@@ -94,7 +94,7 @@ def tir_helper(series):
 
     tir_norm = convert_to_rounded_percent(series.loc[(series >= 3.9) & (series <= 10)].size, df_len)
     
-    tir_hyper = convert_to_rounded_percent(series.loc[series > 10].size, df_len)
+    #tir_hyper = convert_to_rounded_percent(series.loc[series > 10].size, df_len)
 
     tir_lv1_hyper = convert_to_rounded_percent(series.loc[(series <= 13.9) & (series > 10)].size, df_len)
 
@@ -110,8 +110,9 @@ def tir_helper(series):
 
     tir_hyper_ex = series.loc[series > 15].size, df_len)
     '''
-    return {'TIR normal': tir_norm, 'TIR hypoglycemia':tir_hypo, 'TIR level 1 hypoglycemia':tir_lv1_hypo, 'TIR level 2 hypoglycemia':tir_lv2_hypo, #'TIR normal (3.9-7.8)': tir_norm_1, 'TIR normal (7.8-10)': tir_norm_2, 
-            'TIR hyperglycemia':tir_hyper, 'TIR level 1 hyperglycemia':tir_lv1_hyper, 'TIR level 2 hyperglycemia':tir_lv2_hyper}
+    #'TIR hypoglycemia':tir_hypo,'TIR hyperglycemia':tir_hyper, 
+    return {'TIR normal': tir_norm,  'TIR level 1 hypoglycemia':tir_lv1_hypo, 'TIR level 2 hypoglycemia':tir_lv2_hypo, #'TIR normal (3.9-7.8)': tir_norm_1, 'TIR normal (7.8-10)': tir_norm_2, 
+            'TIR level 1 hyperglycemia':tir_lv1_hyper, 'TIR level 2 hyperglycemia':tir_lv2_hyper}
 
 def unique_tir(glc_series, lower_thresh, upper_thresh):
     df_len = glc_series.size

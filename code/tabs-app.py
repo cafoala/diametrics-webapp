@@ -200,6 +200,8 @@ def display_day_time(day_start, day_end, night_start, night_end):
         State('lv2-hypo-slider', 'value'),
         State('lv1-hyper-slider', 'value'),
         State('lv2-hyper-slider', 'value'),
+        State('short-events-mins', 'value'),
+        State('prolonged-events-mins', 'value'),
         State('calculate-metrics', 'n_clicks'),
         State('raw-data-store', 'data'),
         State('start-day-time', 'value'),
@@ -207,7 +209,7 @@ def display_day_time(day_start, day_end, night_start, night_end):
         State('start-night-time', 'value'),
         State('end-night-time', 'value'),
         prevent_initial_call=True)
-def calculate_metrics(additional_tirs, processed_data, edited_data, lv1_hypo, lv2_hypo, lv1_hyper, lv2_hyper, n_clicks, raw_data, day_start, day_end, night_start, night_end):
+def calculate_metrics(additional_tirs, processed_data, edited_data, lv1_hypo, lv2_hypo, lv1_hyper, lv2_hyper, short_mins, long_mins, n_clicks, raw_data, day_start, day_end, night_start, night_end):
     if n_clicks is None or raw_data is None:
         # prevent the None callbacks is important with the store component.
         # you don't want to update the store for nothing.
@@ -215,7 +217,7 @@ def calculate_metrics(additional_tirs, processed_data, edited_data, lv1_hypo, lv
     times = [i[11:16] for i in [day_start, day_end, night_start, night_end]]
     #all_results = section_metrics_tbl.calculate_metrics(raw_data, edited_data, times[0], times[1], times[2], times[3], additional_tirs, lv1_hypo, lv2_hypo,  lv1_hyper, lv2_hyper)
         
-    all_results = section_metrics_tbl.calculate_metrics(processed_data, times[0], times[1], times[2], times[3], additional_tirs, lv1_hypo, lv2_hypo,  lv1_hyper, lv2_hyper)
+    all_results = section_metrics_tbl.calculate_metrics(processed_data, times[0], times[1], times[2], times[3], additional_tirs, lv1_hypo, lv2_hypo,  lv1_hyper, lv2_hyper, short_mins, long_mins, )
 
     #metrics = pd.DataFrame.from_dict(all_results).round(2) # this is stupid - already a dict
     
@@ -231,33 +233,11 @@ def calculate_metrics(additional_tirs, processed_data, edited_data, lv1_hypo, lv
     )
 def update_metrics_table(metrics_data, units, period): 
     df = pd.DataFrame.from_dict(metrics_data)
-    print(df.columns)
     if units == 'mmol/L':
         sub_df = np.round(df[(df['period']==period)&(df['units']==units)], 2)
-        '''sub_df.columns = ['ID', 'Average glucose (mmol/L)', 'SD (mmol/L)', 
-        'CV (mmol/L)', 'eA1c (%)', 'Min. glucose (mmol/L)',
-       'Max. glucose (mmol/L)', 'AUC (mmol h/L)', 'LBGI', 'HBGI', 'MAGE (mmol/L)', 
-       'TIR normal (%)', 'TIR hypoglycemia (%)', 'TIR level 1 hypoglycemia (%)',
-       'TIR level 2 hypoglycemia (%)', 'TIR hyperglycemia (%)',
-       'TIR level 1 hyperglycemia (%)', 'TIR level 2 hyperglycemia (%)', 
-       'Total hypos (#)', 'LV1 hypos (#)', 'LV2 hypos (#)', 'Prolonged hypos (#)', 
-       'Avg. length hypos','Total length hypos', 'Total hypers (#)', 
-       'LV1 hypers (#)', 'LV2 hypers (#)',
-       'Prolonged hypers (#)', 'Avg. length hypers', 'Total length hypers',
-       'period', 'units']'''
     else:
         sub_df = np.round(df[(df['period']==period)&(df['units']==units)], 1)
-        '''sub_df.columns = ['ID', 'Average glucose (mg/dL)', 'SD (mg/dL)', 
-        'CV (mg/dL)', 'eA1c (%)', 'Min. glucose (mg/dL)',
-       'Max. glucose (mg/dL)', 'AUC (mg h/dL)', 'LBGI', 'HBGI', 'MAGE (mg/dL)', 
-       'TIR normal (%)', 'TIR hypoglycemia (%)', 'TIR level 1 hypoglycemia (%)',
-       'TIR level 2 hypoglycemia (%)', 'TIR hyperglycemia (%)',
-       'TIR level 1 hyperglycemia (%)', 'TIR level 2 hyperglycemia (%)', 
-       'Total hypos (#)', 'LV1 hypos (#)', 'LV2 hypos (#)', 'Prolonged hypos (#)', 
-       'Avg. length hypos','Total length hypos', 'Total hypers (#)', 
-       'LV1 hypers (#)', 'LV2 hypers (#)', 'Prolonged hypers (#)', 
-       'Avg. length hypers', 'Total length hypers',
-       'period', 'units']'''
+
     sub_df = sub_df.drop(columns=['period', 'units'])
     metrics_table = section_metrics_tbl.create_metrics_table(sub_df, units)
     return metrics_table
@@ -311,14 +291,15 @@ def update_indiv_figs(subject_id, data):
     #Output('summary-stats', 'children'),
     Input('yaxis-column', 'value'),
     Input('period-type', 'value'),
+    Input('unit-type-options', 'value'),
     State('metrics-store', 'data'),
     #prevent_initital_call=True
 )
-def update_group_figs(yaxis, period, data):
+def update_group_figs(yaxis, period, units, data):
     if yaxis is None or period is None or data is None:
         raise PreventUpdate
     df = pd.DataFrame.from_dict(data)
-    sub_df = df[df['period']==period]
+    sub_df = df[(df['period']==period)&(df['units']==units)]
     bargraph = section_overview_figs.create_bargraph(sub_df, yaxis)
     boxplot = section_overview_figs.create_boxplot(sub_df, yaxis)
     #scatterplot, stats = section_overview_figs.create_scatter(sub_df, 'eA1c', 'TIR normal')

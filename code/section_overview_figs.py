@@ -4,11 +4,24 @@ import pandas as pd
 
 def create_bargraph(df, y_axis):
     if y_axis=='Time in range':
-        fig = px.bar(df, x='ID', y=['TIR level 2 hypoglycemia', 'TIR level 1 hypoglycemia', 'TIR normal', 'TIR level 1 hyperglycemia', 'TIR level 2 hyperglycemia'])
-    elif y_axis =='Hypoglycemic episodes':
-        fig = px.bar(df, x='ID', y=['Level 1 hypoglycemic episodes', 'Level 2 hypoglycemic episodes'])
+        y_value = ['TIR level 2 hypoglycemia', 
+        'TIR level 1 hypoglycemia', 'TIR normal', 
+        'TIR level 1 hyperglycemia', 
+        'TIR level 2 hyperglycemia']
+    elif y_axis == 'Total glycemic events':
+        y_value=['Total hypos','Total hypers']
+    elif y_axis =='Hypoglycemic events':
+        y_value=['LV1 hypos',
+        'LV2 hypos']
+    elif y_axis =='Hyperglycemic events':
+        y_value=['LV1 hypers', 
+        'LV2 hypers']
+    elif y_axis == 'Prolonged glycemic events':
+        y_value=['Prolonged hypos', 
+        'Prolonged hypers']
     else:
-        fig = px.bar(df, x='ID', y=y_axis)
+        y_value=y_axis
+    fig = px.bar(df, x='ID', y=y_value)
     return html.Div([
         dcc.Graph(
                 id='bargraph',
@@ -18,12 +31,22 @@ def create_bargraph(df, y_axis):
 
 def create_boxplot(df, y_axis):
     if y_axis=='Time in range':
-        y_value=['TIR level 2 hypoglycemia', 'TIR level 1 hypoglycemia', 'TIR normal', 'TIR level 1 hyperglycemia', 'TIR level 2 hyperglycemia']
-    elif y_axis =='Hypoglycemic episodes':
-        y_value=['Hypoglycemic episodes', 'Level 1 hypoglycemic episodes', 'Level 2 hypoglycemic episodes']
+        y_value=['TIR level 2 hypoglycemia',
+        'TIR level 1 hypoglycemia', 'TIR normal',
+        'TIR level 1 hyperglycemia',
+        'TIR level 2 hyperglycemia']
+    elif y_axis == 'Total glycemic events':
+        y_value=['Total hypos','Total hypers']
+    elif y_axis == 'Hypoglycemic events':
+        y_value=['LV1 hypos','LV2 hypos']
+    elif y_axis == 'Hyperglycemic events':
+        y_value = ['LV1 hypers', 'LV2 hypers']
+    elif y_axis == 'Prolonged glycemic events':
+        y_value=['Prolonged hypos', 
+        'Prolonged hypers']
+
     else:
         y_value=y_axis
-
     fig = px.box(df, y=y_value, points="all")
     return html.Div([
         dcc.Graph(

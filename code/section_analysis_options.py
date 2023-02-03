@@ -9,25 +9,6 @@ def get_analysis_options_layout():
     accordion = html.Div(
         dbc.Accordion([
             dbc.AccordionItem([
-                        #html.P("Choose your units"),
-                        dbc.RadioItems(
-                            id="unit-type",
-                            className="btn-group",
-                            inputClassName="btn-check",
-                            labelClassName="btn btn-outline-primary",
-                            labelCheckedClassName="active",
-                            options=[
-                                {"label": 'mmol/L', "value": 'mmol/L'},
-                                {"label": "mg/dL", "value": 'mg/dL'},
-                                #{"label": "Both", "value": 'both'},
-                            ],
-                            value='mmol/L',
-                            style={'textAlign': 'center'}
-                        ),
-                    ],
-                    title="Units",
-                ),
-            dbc.AccordionItem([
                 html.P('Edit the times below to adjust the wake/sleep period. The defaults are taken from the international consensus'),
                 dbc.Row([
                     dbc.Col([
@@ -84,33 +65,59 @@ def get_analysis_options_layout():
             dbc.AccordionItem(
                 [
                     html.P("Use the sliders below to select the thresholds for level 1 and level 2 hypoglycemic episodes"),
-                    dbc.Row([
-                        
-                            dbc.Col([dbc.Card(dbc.CardBody([
-                                html.H5('Hypoglycemia'),
-                                html.H6('Level 1', style={'textAlign': 'right'}),
-                                dcc.Slider(2.2, 22.2, step=0.1, value=3.9, 
-                                            id='lv1-hypo-slider',
-                                            tooltip={"placement": "bottom", "always_visible": True},
-                                            marks={
-                                                2.2:{'label': 'Min.'},
-                                                22.2:{'label': 'Max.'}
-                                        }),
 
-                                html.H6('Level 2', style={'textAlign': 'right'}),
-                                dcc.Slider(2.2, 22.2, step=0.1, value=3.0,
-                                            id='lv2-hypo-slider',
-                                            tooltip={"placement": "bottom", "always_visible": True},
-                                            marks={
-                                                2.2:{'label': 'Min.'},
-                                                22.2:{'label': 'Max.'}
-                                        })
-                                    ])),
-                            ]),
-                        
-                        
-                            dbc.Col([dbc.Card(dbc.CardBody([
-                                html.H5('Hyperglycemia',style={'textAlign': 'right'}),
+                    dbc.Row([
+                        dbc.Col([
+                            dbc.Card([dbc.CardBody([
+                                html.H5('Length of events'),
+                                dbc.Row([
+                                    html.H6('Short events'),
+                                    dbc.Col([
+                                        dbc.Input(id='short-events-mins', type="number", min=0, max=1000, step=1,
+                                             value=15)
+                                    ], width=7),
+                                    dbc.Col([
+                                        html.P('mins')
+                                    ])
+                                ]),
+                                dbc.Row([
+                                    html.H6('Prolonged events'),
+                                    dbc.Col([
+                                        dbc.Input(id='prolonged-events-mins', type="number", min=0, max=1000, step=1,
+                                            value=120),
+                                    ], width=7),
+                                    dbc.Col([
+                                        html.P('mins')
+                                    ])
+                                ]),
+                            ])
+                            ])
+                        ], width=3),
+                               
+                        dbc.Col([dbc.Card(dbc.CardBody([
+                            html.H5('Hypoglycemia threshold'),
+                            html.H6('Level 1', style={'textAlign': 'right'}),
+                            dcc.Slider(2.2, 22.2, step=0.1, value=3.9, 
+                                        id='lv1-hypo-slider',
+                                        tooltip={"placement": "bottom", "always_visible": True},
+                                        marks={
+                                            2.2:{'label': 'Min.'},
+                                            22.2:{'label': 'Max.'}
+                                    }),
+
+                            html.H6('Level 2', style={'textAlign': 'right'}),
+                            dcc.Slider(2.2, 22.2, step=0.1, value=3.0,
+                                        id='lv2-hypo-slider',
+                                        tooltip={"placement": "bottom", "always_visible": True},
+                                        marks={
+                                            2.2:{'label': 'Min.'},
+                                            22.2:{'label': 'Max.'}
+                                    })
+                                ])),
+                        ]),
+                    
+                        dbc.Col([dbc.Card(dbc.CardBody([
+                                html.H5('Hyperglycemia threshold',style={'textAlign': 'right'}),
 
                                 html.H6('Level 1'),
                                 dcc.Slider(2.2, 22.2, step=0.1, value=10.0, 
@@ -133,7 +140,7 @@ def get_analysis_options_layout():
                         ]),
                     ])
                 ],
-                title="Hypoglycemic episodes",
+                title="Glycemic events",
             ),
             
         ],
