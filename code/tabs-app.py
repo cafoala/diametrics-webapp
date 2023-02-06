@@ -316,6 +316,63 @@ def toggle_collapse(n, is_open):
         return not is_open
     return is_open
 
+@app.callback(Output('poi-sliders', 'children'),
+            Input('add-poi-slider', 'n_clicks'),
+            State('poi-sliders', 'children')
+            )
+def create_range_slider(n_clicks, children):
+    return section_external_factors.create_range_slider(n_clicks, children)
+    
+all_sliders = ['poi-None']+['poi-'+ str(i) for i in range(1, 50)]
+
+for id in all_sliders:
+    @app.callback(Output((id+'-heading'), 'children'),
+        Input((id+'-slider'), 'drag_value'),
+        )
+    def print_heading(drag):
+        if drag[0]>=-2 and drag[0]<0:
+            first = 'Start of event'
+        elif drag[0]>0 and drag[0]<=2:
+            first = 'End of event'
+        elif drag[0]<-2:
+            first = f'{abs(drag[0]+2)}hrs before'
+        elif drag[0]>2:
+            first = f'{drag[0]-2}hrs after'
+
+        if drag[1]>=-2 and drag[1]<0:
+            last = 'start of event'
+        elif drag[1]>0 and drag[1]<=2:
+            last = 'end of event'
+        elif drag[1]<-2:
+            last = f'{abs(drag[0]+2)}hrs before'
+        elif drag[0]>2:
+            last = f'{drag[0]-2}hrs after'
+
+        drag_heading =f'{first} to {last}'
+        return drag_heading
+
+    @app.callback(Output(id, 'children'),
+            Input((id+'-button'), 'n_clicks'),
+            )
+    def remove_tir(n_clicks_remove):
+        if n_clicks_remove is None:
+            raise PreventUpdate
+        return None
+
+
+@app.callback(Output('ranges-store', 'data'),
+        Input('periodic-metrics-button', 'n_clicks'),
+        State('poi-sliders', 'children')
+        )
+def update_store(clicks, children):
+    if clicks is None:
+        raise PreventUpdate
+    if children is None:
+        return None
+    #ranges = [i['props']['children']['props']['children'][1]['props']['children'][0]['props']['children'][0]['props']['children'][1]['props']['drag_value'] for i in children if i['props']['children']!=None]
+    ranges = [i['props']['children']['props']['children'][0]['props']['children'][1]['props']['children'][0]['props']['children'][0]['props']['drag_value'] for i in children if i['props']['children']!=None]
+    return ranges
+
 @app.callback(Output('poi-datafile', 'children'),
     Output('poi-store', 'data'),
     Input('upload-poi-data', 'last_modified'),
@@ -338,12 +395,38 @@ def poi(date, contents, filename):
     Input('periodic-metrics-button', 'n_clicks'),
     State('poi-store', 'data'),
     State('raw-data-store', 'data'),
-    #State('processed-data-store', 'data'),
+    State('ranges-store', 'data'),
+    State('lv1-hypo-slider', 'value'),
+    State('lv2-hypo-slider', 'value'),
+    State('lv1-hyper-slider', 'value'),
+    State('lv2-hyper-slider', 'value'),
+    State('short-events-mins', 'value'),
+    State('prolonged-events-mins', 'value'),
+    State('start-day-time', 'value'),
+    State('end-day-time', 'value'),
+    State('start-night-time', 'value'),
+    State('end-night-time', 'value'),
     prevent_initial_call=True)
-def metrics(n_clicks, poi_data, raw_data):
+def metrics(n_clicks, poi_data, raw_data, additional_tirs, lv1_hypo, lv2_hypo, lv1_hyper, lv2_hyper, short_mins, long_mins, day_start, day_end, night_start, night_end):
     if n_clicks is None:
         raise PreventUpdate
-    metrics = section_external_factors.calculate_periodic_metrics(poi_data, raw_data)
+    if poi_data is None:
+        return dbc.Alert(
+            "Oops! You haven't uploaded your periods file. Go back to step 1 to upload your data",
+            id="alert-fade",
+            dismissable=True,
+            is_open=True,
+            color='danger'
+        ),
+    if raw_data is None:
+        return dbc.Alert(
+            "You haven't uploaded any CGM data! Go back to page 1 to upload your CGM data",
+            id="alert-fade",
+            dismissable=True,
+            is_open=True,
+            color='danger'
+        ),
+    metrics = section_external_factors.calculate_periodic_metrics(poi_data, raw_data, additional_tirs, lv1_hypo, lv2_hypo, lv1_hyper, lv2_hyper, short_mins, long_mins, day_start, day_end, night_start, night_end)
     table = section_external_factors.create_data_table(metrics)
     return table
 

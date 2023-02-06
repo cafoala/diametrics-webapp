@@ -121,6 +121,7 @@ content = html.Div([
     dcc.Store(storage_type='memory', id='tir-store'),
     dcc.Store(storage_type='memory', id='poi-data-store'),
     dcc.Store(storage_type='memory', id='metrics-store'),
+    dcc.Store(storage_type='memory', id='ranges-store'),
     dcc.Store(storage_type='memory', id='poi-store'),
     #navbar,
     #intro,
