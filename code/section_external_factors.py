@@ -8,43 +8,6 @@ from datetime import timedelta
 
 
 poi_template = pd.DataFrame([['ID must match your IDs in the webapp',	'dd/mm/yy/ HH:MM',	'dd/mm/yy/ HH:MM',	'This can be used to label repeating periods']], columns= ['ID', 'startDateTime', 'endDateTime', 'label'])
-accordion = dbc.Accordion(
-            [dbc.AccordionItem(
-                    [
-                        html.P("This section will be for diet")
-                    ],
-                    title="Diet",
-                ),
-                dbc.AccordionItem(
-                    [
-                        html.P("This section will be for insulin data")
-                    ],
-                    title="Insulin",
-                ),
-                dbc.AccordionItem(
-                    [
-                        html.P("This section will be for exercise")
-                    ],
-                    title="Exercise",
-                ),
-                dbc.AccordionItem(
-                    [html.H5('File template'),
-                    dash_table.DataTable(data=poi_template.to_dict('records'),
-                                columns=[{"name": i, "id": i} for i in poi_template.columns],
-                                export_format="csv",
-                                export_headers="display",
-                                style_table={'overflowX': 'auto',},
-                                style_cell={'whiteSpace': 'normal',},),
-                    dcc.Upload(dbc.Button('Upload periods file', color="secondary"),
-                                multiple=False,
-                                id='upload-poi-data',),
-                    html.Div(id='poi-datafile'),
-                    html.H5('Time after period'),
-                    dcc.Checklist(['1 hour', '2 hours', '3 hours', '4 hours'], id='time-after-checklist', inline=False),
-                                ],
-                    title="Other",
-                ),
-])
 
 def create_period_of_interest():
     return html.Div([
@@ -85,6 +48,8 @@ def create_period_of_interest():
         dbc.Card(dbc.CardBody([
             html.H4('3. Calculate metrics'),
             dbc.Button('Calculate', color="secondary", id='periodic-metrics-button',),
+            dbc.Button('Rando button', color="secondary", id='rando-button',),
+
             html.Div(id='poi-metrics')
         ])),
     ])
@@ -122,6 +87,46 @@ def create_range_slider(n_clicks, children):
     else:
         return [section]
 
+def drag_values(drag):
+    if drag[0]>=-2 and drag[0]<0:
+        first_num = 'start'
+        first = 'Start of event'
+    elif drag[0]>0 and drag[0]<=2:
+        first_num = 'end'
+        first = 'End of event'
+    elif drag[0]<-2:
+        first_num=drag[0]+2
+        if first_num == 1:
+            first = f'{abs(first_num)}hr before'
+        else:
+            first = f'{abs(first_num)}hrs before'
+    elif drag[0]>2:
+        first_num= drag[0]-2
+        if first_num == 1:
+            first = f'{first_num}hr after'
+        else:
+            first = f'{first_num}hrs after'
+    if drag[1]>=-2 and drag[1]<0:
+        last_num = 'start'
+        last = 'start of event'
+    elif drag[1]>0 and drag[1]<=2:
+        last_num = 'end'
+        last = 'end of event'
+    elif drag[1]<-2:
+        last_num = drag[0]+2
+        if last_num == 1:
+            last = f'{abs(last_num)}hr before'
+        else:
+            last = f'{abs(last_num)}hrs before'
+    elif drag[1]>2:
+        last_num = drag[1]-2
+        if last_num == 1:
+            last = f'{last_num}hr after'
+        else:
+            last = f'{last_num}hrs after'
+    return first, last, first_num, last_num
+
+
 def parse_file(contents, filename, date):
     content_type, content_string = contents.split(',')
     decoded = base64.b64decode(content_string)
@@ -133,7 +138,6 @@ def parse_file(contents, filename, date):
         elif 'xls' in filename:
             # Assume that the user uploaded an excel file
             df = pd.read_excel(io.BytesIO(decoded))
-
         elif 'txt' or 'tsv' in filename:
             # Assume that the user upl, delimiter = r'\s+'oaded an excel file
             df = pd.read_csv(
@@ -149,9 +153,10 @@ def parse_file(contents, filename, date):
             'There was an error processing file with name: ' + filename
         ])
 
-def calculate_periodic_metrics(poi_data, raw_data, additional_tirs, lv1_hypo, lv2_hypo, lv1_hyper, lv2_hyper, short_mins, long_mins, day_start, day_end, night_start, night_end, hours_after=4):
+def calculate_periodic_metrics(poi_ranges, poi_data, raw_data,):# additional_tirs, lv1_hypo, lv2_hypo, lv1_hyper, lv2_hyper, short_mins, long_mins, day_start, day_end, night_start, night_end, ):
     results = []
     for i in poi_data:
+        print(i)
         ID = i['ID']
         start = pd.to_datetime(i['startDatetime']).round('S')
         end = pd.to_datetime(i['endDatetime']).round('S')
@@ -168,7 +173,7 @@ def calculate_periodic_metrics(poi_data, raw_data, additional_tirs, lv1_hypo, lv
             continue
         glc_data = pd.DataFrame.from_dict(id_raw_data['data'])
         glc_data['time'] = pd.to_datetime(glc_data['time'])
-        subsection = glc_data[(glc_data['time']>=start)&(glc_data['time']<end)]
+        '''subsection = glc_data[(glc_data['time']>=start)&(glc_data['time']<end)]
         #subsection = [i for i in glc_data if ((i['time']>=start)&(i['time']<=end))]
         df = subsection #pd.DataFrame.from_dict(subsection)
         if df.empty:
@@ -187,40 +192,50 @@ def calculate_periodic_metrics(poi_data, raw_data, additional_tirs, lv1_hypo, lv
             info.update(metrics)
             #combined = pd.concat([info, metrics], axis=1)
             results.append(info)
-            #results.append(combined)
-
+            #results.append(combined)'''
             
-            for j in range(0, hours_after):
-                print(j)
-                start = end+timedelta(hours=j)
-                end = end+timedelta(hours=j+1)
-                
-                df = glc_data[(glc_data['time']>=start)&(glc_data['time']<end)]
-                info = {'ID':ID, 'Label':label, 'Period': f'{j+1} hour after', 'startDatetime':start, 'endDatetime':end}
-                print(info)
-                if df.empty:
-                    #continue
-                    results.append(info)
+        for drag in poi_ranges:
+                # First num values
+                first, last, first_num, last_num = drag_values(drag)
+                #first, last, first_num, last_num = calculate_metrics_poi_ranges(drag)
+                if first_num=='start':
+                    first_time = start
+                elif first_num =='end':
+                    first_time = end
+                elif first_num>0:
+                    first_time = end+timedelta(hours=first_num)
                 else:
-                    metrics, metrics_mg = metrics_experiment.calculate_all_metrics(df, ID=ID, 
+                    first_time = start-timedelta(hours=abs(first_num))
+                # Last num value
+                if last_num=='start':
+                    last_time = start
+                elif last_num =='end':
+                    last_time = end
+                elif last_num>0:
+                    last_time = end+timedelta(hours=last_num)
+                else:
+                    last_time = start-timedelta(hours=abs(last_num))
+                sub_df = glc_data[(glc_data['time']>=first_time)&(glc_data['time']<last_time)]
+                info = {'ID':ID, 'Label':label, 'Period': f'{first} to {last}', 'startDatetime':start, 'endDatetime':end}
+                if sub_df.empty:
+                    results.append(info)
+                    continue
+                else:   
+                    metrics, metrics_mg = metrics_experiment.calculate_all_metrics(sub_df, return_df=False, 
                                     units=id_raw_data['Units'], #interval=id_raw_data['Interval'], 
-                                    additional_tirs=additional_tirs, lv1_hypo=lv1_hypo, 
-                                    lv2_hypo=lv2_hypo, lv1_hyper=lv1_hyper, lv2_hyper=lv2_hyper, 
-                                    event_mins=short_mins, event_long_mins=long_mins
+                                    #additional_tirs=additional_tirs, lv1_hypo=lv1_hypo, 
+                                    #lv2_hypo=lv2_hypo, lv1_hyper=lv1_hyper, lv2_hyper=lv2_hyper, 
+                                    #event_mins=short_mins, event_long_mins=long_mins
                                     )
-                    #info = {'ID':ID, 'Label':label, 'Period': f'{j+1} hour after', 'startDatetime':start, 'endDatetime':end}
-                    #metrics_mg['label'] = label
                     info.update(metrics)
                     results.append(info)
-
     return results
 
 def create_data_table(data):
     df = pd.DataFrame.from_dict(data).round(2)
     df['startDatetime'] = df['startDatetime'].astype(str)
     df['endDatetime'] = df['endDatetime'].astype(str)
-
-    return html.Div([
+    '''html.Div([
         dbc.RadioItems(
                 id="unit-type-options",
                 className="btn-group",
@@ -234,7 +249,8 @@ def create_data_table(data):
                 ],
                 value='mmol/L',
                 style={'textAlign': 'center'}
-            ),
+            ),'''
+    return html.Div([
         dash_table.DataTable(id='poi-data', data=df.to_dict('records'), 
             columns=[
                             {"name": i, "id": i, "deletable": False, "selectable": True, "hideable": False}
