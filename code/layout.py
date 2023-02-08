@@ -123,12 +123,13 @@ content = html.Div([
     dcc.Store(storage_type='memory', id='metrics-store'),
     dcc.Store(storage_type='memory', id='ranges-store'),
     dcc.Store(storage_type='memory', id='poi-store'),
+    dcc.Store(storage_type='memory', id='poi-metrics-store'),
     #navbar,
     #intro,
     #jumbotron,
     #html.H1(['WebApp'], style={'textAlign':'center'}),
-    dbc.Card(
-        dbc.CardBody([
+    #dbc.Card(
+     #   dbc.CardBody([
             dbc.Tabs(
                     [
                         dbc.Tab(
@@ -164,13 +165,13 @@ content = html.Div([
                                 section_external_factors.create_period_of_interest())),
                                 label="Advanced options", 
                                 tab_id="external-tab", id='external-tab', 
-                                disabled=False, active_label_style={"color": "#FB79B3"}),
+                                disabled=True, active_label_style={"color": "#FB79B3"}),
                     ],
                     id="card-tabs",
                     active_tab="upload-tab",
             )
-        ])
-    ),
+        #])
+   # ),
 ], style=CONTENT_STYLE)
 
 def create_tabs_layout():

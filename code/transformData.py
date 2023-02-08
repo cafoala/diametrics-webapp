@@ -30,8 +30,8 @@ class transformData:
             # set time interval to 15mins
             self.interval = 15
             # Set ID if it's not empty
-            if pd.notnull(df.iloc[1,0]):
-                self.id = df.iloc[1,0]
+            '''if pd.notnull(df.iloc[1,0]):
+                self.id = df.iloc[1,0]'''
             return True
         else:
             return False

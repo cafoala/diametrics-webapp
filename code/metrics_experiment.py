@@ -21,12 +21,16 @@ def calculate_all_metrics(df, return_df=True,units='mmol/L', additional_tirs=Non
         ea1c = (avg_glc + 2.59) / 1.59 # mmol right?
         auc, daily_breakdown, hourly_breakdown = metrics_helper.auc_helper(df)
         
-        glyc_var = {'Average glucose':avg_glc, 'SD':sd, 'CV':cv, 'eA1c':ea1c, 
+        glyc_var = {'Average glucose':avg_glc, 'SD':sd, 'CV (%)':cv, 'eA1c (%)':ea1c, 
                     'Min. glucose':min_glc, 'Max. glucose':max_glc, 'AUC': auc}
         results.update(glyc_var)
         glyc_var_mg =  {}
+        
         for i in glyc_var:
-            glyc_var_mg[i] = glyc_var[i]/factor         
+            if (i=='CV (%)') or (i=='eA1c (%)'):
+                glyc_var_mg[i] = glyc_var[i]
+            else:
+                glyc_var_mg[i] = glyc_var[i]/factor
         results_mg.update(glyc_var_mg)
 
         # LBGI and HBGI
@@ -71,6 +75,6 @@ def calculate_all_metrics(df, return_df=True,units='mmol/L', additional_tirs=Non
         return results, results_mg
     
     else:
-        print('EXPLODE THE PROGRAM')
+        return None, None
 
 

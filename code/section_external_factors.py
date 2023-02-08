@@ -4,8 +4,8 @@ import dash_bootstrap_components as dbc
 import base64
 import io
 import metrics_experiment
+import metrics_helper
 from datetime import timedelta
-
 
 poi_template = pd.DataFrame([['ID must match your IDs in the webapp',	'dd/mm/yy/ HH:MM',	'dd/mm/yy/ HH:MM',	'This can be used to label repeating periods']], columns= ['ID', 'startDateTime', 'endDateTime', 'label'])
 
@@ -32,24 +32,56 @@ def create_period_of_interest():
                                         The default is set to calculate the period of interest only \
                                             but alongside this you can add periods before or after."),
             dbc.Row([
-                dbc.Col([#dbc.Card([dbc.CardBody([
+                dbc.Card([dbc.CardBody([
+                    html.H5('Day/night breakdown'),
+                    html.P('Select the periods you\'re intererest in for the day/night breakdown'),
+                    dbc.Checklist(options=[{'label':'Days with events', 'value':1}, {'label':'Days without events','value':2}, 
+                                    {'label':'Nights after events','value':3}, {'label':'Nights after no events','value':4}], 
+                                    id='day-night-poi-checklist', value=[]),])]),
+                dbc.Card([dbc.CardBody([
                     #html.H5('Number of hours after analysis'),
                     html.Div(id='poi-sliders'),
                     dbc.Button("Add another range", id='add-poi-slider', color='primary'),
-                ]),#])]),
-                dbc.Col([dbc.Card([dbc.CardBody([
-                    html.H5('Day/night calculations'),
-                    dbc.Checklist(options=[{'label':'Days with events', 'value':1}, {'label':'Days without events','value':2}, 
-                                    {'label':'Nights after events','value':3}, {'label':'Nights after no events','value':4}], 
-                                    id='day-night-poi-checklist', value=[]),
-                ])])], width=3)
+                ])]),
             ])
         ])),
         dbc.Card(dbc.CardBody([
             html.H4('3. Calculate metrics'),
             dbc.Button('Calculate', color="secondary", id='periodic-metrics-button',),
-            dbc.Button('Rando button', color="secondary", id='rando-button',),
-
+            dbc.Row([
+            dbc.Col(width=6),
+            dbc.Col([
+                dbc.RadioItems(
+                    id="poi-unit-options",
+                    className="btn-group",
+                    inputClassName="btn-check",
+                    labelClassName="btn btn-outline-primary",
+                    labelCheckedClassName="active",
+                    options=[
+                        {"label": 'mmol/L', "value": 'mmol/L'},
+                        {"label": "mg/dL", "value": 'mg/dL'},
+                        #{"label": "Both", "value": 'both'},
+                    ],
+                    value='mmol/L',
+                    style={'textAlign': 'center'}
+                ),
+            ]),
+            dbc.Col([
+                dbc.RadioItems(
+                    id="poi-period-options",
+                    className="btn-group",
+                    inputClassName="btn-check",
+                    labelClassName="btn btn-outline-primary",
+                    labelCheckedClassName="active",
+                    options=[
+                        {"label": 'Events', "value": 'Events'},
+                        {"label": "Day/night", "value": 'Day/night'},
+                    ],
+                    value='Events',
+                    style={'textAlign': 'center'}
+                ),
+            ])
+        ]),
             html.Div(id='poi-metrics')
         ])),
     ])
@@ -96,7 +128,7 @@ def drag_values(drag):
         first = 'End of event'
     elif drag[0]<-2:
         first_num=drag[0]+2
-        if first_num == 1:
+        if abs(first_num) == 1:
             first = f'{abs(first_num)}hr before'
         else:
             first = f'{abs(first_num)}hrs before'
@@ -113,8 +145,8 @@ def drag_values(drag):
         last_num = 'end'
         last = 'end of event'
     elif drag[1]<-2:
-        last_num = drag[0]+2
-        if last_num == 1:
+        last_num = drag[1]+2
+        if abs(last_num) == 1:
             last = f'{abs(last_num)}hr before'
         else:
             last = f'{abs(last_num)}hrs before'
@@ -125,7 +157,6 @@ def drag_values(drag):
         else:
             last = f'{last_num}hrs after'
     return first, last, first_num, last_num
-
 
 def parse_file(contents, filename, date):
     content_type, content_string = contents.split(',')
@@ -145,18 +176,15 @@ def parse_file(contents, filename, date):
         if set(['ID', 'startDatetime', 'endDatetime', 'label']).issubset(df.columns):
             return df.to_dict('records')
         else:
-            return html.Div(['Columns are incorrect'])
+            return 'columns'
 
     except Exception as e:
         print(e)
-        return html.Div([
-            'There was an error processing file with name: ' + filename
-        ])
+        return 'format'
 
-def calculate_periodic_metrics(poi_ranges, poi_data, raw_data,):# additional_tirs, lv1_hypo, lv2_hypo, lv1_hyper, lv2_hyper, short_mins, long_mins, day_start, day_end, night_start, night_end, ):
+def calculate_periodic_metrics(poi_ranges, poi_data, raw_data, additional_tirs, lv1_hypo, lv2_hypo, lv1_hyper, lv2_hyper, short_mins, long_mins, day_start, day_end, night_start, night_end):
     results = []
     for i in poi_data:
-        print(i)
         ID = i['ID']
         start = pd.to_datetime(i['startDatetime']).round('S')
         end = pd.to_datetime(i['endDatetime']).round('S')
@@ -166,93 +194,76 @@ def calculate_periodic_metrics(poi_ranges, poi_data, raw_data,):# additional_tir
         except:
             # Add sumink
             continue
-        #raw_data = pd.DataFrame.from_dict(raw_data)
-        #id_raw_data = raw_data[raw_data['ID']==ID]
         if not id_raw_data['Usable']:
             # Return ID with sumink or uvver
             continue
         glc_data = pd.DataFrame.from_dict(id_raw_data['data'])
         glc_data['time'] = pd.to_datetime(glc_data['time'])
-        '''subsection = glc_data[(glc_data['time']>=start)&(glc_data['time']<end)]
-        #subsection = [i for i in glc_data if ((i['time']>=start)&(i['time']<=end))]
-        df = subsection #pd.DataFrame.from_dict(subsection)
-        if df.empty:
-            # Should probs add something here
-            continue
-        else:
-            metrics, metrics_mg = metrics_experiment.calculate_all_metrics(df, return_df=False, #ID=ID, 
-                                    units=id_raw_data['Units'], #interval=id_raw_data['Interval'], 
-                                    additional_tirs=additional_tirs, lv1_hypo=lv1_hypo, 
-                                    lv2_hypo=lv2_hypo, lv1_hyper=lv1_hyper, lv2_hyper=lv2_hyper, 
-                                    event_mins=short_mins, event_long_mins=long_mins
-                                    )
-            #info = pd.DataFrame([[ID, label, 'During', start, end]], columns = ['ID', 'Label', 'Period', 'startDatetime', 'endDatetime'])
-            info = {'ID':ID, 'Label':label, 'Period': 'During', 'startDatetime':start, 'endDatetime':end}
-            metrics_mg['label'] = label
-            info.update(metrics)
-            #combined = pd.concat([info, metrics], axis=1)
-            results.append(info)
-            #results.append(combined)'''
-            
         for drag in poi_ranges:
-                # First num values
-                first, last, first_num, last_num = drag_values(drag)
-                #first, last, first_num, last_num = calculate_metrics_poi_ranges(drag)
-                if first_num=='start':
-                    first_time = start
-                elif first_num =='end':
-                    first_time = end
-                elif first_num>0:
-                    first_time = end+timedelta(hours=first_num)
-                else:
-                    first_time = start-timedelta(hours=abs(first_num))
-                # Last num value
-                if last_num=='start':
-                    last_time = start
-                elif last_num =='end':
-                    last_time = end
-                elif last_num>0:
-                    last_time = end+timedelta(hours=last_num)
-                else:
-                    last_time = start-timedelta(hours=abs(last_num))
-                sub_df = glc_data[(glc_data['time']>=first_time)&(glc_data['time']<last_time)]
-                info = {'ID':ID, 'Label':label, 'Period': f'{first} to {last}', 'startDatetime':start, 'endDatetime':end}
-                if sub_df.empty:
+            # First num values
+            first, last, first_num, last_num = drag_values(drag)
+            if first_num=='start':
+                first_time = start
+            elif first_num =='end':
+                first_time = end
+            elif first_num>0:
+                first_time = end+timedelta(hours=first_num)
+            else:
+                first_time = start-timedelta(hours=abs(first_num))
+            # Last num value
+            if last_num=='start':
+                last_time = start
+            elif last_num =='end':
+                last_time = end
+            elif last_num>0:
+                last_time = end+timedelta(hours=last_num)
+            else:
+                last_time = start-timedelta(hours=abs(last_num))
+            sub_df = glc_data[(glc_data['time']>=first_time)&(glc_data['time']<last_time)]
+            info = {'ID':ID, 'Label':label, 'Start of event':start, 
+                        'End of event':end, 'Period': f'{first} to {last}'}
+            if sub_df.empty:
+                info['Data Sufficiency (%)'] = 0
+                info_mg = info.copy()
+                info['units'] = 'mmol/L'
+                info_mg['units'] = 'mg/dL'
+                results.append(info)
+                results.append(info_mg)
+                continue
+            else:
+                data_sufficiency = metrics_helper.helper_missing(sub_df, gap_size=id_raw_data['Interval'], start_time=first_time, end_time=last_time)['Data Sufficiency']
+                info['Data Sufficiency (%)'] = data_sufficiency
+                info_mg = info.copy()
+                metrics, metrics_mg = metrics_experiment.calculate_all_metrics(sub_df, return_df=False, 
+                                units=id_raw_data['Units'], #interval=id_raw_data['Interval'], 
+                                additional_tirs=additional_tirs, lv1_hypo=lv1_hypo, 
+                                lv2_hypo=lv2_hypo, lv1_hyper=lv1_hyper, lv2_hyper=lv2_hyper, 
+                                event_mins=short_mins, event_long_mins=long_mins
+                                )
+                if metrics is None:
+                    info['Data Sufficiency (%)'] = 0
+                    info_mg = info.copy()
+                    info['units'] = 'mmol/L'
+                    info_mg['units'] = 'mg/dL'
                     results.append(info)
+                    results.append(info_mg)
                     continue
-                else:   
-                    metrics, metrics_mg = metrics_experiment.calculate_all_metrics(sub_df, return_df=False, 
-                                    units=id_raw_data['Units'], #interval=id_raw_data['Interval'], 
-                                    #additional_tirs=additional_tirs, lv1_hypo=lv1_hypo, 
-                                    #lv2_hypo=lv2_hypo, lv1_hyper=lv1_hyper, lv2_hyper=lv2_hyper, 
-                                    #event_mins=short_mins, event_long_mins=long_mins
-                                    )
-                    info.update(metrics)
-                    results.append(info)
+
+                metrics['units'] = 'mmol/L'
+                metrics_mg['units'] = 'mg/dL'
+                info.update(metrics)
+                info_mg.update(metrics_mg)
+                results.append(info)
+                results.append(info_mg)
     return results
 
 def create_data_table(data):
     df = pd.DataFrame.from_dict(data).round(2)
-    df['startDatetime'] = df['startDatetime'].astype(str)
-    df['endDatetime'] = df['endDatetime'].astype(str)
-    '''html.Div([
-        dbc.RadioItems(
-                id="unit-type-options",
-                className="btn-group",
-                inputClassName="btn-check",
-                labelClassName="btn btn-outline-primary",
-                labelCheckedClassName="active",
-                options=[
-                    {"label": 'mmol/L', "value": 'mmol/L'},
-                    {"label": "mg/dL", "value": 'mg/dL'},
-                    #{"label": "Both", "value": 'both'},
-                ],
-                value='mmol/L',
-                style={'textAlign': 'center'}
-            ),'''
-    return html.Div([
-        dash_table.DataTable(id='poi-data', data=df.to_dict('records'), 
-            columns=[
+    df['Start of event'] = pd.to_datetime(df['Start of event']).astype(str)
+    df['End of event'] = pd.to_datetime(df['End of event']).astype(str)
+    df = df.fillna('N/A')
+    return dash_table.DataTable(id='poi-data', data=df.to_dict('records'), 
+                columns=[
                             {"name": i, "id": i, "deletable": False, "selectable": True, "hideable": False}
                             if i == "iso_alpha3" or i == "ID" or i == "id"
                             else {"name": i, "id": i, "hideable": True, "selectable": True}
@@ -283,6 +294,5 @@ def create_data_table(data):
                         'HBGI': 'High blood glucose index'
 
                     },
-                )
-    ])
+)
 

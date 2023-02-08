@@ -144,8 +144,7 @@ def analysis_options_callbacks(app):
             raise PreventUpdate
         return section_analysis_options.create_range_slider(n_clicks, children, units)
     
-#all_sliders = ['tir_None', 'tir_1', 'tir_2', 'tir_3', 'tir_4', 'tir_5']   
-all_sliders = ['tir-'+ str(i) for i in range(1, 5)]
+all_sliders = ['tir-'+ str(i) for i in range(1, 10)]
 
 for id in all_sliders:
     @app.callback(Output((id+'-heading'), 'children'),
@@ -237,16 +236,14 @@ def update_metrics_table(metrics_data, units, period):
         sub_df = np.round(df[(df['period']==period)&(df['units']==units)], 2)
     else:
         sub_df = np.round(df[(df['period']==period)&(df['units']==units)], 1)
-
+    sub_df = section_metrics_tbl.change_headings(sub_df, units)
     sub_df = sub_df.drop(columns=['period', 'units'])
-    metrics_table = section_metrics_tbl.create_metrics_table(sub_df, units)
+    metrics_table = section_metrics_tbl.create_metrics_table(sub_df)
     return metrics_table
 
 
 ## INDIVIDUAL FIGS ##
 @app.callback(
-    #Output('individual-figs', 'children'),
-    #Input('calculate-metrics', 'n_clicks'),
     Output('subject-id-div', 'children'),
     Input('metrics-store', 'modified_timestamp'),
     State('metrics-store', 'data'),
@@ -323,7 +320,7 @@ def toggle_collapse(n, is_open):
 def create_range_slider(n_clicks, children):
     return section_external_factors.create_range_slider(n_clicks, children)
     
-all_sliders_poi = ['poi-None']+['poi-'+ str(i) for i in range(1, 5)]
+all_sliders_poi = ['poi-None']+['poi-'+ str(i) for i in range(1, 10)]
 
 for id in all_sliders_poi:
     @app.callback(Output((id+'-heading'), 'children'),
@@ -352,10 +349,7 @@ def update_store(clicks, children):
         raise PreventUpdate
     if children is None:
         return None
-    #ranges = [i['props']['children']['props']['children'][1]['props']['children'][0]['props']['children'][0]['props']['children'][1]['props']['drag_value'] for i in children if i['props']['children']!=None]
     ranges = [i['props']['children']['props']['children'][0]['props']['children'][1]['props']['children'][0]['props']['children'][0]['props']['drag_value'] for i in children if i['props']['children']!=None]
-    print('ranges for store')
-    print(ranges)
     return ranges
 
 @app.callback(Output('poi-datafile', 'children'),
@@ -366,33 +360,55 @@ def update_store(clicks, children):
     prevent_initial_call=True)
 def poi(date, contents, filename):
     data = section_external_factors.parse_file(contents, filename, date)#.round(2)
-    df = pd.DataFrame.from_dict(data)
-    df['startDatetime'] = pd.to_datetime(df['startDatetime']).round('S').astype(str)
-    df['endDatetime'] = pd.to_datetime(df['endDatetime']).round('S').astype(str)
-    table = dash_table.DataTable(id='poi-data', data=df.to_dict('records'), 
-            style_table={
-                        'overflowX': 'auto',
-                        'height': 300,
-                        },)
-    return table, data
+    if data=='columns':
+        table = dbc.Alert(
+            "Your file doesn't have the correct headings!",
+            id="alert-columns",
+            dismissable=True,
+            is_open=True,
+            color='danger'
+        )
+        return table, None
 
-@app.callback(Output('poi-metrics', 'children'),
+    elif data=='format':
+        table = dbc.Alert(
+            "Your file isn't in the correct format - csv, excel or txt only!",
+            id="alert-format",
+            dismissable=True,
+            is_open=True,
+            color='danger'
+        )
+        return table, None
+    else:
+        df = pd.DataFrame.from_dict(data)
+        df['startDatetime'] = pd.to_datetime(df['startDatetime']).round('S').astype(str)
+        df['endDatetime'] = pd.to_datetime(df['endDatetime']).round('S').astype(str)
+        df['ID'] = df['ID'].astype(str)
+        table = dash_table.DataTable(id='poi-data', data=df.to_dict('records'), 
+                style_table={
+                            'overflowX': 'auto',
+                            'height': 300,
+                            },)
+        return table, data
+
+@app.callback(#Output('poi-metrics', 'children'),
+    Output('poi-metrics-store', 'data'),
     Input('ranges-store', 'data'),
     State('poi-store', 'data'),
     State('raw-data-store', 'data'),
-    #State('tir-store', 'data'),
-    #State('lv1-hypo-slider', 'value'),
-    #State('lv2-hypo-slider', 'value'),
-    #State('lv1-hyper-slider', 'value'),
-    #State('lv2-hyper-slider', 'value'),
-    #State('short-events-mins', 'value'),
-    #State('prolonged-events-mins', 'value'),
-    #State('start-day-time', 'value'),
-    #State('end-day-time', 'value'),
-    #State('start-night-time', 'value'),
-    #State('end-night-time', 'value'),
+    State('tir-store', 'data'),
+    State('lv1-hypo-slider', 'value'),
+    State('lv2-hypo-slider', 'value'),
+    State('lv1-hyper-slider', 'value'),
+    State('lv2-hyper-slider', 'value'),
+    State('short-events-mins', 'value'),
+    State('prolonged-events-mins', 'value'),
+    State('start-day-time', 'value'),
+    State('end-day-time', 'value'),
+    State('start-night-time', 'value'),
+    State('end-night-time', 'value'),
     prevent_initial_call=True)
-def metrics(poi_ranges, poi_data, raw_data,):# additional_tirs, lv1_hypo, lv2_hypo, lv1_hyper, lv2_hyper, short_mins, long_mins, day_start, day_end, night_start, night_end):
+def metrics(poi_ranges, poi_data, raw_data, additional_tirs, lv1_hypo, lv2_hypo, lv1_hyper, lv2_hyper, short_mins, long_mins, day_start, day_end, night_start, night_end):
     if poi_ranges is None:
         raise PreventUpdate
     if poi_data is None:
@@ -411,11 +427,31 @@ def metrics(poi_ranges, poi_data, raw_data,):# additional_tirs, lv1_hypo, lv2_hy
             is_open=True,
             color='danger'
         ),
-    print('triggered')
-    metrics = section_external_factors.calculate_periodic_metrics(poi_ranges, poi_data, raw_data,)# additional_tirs, lv1_hypo, lv2_hypo, lv1_hyper, lv2_hyper, short_mins, long_mins, day_start, day_end, night_start, night_end)
-    print(metrics)
-    table = section_external_factors.create_data_table(metrics)
-    #table = dash_table.DataTable(data=metrics)
+    metrics = section_external_factors.calculate_periodic_metrics(poi_ranges, poi_data, raw_data, additional_tirs, lv1_hypo, lv2_hypo, lv1_hyper, lv2_hyper, short_mins, long_mins, day_start, day_end, night_start, night_end)
+    return metrics
+
+
+# Update
+@app.callback(
+    Output('poi-metrics', 'children'),
+    Input('poi-metrics-store', 'data'),
+    Input('poi-unit-options', 'value'),
+    Input('poi-period-options', 'value'),
+    prevent_initial_call=True
+    )
+def update_poi_metrics_table(metrics_data, units, period): 
+    df = pd.DataFrame.from_dict(metrics_data)
+    if units == 'mmol/L':
+        #sub_df = np.round(df[(df['period']==period)&(df['units']==units)], 2)
+        sub_df = np.round(df[df['units']==units], 2)
+        
+    else:
+        #sub_df = np.round(df[(df['period']==period)&(df['units']==units)], 1)
+        sub_df = np.round(df[df['units']==units], 1)
+
+    sub_df = section_metrics_tbl.change_headings(sub_df, units)
+    sub_df = sub_df.drop(columns=['units']) #'period', 
+    table = section_external_factors.create_data_table(sub_df)
     return table
 
 if __name__ == '__main__':

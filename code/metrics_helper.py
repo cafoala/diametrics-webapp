@@ -129,7 +129,7 @@ def calculate_unique_tirs(glc_series, thresholds, units):
         return {}
     results_dict = {}
     for i in thresholds:
-        name = f'TIR {i[0]}-{i[1]}{units}'
+        name = f'TIR {i[0]}-{i[1]}{units} (%)'
         tir = unique_tir(glc_series, i[0], i[1])
         results_dict[name] = tir
     return results_dict
@@ -137,11 +137,18 @@ def calculate_unique_tirs(glc_series, thresholds, units):
 def calculate_glycemic_episodes(df, hypo_lv1_thresh=3.9, hypo_lv2_thresh=3, hyper_lv1_thresh=10, hyper_lv2_thresh=13.9, mins=15, long_mins=120):
     total_hypos, lv1_hypos, lv2_hypos, prolonged_hypos, avg_length_hypos, total_time_hypos = glycemic_events_helper.calculate_episodes(df, True, hypo_lv1_thresh, hypo_lv2_thresh, mins, long_mins)
     total_hypers, lv1_hypers, lv2_hypers, prolonged_hypers, avg_length_hypers, total_time_hypers = glycemic_events_helper.calculate_episodes(df, False, hyper_lv1_thresh, hyper_lv2_thresh, mins, long_mins)
-    results = {'Total hypos': total_hypos, 'LV1 hypos': lv1_hypos, 'LV2 hypos':lv2_hypos, 
-                    'Prolonged hypos':prolonged_hypos, 'Avg. length hypos': avg_length_hypos, 
-                    'Total length hypos':total_time_hypos, 'Total hypers':total_hypers, 
-                    'LV1 hypers':lv1_hypers, 'LV2 hypers':lv2_hypers, 'Prolonged hypers':prolonged_hypers, 
-                    'Avg. length hypers':avg_length_hypers, 'Total length hypers':total_time_hypers}
+    results = {'Total number of hypoglycemic events': total_hypos, 
+                'Number LV1 hypoglycemic events': lv1_hypos, 
+                'Number LV2 hypoglycemic events':lv2_hypos, 
+                'Number of prolonged hypoglycemic events':prolonged_hypos, 
+                'Avg. length of hypoglycemic events': avg_length_hypos, 
+                'Total time spent in hypoglycemic events':total_time_hypos,
+                'Total number of hyperglycemic events':total_hypers, 
+                'Number of LV1 hyperglycemic events':lv1_hypers,
+                'Number of LV2 hyperglycemic events':lv2_hypers,
+                'Prolonged hyperglycemic events':prolonged_hypers, 
+                'Avg. length of hyperglycemic events':avg_length_hypers,
+                'Total time spent in hyperglycemic events':total_time_hypers}
     return results
 
 def helper_hypo_episodes(df, gap_size, interpolate=False, interp_method='pchip', lv1_threshold=3.9, lv2_threshold=3):
@@ -287,7 +294,7 @@ def helper_hypo_episodes(df, gap_size, interpolate=False, interp_method='pchip',
     number_lv2_hypos = results[results['lv2']].shape[0]
     number_lv1_hypos = number_hypos - number_lv2_hypos
 
-    overview = {'Total hypoglycemic episodes':number_hypos, 'Level 1 hypoglycemic episodes':number_lv1_hypos, 'Level 2 hypoglycemic episodes':number_lv2_hypos,
+    overview = {'Total number of hypoglycemic episodes':number_hypos, 'Number LV1 hypoglycemic episodes':number_lv1_hypos, 'Number LV2 hypoglycemic episodes':number_lv2_hypos,
                     'Average length of hypoglycemic episodes':avg_length, 'Total time in hypoglycemia':total_time_hypo}
 
     return overview, results
@@ -344,7 +351,7 @@ def helper_missing(df, gap_size, start_time=None, end_time=None):
     elif gap_size==15:
         freq = '15min'
     else:
-        return print('EXPLODE THE PROGRAM')
+        return print('YOU CAN\'T USE THAT INTERVAL!')
     
     # calculate the number of non-null values
     number_readings = sum(df.set_index('time').groupby(pd.Grouper(freq=freq)).count()['glc'] > 0)

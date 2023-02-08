@@ -12,3 +12,10 @@ border-top-left-radius: 0;
 border-bottom-left-radius: 0;
 margin-left: -1px;
 }
+
+#card-tabs {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background-color: white;
+}

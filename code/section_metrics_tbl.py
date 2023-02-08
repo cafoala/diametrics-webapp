@@ -126,36 +126,29 @@ def calculate_metrics(processed_data, day_start, day_end, night_start,
     all_results = all_results.reset_index().drop(columns='level_1')
     all_results = all_results.to_dict('records')
     return all_results
-        
-def create_metrics_table(df, units):
+
+def change_headings(df, units):
     if units == 'mmol/L':
-        df.columns = ['ID', 'Average glucose (mmol/L)', 'SD (mmol/L)', 
-        'CV (%)', 'eA1c (%)', 'Min. glucose (mmol/L)',
-       'Max. glucose (mmol/L)', 'AUC (mmol h/L)', 'LBGI', 'HBGI', 'MAGE (mmol/L)', 
-       'Time in range 3.9-10mmol/L (%)', 
-       'Time in range 3.0-3.9 mmol/L (%)',
-       'Time in range <3.0 mmol/L (%)',
-       'Time in range 10-13.9 mmol/L (%)', 'Time in range >13.9 mmol/L (%)', 
-       'Total hypos (#)', 'LV1 hypos (#)', 'LV2 hypos (#)', 'Prolonged hypos (#)', 
-       'Avg. length hypos','Total length hypos', 'Total hypers (#)', 
-       'LV1 hypers (#)', 'LV2 hypers (#)', 'Prolonged hypers (#)',
-       'Avg. length hypers', 'Total length hypers',
-       ]
+        return df.rename(columns={'Average glucose':'Average glucose (mmol/L)','SD':'SD (mmol/L)', 
+                    'Min. glucose':'Min. glucose (mmol/L)',
+                    'Max. glucose':'Max. glucose (mmol/L)', 'AUC':'AUC (mmol h/L)', 
+                    'MAGE':'MAGE (mmol/L)', 'TIR normal':'Time in range 3.9-10mmol/L (%)',
+                    'TIR level 1 hypoglycemia':'Time in range 3.0-3.9 mmol/L (%)', 
+                    'TIR level 2 hypoglycemia':'Time in range <3.0 mmol/L (%)',
+       'TIR level 1 hyperglycemia':'Time in range 10-13.9 mmol/L (%)', 
+       'TIR level 2 hyperglycemia':'Time in range >13.9 mmol/L (%)',})
     else:
-        df.columns = ['ID', 'Average glucose (mg/dL)', 'SD (mg/dL)', 
-        'CV (%)', 'eA1c (%)', 'Min. glucose (mg/dL)',
-       'Max. glucose (mg/dL)', 'AUC (mg h/dL)', 'LBGI', 'HBGI', 'MAGE (mg/dL)', 
-       'Time in range 70-180mg/dL (%)', 
-       'Time in range <70–54mg/dL (%)',
-       'Time in range <54mg/dL (%)', 
-       'Time in range 180-250mg/dL (%)', 'Time in range >250mg/dL (%)', 
-       'Total number of hypoglycemic episodes', 'Number LV1 hypoglycemic episodes (#)', 
-       'Number LV2 hypoglycemic episodes (#)', 'Number of prolonged hypoglycemic episodes (#)', 
-       'Avg. length of hypoglycemic episodes', 'Total time spent in hyperglycemic episodes', 
-       'Total hyperglycemic episodes (#)', 'LV1 hyperglycemic episodes (#)', 
-       'LV2 hyperglycemic episodes (#)', 'Prolonged hyperglycemic episodes (#)', 
-       'Avg. length of hyperglycemic episodes', 'Total time spent in hyperglycemic episodes',
-       ]
+        return df.rename(columns={'Average glucose':'Average glucose (mg/dL)','SD':'SD (mg/dL)', 
+                    'Min. glucose':'Min. glucose (mg/dL)',
+                    'Max. glucose':'Max. glucose (mg/dL)', 'AUC':'AUC (mg h/dL)', 
+                    'MAGE':'MAGE (mg/dL)', 'TIR normal':'Time in range 70-180mg/dL (%)',
+                    'TIR level 1 hypoglycemia':'Time in range <70–54mg/dL (%)', 
+                    'TIR level 2 hypoglycemia':'Time in range <54mg/dL (%)',
+       'TIR level 1 hyperglycemia':'Time in range 180-250mg/dL (%)', 
+       'TIR level 2 hyperglycemia':'Time in range >250mg/dL (%)',})
+
+def create_metrics_table(df):
+    df = df.fillna('N/A')
     data_table= dash_table.DataTable(
                 #id='metrics_tbl',
                 columns=[
