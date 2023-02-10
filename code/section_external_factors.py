@@ -11,7 +11,7 @@ poi_template = pd.DataFrame([['ID must match your IDs in the webapp',	'dd/mm/yy/
 
 def create_period_of_interest():
     return html.Div([
-        html.H2('Incorporating external factors'),
+        html.H2('Exploring specific periods of interest'),
         html.P('This section enables you to take a more in depth look at different periods of interest in your data. \
             For this to work you\'ll need to upload a file that includes the ID of the participant, the start and end times of the period \
             of interest and an optional label. From there, you\'ll get a breakdown of the metrics of glycemic control\
@@ -27,16 +27,16 @@ def create_period_of_interest():
             html.Div(id='poi-datafile'),
         ])),
         dbc.Card(dbc.CardBody([
-            html.H4('2. Select analysis options'),
-            html.P("Use the slider below to select time period that you're interested in. \
+            html.H4('2. Select windows around events'),
+            html.P("Use the sliders and buttons below to select time period that you're interested in. \
                                         The default is set to calculate the period of interest only \
                                             but alongside this you can add periods before or after."),
             dbc.Row([
                 dbc.Card([dbc.CardBody([
                     html.H5('Day/night breakdown'),
                     html.P('Select the periods you\'re intererest in for the day/night breakdown'),
-                    dbc.Checklist(options=[{'label':'Days with events', 'value':1}, {'label':'Days without events','value':2}, 
-                                    {'label':'Nights after events','value':3}, {'label':'Nights after no events','value':4}], 
+                    dbc.Checklist(options=[{'label':'All 24hrs after event', 'value':1},
+                                    {'label':'Night after event','value':2}], 
                                     id='day-night-poi-checklist', value=[]),])]),
                 dbc.Card([dbc.CardBody([
                     #html.H5('Number of hours after analysis'),

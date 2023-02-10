@@ -112,16 +112,17 @@ def preprocess_data(n_clicks, list_of_dates, list_of_contents, list_of_names):
 def update_columns(timestamp, rows, raw_data):
     for row in rows:
         # Calculate number of days
+        print(row)
         try:
             row['Days'] = str(pd.to_datetime(row['End DateTime']) - pd.to_datetime(row['Start DateTime']))
         except:
-            row['Days'] = 'NA'
+            row['Days'] = 'N/A'
         # Calculate data sufficiency
         #section_data_overview.calculate_data_sufficiency(row['Filename'], row['Start DateTime'], row['End DateTime'], raw_data)
         try:
             row['Data Sufficiency (%)'] = section_data_overview.calculate_data_sufficiency(row['Filename'], row['Start DateTime'], row['End DateTime'], raw_data)
         except: 
-            row['Data Sufficiency (%)'] = 'NA'
+            row['Data Sufficiency (%)'] = 'N/A'
     return rows
 
 @app.callback(Output('processed-data-store', 'data'),

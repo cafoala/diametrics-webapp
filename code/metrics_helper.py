@@ -363,7 +363,7 @@ def helper_missing(df, gap_size, start_time=None, end_time=None):
     else:
         data_sufficiency = number_readings*100/total_readings
     
-    return {'Start DateTime': str(start_time.round('min')), 'End DateTime':str(end_time.round('min')), 'Data Sufficiency':np.round(data_sufficiency, 1)}
+    return {'Start DateTime': str(start_time.round('min')), 'End DateTime':str(end_time.round('min')), 'Data Sufficiency (%)':np.round(data_sufficiency, 1)}
 
 # LBGI and HBGI
 def calc_bgi(glucose, units):

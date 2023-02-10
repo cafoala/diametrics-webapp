@@ -26,10 +26,11 @@ def parse_contents(contents, filename, date):
                 io.StringIO(decoded.decode('utf-8'))) # , delimiter = r'\s+', header=None
 
     except Exception as e:
-        print(e)
-        return html.Div([
-            'There was an error processing file with name: ' + filename
-        ])
+        data_dictionary = {'Usable': False, 'Filename': filename, 
+           # 'Device':'N/A', 'Interval': 'N/A', 'data': 'N/A',
+            'ID': 'N/A', 'Start DateTime': 'N/A', 'End DateTime': 'N/A',
+            'Days': 'N/A', 'Data Sufficiency (%)':'N/A'}
+        return data_dictionary
     return preprocessing.preprocess_df(df, filename)
 
 def get_datatable_layout():
@@ -49,8 +50,10 @@ def get_datatable_layout():
             ])
 
 def create_data_table(children):
-    data_details = pd.DataFrame.from_dict(children)[['Filename', 'Usable', 'ID', 'Start DateTime', 'End DateTime', 'Days', 'Data Sufficiency']] #'Device', 'Interval', 'Units',
-    data_details.columns = ['Filename', 'Usable', 'ID', 'Start DateTime', 'End DateTime', 'Days', 'Data Sufficiency (%)'] #'Interval (mins)', 'Units',
+    data_details = pd.DataFrame.from_dict(children)
+    print(data_details)
+    data_details = data_details[['Filename', 'Usable', 'ID', 'Start DateTime', 'End DateTime', 'Days', 'Data Sufficiency (%)']] #'Device', 'Interval', 'Units',
+    #data_details.columns = ['Filename', 'Usable', 'ID', 'Start DateTime', 'End DateTime', 'Days', 'Data Sufficiency (%)'] #'Interval (mins)', 'Units',
     data_details['Usable'] = data_details['Usable'].replace({True:'Yes', False:'No'})
     return html.Div([
                 #html.H2('Data details'),
@@ -101,13 +104,13 @@ def calculate_data_sufficiency(filename, start, end, raw_data):
     data = pd.DataFrame(subject['data'])
     data['time'] = pd.to_datetime(data['time'])
     results = metrics_helper.helper_missing(data, interval, start, end)
-    ds = results['Data Sufficiency']
+    ds = results['Data Sufficiency (%)']
     return ds
 
 def merge_glc_data(table_data, raw_data):
     results = pd.DataFrame()
     for row in table_data:
-        if row['Days'] == 'NA':
+        if row['Days'] == 'N/A':
             continue
         subject = [i for i in raw_data if i['Filename']==row['Filename']][0]
         data = pd.DataFrame(subject['data'])

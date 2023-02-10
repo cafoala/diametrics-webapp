@@ -8,21 +8,32 @@ class transformData:
         self.interval = None
         self.data = None
         self.id = None
-        
         if self.assert_flash_libre(df):
-            self.convert_flash_libre(df)
-            
+            try:
+                self.convert_flash_libre(df)
+            except:
+                print('idk')
+        elif self.assert_dexcom(df):
+            print('it\s a dexcom')
+            try:
+                self.convert_dexcom(df)
+            except:
+                print('still dk') 
         else:
             # output can return whether it's usable or not usable
             # can we also store feedback of why it didn't work?
             self.autoprocess(df)
             # 
-            
+        print(self.device)   
     
     def assert_flash_libre(self, df):
         #check if cols align
-        header =['Meter', 'Serial Number', 'Meter Timestamp', 'Record Type', 'Historic Glucose(mmol/L)', 'Scan Glucose(mmol/L)']
-        if set(header).issubset(set(df.iloc[2])):
+        header_mmol = ['Meter Timestamp', 'Historic Glucose(mmol/L)', 'Scan Glucose(mmol/L)']
+        header_mmol_2 = ['Device Timestamp', 'Historic Glucose mmol/L', 'Scan Glucose mmol/L']
+        header_mg = ['Meter Timestamp', 'Historic Glucose(mg/dL)', 'Scan Glucose(mg/dL)']
+        header_mg_2 = ['Device Timestamp', 'Historic Glucose mg/dL', 'Scan Glucose mg/dL']
+
+        if set(header_mmol).issubset(set(df.iloc[2])) or set(header_mg).issubset(set(df.iloc[2])):
             # Set that it's usable
             self.usable = True # might not be
             # Set device name
@@ -45,7 +56,15 @@ class transformData:
         df.drop(index=[2], inplace=True)
         df.reset_index(inplace=True, drop=True)
         # Keep important columns
-        df = df.loc[:,('Meter Timestamp', 'Historic Glucose(mmol/L)', 'Scan Glucose(mmol/L)')]
+        if 'Historic Glucose(mmol/L)' in df.columns:
+            df = df.loc[:,('Meter Timestamp', 'Historic Glucose(mmol/L)', 'Scan Glucose(mmol/L)')]
+        elif 'Historic Glucose(mg/dL)' in df.columns:
+            df = df.loc[:,('Meter Timestamp', 'Historic Glucose(mg/dL)', 'Scan Glucose(mg/dL)')]
+        elif 'Historic Glucose mmol/L' in df.columns:
+            df = df.loc[:,('Device Timestamp', 'Historic Glucose mmol/L', 'Scan Glucose mmol/L')]
+        else:
+            df = df = df.loc[:,('Device Timestamp', 'Historic Glucose mg/dL', 'Scan Glucose mg/dL')]
+
         # Rename cols
         df.columns = ['time', 'glc', 'scan_glc']
         self.data = df
@@ -55,6 +74,36 @@ class transformData:
     'Device', 'Serial Number', 'Device Timestamp', 'Record Type',
         'Historic Glucose mmol/L', 'Scan Glucose mmol/L',
     '''
+
+    def assert_dexcom(self, df):
+        header =['GlucoseDisplayTime', 'GlucoseValue',	'MeterInternalTime', 'MeterDisplayTime', 'MeterValue']
+        if set(header).issubset(set(df.columns)):
+            # Set that it's usable
+            self.usable = True # might not be
+            # Set device name
+            self.device = 'Dexcom'
+            # set time interval to 15mins
+            self.interval = 5
+            # Set ID if it's not empty
+            '''if pd.notnull(df.iloc[1,0]):
+                self.id = df.iloc[1,0]'''
+            return True
+        else:
+            return False
+
+    def convert_dexcom(self, df):
+        # Drop top rows
+        #df = df.iloc[2:]
+        # Set first row as column headers
+        #df.columns = df.iloc[0]
+        #df.drop(index=[2], inplace=True)
+        df.reset_index(inplace=True, drop=True)
+        # Keep important columns
+        df = df.loc[:,('GlucoseDisplayTime', 'GlucoseValue')]
+        # Rename cols
+        df.columns = ['time', 'glc']
+        self.data = df
+
     def autoprocess(self, df):
         self.device = 'Unknown'
 
