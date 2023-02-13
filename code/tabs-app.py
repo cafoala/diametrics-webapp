@@ -38,29 +38,73 @@ app.layout = layout.create_tabs_layout()
 
 
 @app.callback(Output('card-tabs', 'active_tab'),
-    Input('preprocess-button', 'n_clicks'),
-    Input('analysis-options-button', 'n_clicks'),
-    Input('calculate-metrics', 'n_clicks'),
+    Input('data-overview-back-button', 'n_clicks'), # upload data
+    Input('upload-next-button', 'n_clicks'), # data overview
+    Input('analysis-options-back-button', 'n_clicks'), # data overview
+    Input('data-overview-next-button', 'n_clicks'), # analysis options
+    Input('standard-metrics-back-button', 'n_clicks'), # analysis options
+    Input('analysis-options-next-button', 'n_clicks'), # standard metrics
+    Input('indiv-vis-back-button', 'n_clicks'), # std metrics
+    Input('standard-metrics-next-button', 'n_clicks'), # indiv vis
+    Input('poi-back-button', 'n_clicks'), # indiv vis
+    Input('indiv-vis-next-button', 'n_clicks'), # poi
     prevent_initial_call=True)
-def switch_tabs(n1, n2, n3):
+def switch_tabs(n1, n2, n3, n4, n5, n6, n7, n8, n9, n10):
     triggered_id = ctx.triggered_id
-    if triggered_id=='preprocess-button':
-        if n1 is None:
-            raise PreventUpdate
-        return 'data-tab'
-    elif triggered_id == 'analysis-options-button':
+    if triggered_id=='data-overview-back-button':
+        return 'upload-tab'
+    if (triggered_id=='upload-next-button') or (triggered_id == 'analysis-options-back-button'):
         if n2 is None:
-            raise PreventUpdate
+           raise PreventUpdate
+        return 'data-tab'
+    elif (triggered_id == 'data-overview-next-button') or (triggered_id == 'standard-metrics-back-button'):
+        #if n2 is None:
+         #   raise PreventUpdate
         return 'other-metrics-tab'
-    elif triggered_id == 'calculate-metrics':
-        if n3 is None:
-            raise PreventUpdate
+    elif (triggered_id == 'analysis-options-next-button') or (triggered_id == 'indiv-vis-back-button'):
+        #if n3 is None:
+         #   raise PreventUpdate
         return 'metrics-tab'
+    elif (triggered_id == 'standard-metrics-next-button') or (triggered_id == 'poi-back-button'):
+        #if n4 is None:
+        #    raise PreventUpdate
+        return 'indiv-vis'
+    elif triggered_id == 'indiv-vis-next-button':
+        #if n4 is None:
+         #   raise PreventUpdate
+        return 'external-tab'
+
+# Disable once files uploaded
+@app.callback(Output('data-tab', 'disabled'),
+        Output('upload-next-button', 'disabled'),
+        Input('filelist', 'children'),
+        prevent_initial_call=True)
+def show_metrics_tab(children):
+    return False, False
+
+# Undisable when data overview has loaded 
+@app.callback(Output('other-metrics-tab', 'disabled'),
+        Output('data-overview-next-button', 'disabled'),
+        Input('data-tbl-div', 'children'),
+        prevent_initial_call=True)
+def show_metrics_tab(children):
+    return False, False
+
+# Undisable when metrics have loaded
+@app.callback(Output('indiv-vis', 'disabled'),
+        Output('external-tab', 'disabled'),
+        Output('standard-metrics-next-button', 'disabled'),
+        Input('test-table', 'children'),
+        prevent_initial_call=True)
+def show_metrics_tab(children):
+    return False, False, False
 
 
-for i in [['data-tab', 'preprocess-button'],['other-metrics-tab', 'analysis-options-button'], 
-                ['metrics-tab', 'calculate-metrics'], ['indiv-vis', 'calculate-metrics'],
-                ['external-tab', 'calculate-metrics']]:
+
+
+for i in [#['data-tab', 'upload-next-button'],#['other-metrics-tab', 'data-overview-next-button'], 
+                ['metrics-tab', 'analysis-options-next-button']]:#, ['indiv-vis', 'analysis-options-next-button'],
+                #['external-tab', 'analysis-options-next-button']]:
     @app.callback(Output(i[0], 'disabled'),
                 Input(i[1], 'n_clicks'),
                 prevent_initial_call=True)
@@ -87,7 +131,7 @@ def list_files(list_of_contents, list_of_names):
 ## DATA TABLE ##                
 @app.callback([Output('raw-data-store', 'data'),
     Output('data-tbl-div', 'children')],
-    Input('preprocess-button', 'n_clicks'),
+    Input('upload-next-button', 'n_clicks'),
     State('upload-data', 'last_modified'),
     State('upload-data', 'contents'),
     State('upload-data', 'filename'),
@@ -165,7 +209,7 @@ for id in all_sliders:
 
 
 @app.callback(Output('tir-store', 'data'),
-        Input('calculate-metrics', 'n_clicks'),
+        Input('analysis-options-next-button', 'n_clicks'),
         State('tir-sliders', 'children')
         )
 def update_store(clicks, children):
@@ -202,7 +246,7 @@ def display_day_time(day_start, day_end, night_start, night_end):
         State('lv2-hyper-slider', 'value'),
         State('short-events-mins', 'value'),
         State('prolonged-events-mins', 'value'),
-        State('calculate-metrics', 'n_clicks'),
+        State('analysis-options-next-button', 'n_clicks'),
         State('raw-data-store', 'data'),
         State('start-day-time', 'value'),
         State('end-day-time', 'value'),

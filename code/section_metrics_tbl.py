@@ -49,8 +49,9 @@ def get_metrics_layout():
 
         html.Div(id='asterix-day-time', style={'textAlign': 'right'}),
         dbc.Row([
-                dbc.Col(dbc.Spinner(spinner_style={"width": "3rem", "height": "3rem"}), id='test-table'),
-        ]),
+                dbc.Col(dbc.Spinner(spinner_style={"width": "3rem", "height": "3rem"}), 
+                 id='test-table'),
+        ], style={'textAlign': 'center'}),
     ])
     return metrics_layout
 

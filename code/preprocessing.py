@@ -18,7 +18,6 @@ def preprocess_df(df, filename):
     # ?DOUBLE CHECK THESE VALUES?
     df.replace({'High': 22.2, 'Low': 2.2, 'HI':22.2, 'LO':2.2, 'hi':22.2, 'lo':2.2}, inplace=True)
     df_transformed = transformData.transformData(df)
-    print(df_transformed.data.head())
     if df_transformed.data.empty:
         df_transformed.usable = False
 
@@ -54,12 +53,10 @@ def preprocess_df(df, filename):
             return data_dictionary
         except Exception as ex:
             # log that there is a non-dt item in the col
-            print(ex)
             data_dictionary = {'Usable': False, 'Filename': filename,
                 'ID': 'N/A', 'Start DateTime': 'N/A', 'End DateTime': 'N/A',
                 'Days': 'N/A', 'Data Sufficiency (%)':'N/A'}
             return data_dictionary
-
     else:
         # Log the errors?
         data_dictionary = {'Usable': False, 'Filename': filename,

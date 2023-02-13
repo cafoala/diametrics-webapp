@@ -130,46 +130,102 @@ content = html.Div([
     #html.H1(['WebApp'], style={'textAlign':'center'}),
     #dbc.Card(
      #   dbc.CardBody([
-            dbc.Tabs(
-                    [
-                        dbc.Tab(
-                            dbc.Card(dbc.CardBody(
-                                [section_upload_content.get_upload_layout()])), 
-                                label="1. Upload files", tab_id="upload-tab", 
-                                id='upload-tab', active_label_style={"color": "#FB79B3"}),
-                        dbc.Tab(
-                            dbc.Card(dbc.CardBody(
-                                [section_data_overview.get_datatable_layout()])), 
-                                label="2. Check data", tab_id="data-tab",id="data-tab", 
-                                disabled=True, active_label_style={"color": "#FB79B3"}),
-                        dbc.Tab(
-                            dbc.Card(dbc.CardBody(
-                                [section_analysis_options.get_analysis_options_layout()])), 
-                                label="3. Analysis options", tab_id="other-metrics-tab", 
-                                id='other-metrics-tab', disabled=True, 
-                                active_label_style={"color": "#FB79B3"}),
-                        dbc.Tab(
-                            dbc.Card(dbc.CardBody(
-                                [section_metrics_tbl.get_metrics_layout()])), 
-                                label="4. Standard metrics", tab_id="metrics-tab", 
-                                id='metrics-tab', disabled=True, 
-                                active_label_style={"color": "#FB79B3"}),
-                        dbc.Tab(
-                            dbc.Card(dbc.CardBody(
-                                section_individual_figs.create_indiv_layout())), 
-                                label="Visualisations", 
-                                tab_id="indiv-vis", id='indiv-vis', disabled=True, 
-                                active_label_style={"color": "#FB79B3"}),
-                        dbc.Tab(
-                            dbc.Card(dbc.CardBody(
-                                section_external_factors.create_period_of_interest())),
-                                label="Advanced options", 
-                                tab_id="external-tab", id='external-tab', 
-                                disabled=True, active_label_style={"color": "#FB79B3"}),
-                    ],
-                    id="card-tabs",
-                    active_tab="upload-tab",
-            )
+    dbc.Tabs(
+            [
+                dbc.Tab(
+                    [dbc.Card(dbc.CardBody(
+                        [section_upload_content.get_upload_layout()]),
+                        style={'height':'75vh'},), #'overflowY': 'scroll', 
+                        dbc.Row([
+                            dbc.Col([                
+                                dbc.Button('Next', id='upload-next-button', color='secondary', disabled=True)   
+                            ], style={'text-align': 'right'})
+                        ])],
+                        label="1. Upload files", tab_id="upload-tab",
+                        id='upload-tab', active_label_style={"color": "#FB79B3"}),
+                dbc.Tab(
+                    [dbc.Card(dbc.CardBody(
+                        [section_data_overview.get_datatable_layout()]),
+                        style={'height':'75vh'}), #'overflowY': 'scroll',
+                    dbc.Row([
+                        dbc.Col([                
+                            dbc.Button('Back', id='data-overview-back-button', color='secondary')
+                        ]),
+                        dbc.Col([                
+                            dbc.Button('Next', id='data-overview-next-button', color='secondary', disabled=True)   
+
+                        ], style={'text-align': 'right'})
+                    ])], 
+                        label="2. Check data", tab_id="data-tab",id="data-tab", 
+                        disabled=True, active_label_style={"color": "#FB79B3"}),
+                dbc.Tab(
+                    [dbc.Card(dbc.CardBody(
+                        [section_analysis_options.get_analysis_options_layout()]),
+                        style={'height':'75vh','overflowY': 'scroll'}),
+                    dbc.Row([
+                        dbc.Col([                
+                            #dbc.Button('Back', id='calculate-metrics-back-button', color='secondary')   
+                            dbc.Button('Back', id='analysis-options-back-button', color='secondary')   
+
+                        ]),
+                        dbc.Col([                
+                            #dbc.Button('Next', id='calculate-metrics', color='secondary')  
+                            dbc.Button('Next', id='analysis-options-next-button', color='secondary')   
+                        ], style={'text-align': 'right'})
+                    ])],
+                        label="3. Analysis options", tab_id="other-metrics-tab", 
+                        id='other-metrics-tab', disabled=True, 
+                        active_label_style={"color": "#FB79B3"}),
+                dbc.Tab(
+                    [dbc.Card(dbc.CardBody(
+                        [section_metrics_tbl.get_metrics_layout()]),
+                        style={'overflowY': 'scroll', 'height':'75vh'}),
+                    dbc.Row([
+                        dbc.Col([                
+                            dbc.Button('Back', id='standard-metrics-back-button', color='secondary')   
+                        ]),
+                        dbc.Col([                
+                            dbc.Button('Next', id='standard-metrics-next-button', color='secondary', disabled=True)   
+                        ], style={'text-align': 'right'})
+                    ])],
+                        label="4. Standard metrics", tab_id="metrics-tab", 
+                        id='metrics-tab', disabled=True, 
+                        active_label_style={"color": "#FB79B3"}),
+                dbc.Tab(
+                    [dbc.Card(dbc.CardBody(
+                        section_individual_figs.create_indiv_layout()),
+                        style={'overflowY': 'scroll', 'height':'75vh'}),
+                    dbc.Row([
+                        dbc.Col([                
+                            dbc.Button('Back', id='indiv-vis-back-button', color='secondary')   
+                        ]),
+                        dbc.Col([                
+                            dbc.Button('Next', id='indiv-vis-next-button', color='secondary')   
+                        ], style={'text-align': 'right'})
+                    ])],
+                        label="Visualisations", 
+                        tab_id="indiv-vis", id='indiv-vis', disabled=True, 
+                        active_label_style={"color": "#FB79B3"}),
+                dbc.Tab(
+                    [dbc.Card(
+                        dbc.CardBody(
+                            section_external_factors.create_period_of_interest()),
+                            style={'overflowY': 'scroll', 'height':'75vh'}),
+                    dbc.Row([
+                        dbc.Col([                
+                            dbc.Button('Back', id='poi-back-button', color='secondary')   
+                        ]),
+                    ])],
+                        label="Advanced options", 
+                        tab_id="external-tab", id='external-tab',
+                        disabled=True, active_label_style={"color": "#FB79B3"}
+                ),
+
+            ],
+            id="card-tabs",
+            active_tab="upload-tab",
+    ),
+    
         #])
    # ),
 ], style=CONTENT_STYLE)
@@ -231,6 +287,7 @@ def create_layout():
             dbc.Row([
                 dbc.Col(id='individual-figs'),
             ]),
+            
         ])
     )
 ])    

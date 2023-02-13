@@ -38,15 +38,7 @@ def get_datatable_layout():
                 html.H2('Data overview'),
                 html.Div(dbc.Spinner(spinner_style={"width": "3rem", "height": "3rem"}), id='data-tbl-div'),
                 html.P('The table shows your preprocessed data. Please make sure to check that the data is \
-                        what you want for your files. You can edit the IDs'),
-                dbc.Row([
-                    dbc.Col([                
-                        dbc.Button('Back', id='analysis-options-back-button', color='secondary')   
-                    ]),
-                    dbc.Col([                
-                        dbc.Button('Next', id='analysis-options-button', color='secondary')   
-                    ], style={'text-align': 'right'})
-                ])
+                        what you want for your files. You can edit the IDs'),      
             ])
 
 def create_data_table(children):
