@@ -21,6 +21,7 @@ import section_overview_figs
 import section_individual_figs
 import section_external_factors
 import dash_uploader as du
+import datetime
 from dash_extensions.enrich import Output, DashProxy, Input, MultiplexerTransform
 logging.basicConfig(level=logging.DEBUG)
 
@@ -148,6 +149,7 @@ def preprocess_data(n_clicks, list_of_dates, list_of_contents, list_of_names):
 
 @app.callback(
     Output('data-tbl', 'data'),
+    Output('data-tbl', 'style_data_conditional'),
     Input('data-tbl', 'data_timestamp'),
     State('data-tbl', 'data'),
     State('raw-data-store', 'data'),
@@ -156,18 +158,65 @@ def preprocess_data(n_clicks, list_of_dates, list_of_contents, list_of_names):
 def update_columns(timestamp, rows, raw_data):
     for row in rows:
         # Calculate number of days
-        print(row)
         try:
-            row['Days'] = str(pd.to_datetime(row['End DateTime']) - pd.to_datetime(row['Start DateTime']))
+            days = pd.to_datetime(row['End DateTime']) - pd.to_datetime(row['Start DateTime'])
+            if days <= datetime.timedelta(minutes=1):
+                days ='N/A'
         except:
-            row['Days'] = 'N/A'
+            days = 'N/A'
+        row['Days'] = str(days)
+        
         # Calculate data sufficiency
-        #section_data_overview.calculate_data_sufficiency(row['Filename'], row['Start DateTime'], row['End DateTime'], raw_data)
-        try:
-            row['Data Sufficiency (%)'] = section_data_overview.calculate_data_sufficiency(row['Filename'], row['Start DateTime'], row['End DateTime'], raw_data)
-        except: 
-            row['Data Sufficiency (%)'] = 'N/A'
-    return rows
+        if days != 'N/A':
+            print(days)
+            try:
+                data_suff = section_data_overview.calculate_data_sufficiency(row['Filename'], 
+                                                                        row['Start DateTime'], 
+                                                                        row['End DateTime'], 
+                                                                        raw_data)
+            except: 
+                data_suff = 'N/A'
+        else:
+            data_suff = 'N/A'
+        row['Data Sufficiency (%)'] = data_suff
+    df = pd.DataFrame(rows)
+    days_series = df['Days'].apply(lambda x: x.split(' ')[0]).replace({'N/A':0}).astype(int)
+    index = days_series[days_series<14].index
+    style_cell = {
+                            'whiteSpace': 'normal',
+                            'font-family':'sans-serif',
+                            'textAlign':'center',
+                            'backgroundColor':'white'
+                },
+    style_conds = [
+                        
+                        {
+                            'if': {
+                                'column_id': 'Days',
+                                'row_index': index,
+                            },
+                            'backgroundColor': '#e7b2a1',
+                            #'color': 'white'
+                        },
+
+                        {
+                            'if': {
+                                'column_id': 'Data Sufficiency (%)',
+                                'filter_query': '{Data Sufficiency (%)} < 80'
+                            },
+                            'backgroundColor': '#e7b2a1',
+                            #'color': 'white',
+                        },
+                        {
+                            'if': {
+                                'filter_query': '{{Usable}} = {}'.format('No'),
+                            },
+                            'column_id': 'Usable',
+                            'backgroundColor': '#B84343',
+                            'color': 'white'
+                        },
+                    ]    
+    return rows, style_conds
 
 @app.callback(Output('processed-data-store', 'data'),
         Input('data-tbl', 'data_timestamp'),

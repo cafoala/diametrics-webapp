@@ -21,7 +21,7 @@ def create_period_of_interest():
         dbc.Card(dbc.CardBody([
             html.H4('1.Upload external data'),
             html.P('For this to work you\'ll need to upload a file that includes the ID of the participant, the start and end times of the period \
-            of interest and an optional label.'),
+                of interest and an optional label.'),
             dcc.Upload(dbc.Button('Upload file', color="secondary"),
                             multiple=False, id='upload-poi-data',),
             html.Div(id='poi-datafile'),
@@ -271,13 +271,13 @@ def create_data_table(data):
                 ],
                 style_cell={
                             'whiteSpace': 'normal',
+                            'font-family':'sans-serif'
                 },
                 style_data={
                             'whiteSpace': 'normal',
                             'height': 'auto',
                             'width':'200px'
                         },
-                
                 style_table={
                     'overflowX': 'auto',
                     'height': 300,
@@ -292,7 +292,6 @@ def create_data_table(data):
                 tooltip_header={
                         'LBGI':'Low blood glucose index',
                         'HBGI': 'High blood glucose index'
-
                     },
 )
 

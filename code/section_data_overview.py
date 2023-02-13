@@ -5,6 +5,7 @@ import pandas as pd
 import io
 import preprocessing
 import metrics_helper
+from datetime import timedelta
 
 def parse_contents(contents, filename, date):
     content_type, content_string = contents.split(',')
@@ -44,10 +45,13 @@ def get_datatable_layout():
 
 def create_data_table(children):
     data_details = pd.DataFrame.from_dict(children)
-    print(data_details)
     data_details = data_details[['Filename', 'Usable', 'ID', 'Start DateTime', 'End DateTime', 'Days', 'Data Sufficiency (%)']] #'Device', 'Interval', 'Units',
-    #data_details.columns = ['Filename', 'Usable', 'ID', 'Start DateTime', 'End DateTime', 'Days', 'Data Sufficiency (%)'] #'Interval (mins)', 'Units',
     data_details['Usable'] = data_details['Usable'].replace({True:'Yes', False:'No'})
+    print('Days')
+
+    days = data_details['Days'].apply(lambda x: x.split(' ')[0]).replace({'N/A':0}).astype(int)
+    index = days[days<14].index
+
     return html.Div([
                 #html.H2('Data details'),
 
@@ -67,11 +71,44 @@ def create_data_table(children):
                             },
                     style_cell={
                             'whiteSpace': 'normal',
+                            'font-family':'sans-serif',
+                            'textAlign':'center',
+                            'backgroundColor':'white'
                 },
                     style_table={
                         'overflowX': 'auto',
                         'height': 250,
                         },
+                    style_data_conditional=[
+                        {
+                            'if': {
+                                'filter_query': '{{Usable}} = {}'.format('No'),
+                            },
+                            'backgroundColor': '#B84343',
+                            'color': 'white'
+                        },
+                        {
+                            'if': {
+                                'column_id': 'Days',
+                                'row_index': index,
+                            },
+                            'backgroundColor': '#e7b2a1',
+                            #'color': 'white'
+                        },
+                        {
+                            'if': {
+                                'column_id': 'Data Sufficiency (%)',
+                                'filter_query': '{Data Sufficiency (%)} < 80'
+                            },
+                            'backgroundColor': '#e7b2a1',
+                            #'color': 'white',
+                        },
+                    ],
+                    style_header={
+                        'backgroundColor': 'rgb(210, 210, 210)',
+                        'color': 'black',
+                        #'fontWeight': 'bold'
+                    },
                     #editable=True,              # allow editing of data inside all cells
                     #filter_action="native",     # allow filtering of data by user ('native') or not ('none')
                     #sort_action="native",       # enables data to be sorted per-column by user or not ('none')
