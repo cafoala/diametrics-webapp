@@ -201,7 +201,9 @@ def create_metrics_table(df):
                 ),
             ]),
             dbc.Row([
-                dbc.Col(id='bar-graph'),
+                dbc.Col(id='bar-graph')
+            ]),
+            dbc.Row([
                 dbc.Col(id='box-plot')
             ])
         ])

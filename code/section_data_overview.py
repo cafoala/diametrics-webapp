@@ -36,9 +36,10 @@ def parse_contents(contents, filename, date):
 def get_datatable_layout():
     return html.Div([
                 html.H2('Data overview'),
-                html.Div(dbc.Spinner(spinner_style={"width": "3rem", "height": "3rem"}), id='data-tbl-div'),
                 html.P('The table shows your preprocessed data. Please make sure to check that the data is \
-                        what you want for your files. You can edit the IDs'),      
+                        what you want for your files. You can edit the IDs'), 
+                html.Div(dbc.Spinner(spinner_style={"width": "3rem", "height": "3rem"}),
+                            style={'textAlign':'center'}, id='data-tbl-div'),
             ])
 
 def create_data_table(children):

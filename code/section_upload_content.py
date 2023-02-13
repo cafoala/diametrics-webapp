@@ -40,5 +40,5 @@ def create_file_list(list_of_names):
                     'margin': '10px',
                     'justify': "center",}),
             html.P('If you\'re happy with these files, click next to process your data'),
-            dbc.Row(dbc.Col([dbc.Button('Next', id='preprocess-button', color='secondary')], style={'text-align': 'right'})),
+            #dbc.Row(dbc.Col([dbc.Button('Next', id='preprocess-button', color='secondary')], style={'text-align': 'right'})),
             ])

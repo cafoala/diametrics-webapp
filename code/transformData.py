@@ -24,7 +24,6 @@ class transformData:
             # can we also store feedback of why it didn't work?
             self.autoprocess(df)
             # 
-        print(self.device)   
     
     def assert_flash_libre(self, df):
         #check if cols align
