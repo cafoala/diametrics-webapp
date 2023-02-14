@@ -14,37 +14,40 @@ def get_analysis_options_layout():
                     dbc.Col([
                         dbc.Card([
                             html.H5('Day time'),
-                            html.Div(
-                                dmc.Group(
-                                    spacing=50,
-                                    children=[
-                                        dmc.TimeInput(
-                                            id='start-day-time', label="Start", format="24", value=datetime.datetime(year=1, month=1, day=1, hour=6, minute=0)
-                                        ),
-                                        dmc.TimeInput(
-                                            id='end-day-time', label="End", format="24", value=datetime.datetime(year=1, month=1, day=1, hour=0, minute=0)
-                                        ),
-                                    ],
-                                ), style={'textAlign': 'center'}),
+                            dbc.Row([
+                                dbc.Col(width=3),
+                                dbc.Col([html.Div(
+                                    dmc.Group(
+                                        spacing=50,
+                                        children=[
+                                            dmc.TimeInput(
+                                                id='start-day-time', label="Start", format="24", value=datetime.datetime(year=1, month=1, day=1, hour=6, minute=0)
+                                            ),
+                                            dmc.TimeInput(
+                                                id='end-day-time', label="End", format="24", value=datetime.datetime(year=1, month=1, day=1, hour=0, minute=0)
+                                            ),
+                                        ],
+                                    ), style={'textAlign': 'center'})])]),
                         ]),
-                    ],style={'text-align': 'center'}),
+                    ], style={'text-align': 'center'}),
 
                     dbc.Col([
                         dbc.Card([
-                            html.H5('Night time', style={'textAlign': 'center'}),
-                            #create_range_slider(),
-                            html.Div(
-                                dmc.Group(
-                                    spacing=50,
-                                    children=[
-                                        dmc.TimeInput(
-                                            id='start-night-time', label="Start", format="24", value=datetime.datetime(year=1, month=1, day=1, hour=0, minute=0)
-                                        ),
-                                        dmc.TimeInput(
-                                            id='end-night-time', label="End", format="24", value=datetime.datetime(year=1, month=1, day=1, hour=6, minute=0)
-                                        ),
-                                    ]
-                                ), style={'textAlign': 'center'})
+                            html.H5('Night time', style={'textAlign': 'center'}), 
+                            dbc.Row([
+                                dbc.Col(width=3),
+                                dbc.Col(html.Div(
+                                    dmc.Group(
+                                        spacing=50,
+                                        children=[
+                                            dmc.TimeInput(
+                                                id='start-night-time', label="Start", format="24", value=datetime.datetime(year=1, month=1, day=1, hour=0, minute=0)
+                                            ),
+                                            dmc.TimeInput(
+                                                id='end-night-time', label="End", format="24", value=datetime.datetime(year=1, month=1, day=1, hour=6, minute=0)
+                                            ),
+                                        ]
+                                    ), style={'textAlign': 'center'}))])
                         ])
                     ]),
                 ])
@@ -153,8 +156,15 @@ def get_analysis_options_layout():
         dbc.Row([
                 dbc.Col(html.Div([
                     html.H2('Select your analysis options'),
-                    html.P('If you want to adjust the default analysis option do so by playing around with the buttons below'),
-                    ]
+                    dbc.Alert(
+                    [
+                            html.I(className="bi bi-info-circle-fill me-2"),
+                            'If you want to adjust the default analysis option do so by playing around with the buttons below',
+                    ],
+                    color="info",
+                    className="d-flex align-items-center",
+                    ),
+                        ]
                 #style={'textAlign': 'left'}
                 )),
             ]),
@@ -174,7 +184,7 @@ def create_range_slider(n_clicks, children, units):
     if units=='mmol/L':
         
         new_slider = html.Div([html.H6(id=heading_id),
-                    dcc.RangeSlider(2.2, 22.2, step=0.1, value=[3.9, 10],
+                    dcc.RangeSlider(2.2, 22.2, step=0.1, value=[3.9, 7.8],
                                 tooltip={"placement": "bottom", "always_visible": True},
                                 marks={
                                         2.2:{'label': 'Min.'},

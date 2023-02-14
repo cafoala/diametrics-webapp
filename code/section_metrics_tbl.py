@@ -171,7 +171,7 @@ def create_metrics_table(df):
                 
                 style_table={
                     'overflowX': 'auto',
-                    'height': 300,
+                    'maxHeight': 300,
                     },
                 #editable=True,              # allow editing of data inside all cells                        
                 filter_action="native",     # allow filtering of data by user ('native') or not ('none')

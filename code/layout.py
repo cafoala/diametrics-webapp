@@ -89,7 +89,7 @@ SIDEBAR_STYLE = {
 CONTENT_STYLE = {
     "margin-left": "16rem",
     "margin-right": "2rem",
-    "padding": "2rem 1rem",
+    "padding": "1.5rem 1rem",
 }
 
 sidebar = html.Div(
@@ -182,10 +182,12 @@ content = html.Div([
                         style={'overflowY': 'scroll', 'height':'75vh'}),
                     dbc.Row([
                         dbc.Col([                
-                            dbc.Button('Back', id='standard-metrics-back-button', color='secondary')   
+                            dbc.Button('Back', id='standard-metrics-back-button', 
+                            color='secondary')   
                         ]),
                         dbc.Col([                
-                            dbc.Button('Next', id='standard-metrics-next-button', color='secondary', disabled=True)   
+                            dbc.Button('Next', id='standard-metrics-next-button',
+                            color='secondary', disabled=True)   
                         ], style={'text-align': 'right'})
                     ])],
                         label="4. Standard metrics", tab_id="metrics-tab", 
@@ -216,7 +218,7 @@ content = html.Div([
                             dbc.Button('Back', id='poi-back-button', color='secondary')   
                         ]),
                     ])],
-                        label="Advanced options", 
+                        label="Advanced analysis", 
                         tab_id="external-tab", id='external-tab',
                         disabled=True, active_label_style={"color": "#FB79B3"}
                 ),

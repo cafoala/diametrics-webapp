@@ -25,7 +25,7 @@ import datetime
 from dash_extensions.enrich import Output, DashProxy, Input, MultiplexerTransform
 logging.basicConfig(level=logging.DEBUG)
 
-external_stylesheets = [dbc.themes.BOOTSTRAP]
+external_stylesheets = [dbc.themes.BOOTSTRAP, dbc.icons.BOOTSTRAP]
 colors = {
     'background': '#111111',
     'text': '#7FDBFF'
@@ -75,13 +75,21 @@ def switch_tabs(n1, n2, n3, n4, n5, n6, n7, n8, n9, n10):
          #   raise PreventUpdate
         return 'external-tab'
 
-# Disable once files uploaded
-@app.callback(Output('data-tab', 'disabled'),
-        Output('upload-next-button', 'disabled'),
+# Disable button files uploaded
+@app.callback(Output('upload-next-button', 'disabled'),
         Input('filelist', 'children'),
         prevent_initial_call=True)
 def show_metrics_tab(children):
-    return False, False
+    return False
+
+# Disable tab when button is clicked
+@app.callback(Output('data-tab', 'disabled'),
+        Input('upload-next-button', 'n_clicks'),
+        prevent_initial_call=True)
+def show_metrics_tab(n_clicks):
+    if n_clicks is None:
+        raise PreventUpdate
+    return False
 
 # Undisable when data overview has loaded 
 @app.callback(Output('other-metrics-tab', 'disabled'),
@@ -168,7 +176,6 @@ def update_columns(timestamp, rows, raw_data):
         
         # Calculate data sufficiency
         if days != 'N/A':
-            print(days)
             try:
                 data_suff = section_data_overview.calculate_data_sufficiency(row['Filename'], 
                                                                         row['Start DateTime'], 
@@ -179,43 +186,7 @@ def update_columns(timestamp, rows, raw_data):
         else:
             data_suff = 'N/A'
         row['Data Sufficiency (%)'] = data_suff
-    df = pd.DataFrame(rows)
-    days_series = df['Days'].apply(lambda x: x.split(' ')[0]).replace({'N/A':0}).astype(int)
-    index = days_series[days_series<14].index
-    style_cell = {
-                            'whiteSpace': 'normal',
-                            'font-family':'sans-serif',
-                            'textAlign':'center',
-                            'backgroundColor':'white'
-                },
-    style_conds = [
-                        
-                        {
-                            'if': {
-                                'column_id': 'Days',
-                                'row_index': index,
-                            },
-                            'backgroundColor': '#e7b2a1',
-                            #'color': 'white'
-                        },
-
-                        {
-                            'if': {
-                                'column_id': 'Data Sufficiency (%)',
-                                'filter_query': '{Data Sufficiency (%)} < 80'
-                            },
-                            'backgroundColor': '#e7b2a1',
-                            #'color': 'white',
-                        },
-                        {
-                            'if': {
-                                'filter_query': '{{Usable}} = {}'.format('No'),
-                            },
-                            'column_id': 'Usable',
-                            'backgroundColor': '#B84343',
-                            'color': 'white'
-                        },
-                    ]    
+    style_conds = section_data_overview.create_conditional_formatting(rows)
     return rows, style_conds
 
 @app.callback(Output('processed-data-store', 'data'),

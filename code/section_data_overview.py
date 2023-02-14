@@ -7,6 +7,21 @@ import preprocessing
 import metrics_helper
 from datetime import timedelta
 
+def get_datatable_layout():
+    return html.Div([
+                html.H2('Data overview'),
+                dbc.Alert(
+                [
+                        html.I(className="bi bi-info-circle-fill me-2"),
+                        'The table below will show an overview of your data. You can edit the IDs and the start and end time',
+                ],
+                color="info",
+                className="d-flex align-items-center",
+                ),
+                html.Div(dbc.Spinner(spinner_style={"width": "3rem", "height": "3rem"}),
+                            style={'textAlign':'center'}, id='data-tbl-div'),
+            ])
+
 def parse_contents(contents, filename, date):
     content_type, content_string = contents.split(',')
 
@@ -34,23 +49,13 @@ def parse_contents(contents, filename, date):
         return data_dictionary
     return preprocessing.preprocess_df(df, filename)
 
-def get_datatable_layout():
-    return html.Div([
-                html.H2('Data overview'),
-                html.P('The table shows your preprocessed data. Please make sure to check that the data is \
-                        what you want for your files. You can edit the IDs'), 
-                html.Div(dbc.Spinner(spinner_style={"width": "3rem", "height": "3rem"}),
-                            style={'textAlign':'center'}, id='data-tbl-div'),
-            ])
-
 def create_data_table(children):
     data_details = pd.DataFrame.from_dict(children)
     data_details = data_details[['Filename', 'Usable', 'ID', 'Start DateTime', 'End DateTime', 'Days', 'Data Sufficiency (%)']] #'Device', 'Interval', 'Units',
     data_details['Usable'] = data_details['Usable'].replace({True:'Yes', False:'No'})
-    print('Days')
 
-    days = data_details['Days'].apply(lambda x: x.split(' ')[0]).replace({'N/A':0}).astype(int)
-    index = days[days<14].index
+    #days = data_details['Days'].apply(lambda x: x.split(' ')[0]).replace({'N/A':0}).astype(int)
+    #index = days[days<14].index
 
     return html.Div([
                 #html.H2('Data details'),
@@ -74,36 +79,12 @@ def create_data_table(children):
                             'font-family':'sans-serif',
                             'textAlign':'center',
                             'backgroundColor':'white'
-                },
+                    },
                     style_table={
                         'overflowX': 'auto',
-                        'height': 250,
+                        'maxHeight': '45vh',
                         },
-                    style_data_conditional=[
-                        {
-                            'if': {
-                                'filter_query': '{{Usable}} = {}'.format('No'),
-                            },
-                            'backgroundColor': '#B84343',
-                            'color': 'white'
-                        },
-                        {
-                            'if': {
-                                'column_id': 'Days',
-                                'row_index': index,
-                            },
-                            'backgroundColor': '#e7b2a1',
-                            #'color': 'white'
-                        },
-                        {
-                            'if': {
-                                'column_id': 'Data Sufficiency (%)',
-                                'filter_query': '{Data Sufficiency (%)} < 80'
-                            },
-                            'backgroundColor': '#e7b2a1',
-                            #'color': 'white',
-                        },
-                    ],
+                    
                     style_header={
                         'backgroundColor': 'rgb(210, 210, 210)',
                         'color': 'black',
@@ -116,12 +97,13 @@ def create_data_table(children):
                     #export_headers="display",
                     #fixed_rows={'headers':True},
                     tooltip_header={
-                        'Data Sufficiency (%)': 'The percentage of available CGM readings divided by the number of readings that should be present',
+                        'Data Sufficiency (%)': 'The percentage of readings present. Highlighted orange if less than 70% (see FAQs)',
                         'Usable': 'Whether or not the CGM data can be used by the program (True/False)',
                         'Units': 'mmol/L or mg/dL',
                         'ID': 'How you will identify your CGM files, it comes from the filename',
                         'Start DateTime': 'The first reading from your CGM data (YYYY-MM-DD HH:MM:SS)',
-                        'End DateTime': 'The last reading from your CGM data (YYYY-MM-DD HH:MM:SS)'
+                        'End DateTime': 'The last reading from your CGM data (YYYY-MM-DD HH:MM:SS)',
+                        'Days': 'Number of days of data for each file. Will be highlighted orange if less than 14 days (see FAQs)'
                     },
                     ), 
             ])
@@ -156,3 +138,34 @@ def merge_glc_data(table_data, raw_data):
     results = results.to_dict('records')
     return results
 
+def create_conditional_formatting(rows):
+    df = pd.DataFrame(rows)
+    days_series = df['Days'].apply(lambda x: x.split(' ')[0]).replace({'N/A':0}).astype(int)
+    index = days_series[days_series<14].index
+    style_conds = [
+                        {
+                            'if': {
+                                'column_id': 'Days',
+                                'row_index': index,
+                            },
+                            'backgroundColor': 'rgb(253, 205, 172)',
+                        },
+
+                        {
+                            'if': {
+                                'column_id': 'Data Sufficiency (%)',
+                                'filter_query': '{Data Sufficiency (%)} < 70'
+                            },
+                            'backgroundColor': 'rgb(253, 205, 172)',
+                        },
+                        {
+                            'if': {
+                                'filter_query': '{{Usable}} = {}'.format('No'),
+                                'filter_query': '{{Days}} = {}'.format('N/A'),
+                            },
+                            'column_id': 'Usable',
+                            'backgroundColor': 'rgb(254, 217, 166)',
+                            #'color': 'white'
+                        },
+                    ]
+    return style_conds
