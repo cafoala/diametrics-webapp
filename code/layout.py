@@ -102,7 +102,7 @@ sidebar = html.Div(
         dbc.Nav(
             [
                 dbc.NavLink("Home", href="/", active="exact"),
-                dbc.NavLink("Dashboard", href="/page-1", active="exact"),
+                dbc.NavLink("Dashboard", href="/dashboard", active="exact"),
                 dbc.NavLink("Instructions", href="/page-2", active="exact"),
                 dbc.NavLink("About Us", href="/page-3", active="exact"),
                 dbc.NavLink("Contact", href="/contact", active="exact"),
@@ -230,66 +230,7 @@ content = html.Div([
     
         #])
    # ),
-], style=CONTENT_STYLE)
+])#, style=CONTENT_STYLE)
 
 def create_tabs_layout():
     return html.Div([dcc.Location(id="url"), sidebar, content])
-
-def create_layout():
-    return html.Div([
-    dcc.Store(storage_type='memory', id='raw-data-store'),
-    dcc.Store(storage_type='memory', id='poi-data-store'),
-    dcc.Store(storage_type='memory', id='metrics-store'),
-    dbc.Col(navbar),
-    dbc.Card(
-        dbc.CardBody([
-            dbc.Row([dbc.Col(dbc.Collapse(intro, id='intro-collapse', is_open=True)),
-            ]),
-            dbc.Card(
-                    [
-                        dbc.CardHeader(
-                            dbc.Tabs(
-                                [
-                                    dbc.Tab(label="1. Upload files", tab_id="tab-1"),
-                                    dbc.Tab(label="2. Check data", tab_id="tab-2", disabled=True),
-                                    dbc.Tab(label="3. Standard metrics", tab_id="tab-3", disabled=True),
-                                    dbc.Tab(label="Additional metrics", tab_id="tab-4", disabled=True),
-                                    dbc.Tab(label="Incorporating external factors", tab_id="tab-5", disabled=True),
-                                ],
-                                id="card-tabs",
-                                active_tab="tab-1",
-                            )
-                        ),
-                        dbc.CardBody(html.P(id="card-content", className="card-text")),
-                    ]
-                ),
-            dbc.Button("1. Upload files", color="primary", id="collapse-upload-button", n_clicks=0),
-            dbc.Row([
-                dbc.Col(
-                    dbc.Collapse(
-                        dbc.Card(upload_section, body=True),
-                        id="upload-section-collapse",
-                        is_open=True,
-                    )
-                ),
-            ]),
-            dbc.Row([
-                dbc.Col(id='data-tbl'),
-            ]),
-            dbc.Row([
-                dbc.Col(id='analysis-options'),
-            ]),
-
-            dbc.Row([
-                dbc.Col(id='metrics-tbl'),
-            ]),
-            dbc.Row([
-                dbc.Col(id='group-figs'),
-            ]),
-            dbc.Row([
-                dbc.Col(id='individual-figs'),
-            ]),
-            
-        ])
-    )
-])    

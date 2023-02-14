@@ -1,7 +1,7 @@
 import plotly.express as px
 import dash
 from dash.dependencies import Input, Output, State
-from dash import dcc, html, dash_table, ctx
+from dash import dcc, html, dash_table, ctx, callback
 import logging
 import os
 import pandas as pd
@@ -25,20 +25,22 @@ import datetime
 from dash_extensions.enrich import Output, DashProxy, Input, MultiplexerTransform
 logging.basicConfig(level=logging.DEBUG)
 
-external_stylesheets = [dbc.themes.BOOTSTRAP, dbc.icons.BOOTSTRAP]
+
+dash.register_page(__name__)
+'''external_stylesheets = [dbc.themes.BOOTSTRAP, dbc.icons.BOOTSTRAP]
 colors = {
     'background': '#111111',
     'text': '#7FDBFF'
 }
-#app = DashProxy(transforms=[MultiplexerTransform()])
+
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)#, suppress_callback_exceptions=True)
 app.config.suppress_callback_exceptions = True
-#du.configure_upload(app, r"C:/tmp/Uploads")
 
-app.layout = layout.create_tabs_layout()
+app.layout = layout.create_tabs_layout()'''
+layout = layout.create_tabs_layout()
 
 
-@app.callback(Output('card-tabs', 'active_tab'),
+@callback(Output('card-tabs', 'active_tab'),
     Input('data-overview-back-button', 'n_clicks'), # upload data
     Input('upload-next-button', 'n_clicks'), # data overview
     Input('analysis-options-back-button', 'n_clicks'), # data overview
@@ -76,14 +78,14 @@ def switch_tabs(n1, n2, n3, n4, n5, n6, n7, n8, n9, n10):
         return 'external-tab'
 
 # Disable button files uploaded
-@app.callback(Output('upload-next-button', 'disabled'),
+@callback(Output('upload-next-button', 'disabled'),
         Input('filelist', 'children'),
         prevent_initial_call=True)
 def show_metrics_tab(children):
     return False
 
 # Disable tab when button is clicked
-@app.callback(Output('data-tab', 'disabled'),
+@callback(Output('data-tab', 'disabled'),
         Input('upload-next-button', 'n_clicks'),
         prevent_initial_call=True)
 def show_metrics_tab(n_clicks):
@@ -92,7 +94,7 @@ def show_metrics_tab(n_clicks):
     return False
 
 # Undisable when data overview has loaded 
-@app.callback(Output('other-metrics-tab', 'disabled'),
+@callback(Output('other-metrics-tab', 'disabled'),
         Output('data-overview-next-button', 'disabled'),
         Input('data-tbl-div', 'children'),
         prevent_initial_call=True)
@@ -100,7 +102,7 @@ def show_metrics_tab(children):
     return False, False
 
 # Undisable when metrics have loaded
-@app.callback(Output('indiv-vis', 'disabled'),
+@callback(Output('indiv-vis', 'disabled'),
         Output('external-tab', 'disabled'),
         Output('standard-metrics-next-button', 'disabled'),
         Input('test-table', 'children'),
@@ -110,11 +112,10 @@ def show_metrics_tab(children):
 
 
 
-
 for i in [#['data-tab', 'upload-next-button'],#['other-metrics-tab', 'data-overview-next-button'], 
                 ['metrics-tab', 'analysis-options-next-button']]:#, ['indiv-vis', 'analysis-options-next-button'],
                 #['external-tab', 'analysis-options-next-button']]:
-    @app.callback(Output(i[0], 'disabled'),
+    @callback(Output(i[0], 'disabled'),
                 Input(i[1], 'n_clicks'),
                 prevent_initial_call=True)
     def show_next_tab(n_clicks):
@@ -127,7 +128,7 @@ for i in [#['data-tab', 'upload-next-button'],#['other-metrics-tab', 'data-overv
 
 ## FILELIST ## 
 # List the filenames
-@app.callback(Output('filelist', 'children'),
+@callback(Output('filelist', 'children'),
         Input('upload-data', 'contents'),
         State('upload-data', 'filename'),
     prevent_initial_call=True)
@@ -138,7 +139,7 @@ def list_files(list_of_contents, list_of_names):
         return file_list#, False
 
 ## DATA TABLE ##                
-@app.callback([Output('raw-data-store', 'data'),
+@callback([Output('raw-data-store', 'data'),
     Output('data-tbl-div', 'children')],
     Input('upload-next-button', 'n_clicks'),
     State('upload-data', 'last_modified'),
@@ -155,7 +156,7 @@ def preprocess_data(n_clicks, list_of_dates, list_of_contents, list_of_names):
     return (children, data_table)
 
 
-@app.callback(
+@callback(
     Output('data-tbl', 'data'),
     Output('data-tbl', 'style_data_conditional'),
     Input('data-tbl', 'data_timestamp'),
@@ -189,7 +190,7 @@ def update_columns(timestamp, rows, raw_data):
     style_conds = section_data_overview.create_conditional_formatting(rows)
     return rows, style_conds
 
-@app.callback(Output('processed-data-store', 'data'),
+@callback(Output('processed-data-store', 'data'),
         Input('data-tbl', 'data_timestamp'),
         State('data-tbl', 'data'),
         State('raw-data-store', 'data'),
@@ -198,29 +199,34 @@ def store_processed_data(time, table_data, raw_data):
     return section_data_overview.merge_glc_data(table_data, raw_data)
 
 ## ANALYSIS OPTIONS ##
-def analysis_options_callbacks(app):
-    @app.callback(Output('tir-sliders', 'children'),
-            Input('add-tir-slider', 'n_clicks'),
-            State('tir-sliders', 'children'),
-            State('unit-type-options', 'value'),
-            )
-    def create_range_slider(n_clicks, children, units):
-        if n_clicks is None:
-            raise PreventUpdate
-        return section_analysis_options.create_range_slider(n_clicks, children, units)
-    
+#def analysis_options_callbacks(app):
+@callback(Output('tir-sliders', 'children'),
+        Input('add-tir-slider', 'n_clicks'),
+        State('tir-sliders', 'children'),
+        State('unit-type-options', 'value'),
+        prevent_initial_call=True
+        )
+def create_range_slider(n_clicks, children, units):
+    if n_clicks is None:
+        raise PreventUpdate
+    return section_analysis_options.create_range_slider(n_clicks, children, units)
+
+#analysis_options_callbacks(app)
+
 all_sliders = ['tir-'+ str(i) for i in range(1, 10)]
 
 for id in all_sliders:
-    @app.callback(Output((id+'-heading'), 'children'),
+    @callback(Output((id+'-heading'), 'children'),
         Input((id+'-slider'), 'drag_value'),
+        prevent_initial_call=True
         )
     def print_heading(drag):
         drag_heading =f'Time in range {drag[0]}-{drag[1]} mmol/L'
         return drag_heading
 
-    @app.callback(Output(id, 'children'),
+    @callback(Output(id, 'children'),
             Input((id+'-button'), 'n_clicks'),
+            prevent_initial_call=True
             )
     def remove_tir(n_clicks_remove):
         if n_clicks_remove is None:
@@ -228,9 +234,10 @@ for id in all_sliders:
         return None
 
 
-@app.callback(Output('tir-store', 'data'),
+@callback(Output('tir-store', 'data'),
         Input('analysis-options-next-button', 'n_clicks'),
-        State('tir-sliders', 'children')
+        State('tir-sliders', 'children'),
+        prevent_initial_call=True
         )
 def update_store(clicks, children):
     if clicks is None:
@@ -240,12 +247,10 @@ def update_store(clicks, children):
     ranges = [i['props']['children']['props']['children'][1]['props']['children'][0]['props']['children'][0]['props']['children'][1]['props']['drag_value'] for i in children if i['props']['children']!=None]
     return ranges
 
-analysis_options_callbacks(app)
-
 
 ## METRICS TABLE ##
 # Layout
-@app.callback(Output('asterix-day-time', 'children'),
+@callback(Output('asterix-day-time', 'children'),
         Input('start-day-time', 'value'),
         Input('end-day-time', 'value'),
         Input('start-night-time', 'value'),
@@ -255,7 +260,7 @@ def display_day_time(day_start, day_end, night_start, night_end):
     times = [i[11:16] for i in [day_start, day_end, night_start, night_end]]
     return html.P(f'* Day {times[0]}-{times[1]}, night {times[2]}-{times[3]}')
 
-@app.callback(Output('metrics-store', 'data'),
+@callback(Output('metrics-store', 'data'),
         #Output('metrics-tbl', 'children')],
         Input('tir-store', 'data'),
         State('processed-data-store', 'data'),
@@ -288,7 +293,7 @@ def calculate_metrics(additional_tirs, processed_data, edited_data, lv1_hypo, lv
     return all_results#, collapse_table
 
 # Update
-@app.callback(
+@callback(
     Output('test-table', 'children'),
     Input('metrics-store', 'data'),
     Input('unit-type-options', 'value'),
@@ -308,7 +313,7 @@ def update_metrics_table(metrics_data, units, period):
 
 
 ## INDIVIDUAL FIGS ##
-@app.callback(
+@callback(
     Output('subject-id-div', 'children'),
     Input('metrics-store', 'modified_timestamp'),
     State('metrics-store', 'data'),
@@ -325,7 +330,7 @@ def create_individual_figs(ts, metrics):
             ),
     return subject_id
 
-@app.callback(
+@callback(
     Output('amb-glc-profile', 'children'),
     Output('glc-trace', 'children'),
     Output('pie-chart', 'children'),
@@ -346,7 +351,7 @@ def update_indiv_figs(subject_id, data):
 
 
 ## GROUP FIGS ##
-@app.callback(
+@callback(
     Output('bar-graph', 'children'),
     Output('box-plot', 'children'),
     #Output('scatter-plot', 'children'),
@@ -368,7 +373,7 @@ def update_group_figs(yaxis, period, units, data):
     return bargraph, boxplot, #scatterplot, stats
 
 ## ETERNAL FACTORS ##
-@app.callback(
+@callback(
     Output("instructions-collapse", "is_open"),
     [Input("instructions-button", "n_clicks")],
     [State("instructions-collapse", "is_open")],
@@ -378,7 +383,7 @@ def toggle_collapse(n, is_open):
         return not is_open
     return is_open
 
-@app.callback(Output('poi-sliders', 'children'),
+@callback(Output('poi-sliders', 'children'),
             Input('add-poi-slider', 'n_clicks'),
             State('poi-sliders', 'children')
             )
@@ -388,7 +393,7 @@ def create_range_slider(n_clicks, children):
 all_sliders_poi = ['poi-None']+['poi-'+ str(i) for i in range(1, 10)]
 
 for id in all_sliders_poi:
-    @app.callback(Output((id+'-heading'), 'children'),
+    @callback(Output((id+'-heading'), 'children'),
         Input((id+'-slider'), 'drag_value'),
         )
     def print_heading(drag):
@@ -396,7 +401,7 @@ for id in all_sliders_poi:
         drag_heading =f'{first} to {last}'
         return drag_heading
 
-    @app.callback(Output(id, 'children'),
+    @callback(Output(id, 'children'),
             Input((id+'-button'), 'n_clicks'),
             )
     def remove_poi(n_clicks_remove):
@@ -405,7 +410,7 @@ for id in all_sliders_poi:
         return None
 
 
-@app.callback(Output('ranges-store', 'data'),
+@callback(Output('ranges-store', 'data'),
         Input('periodic-metrics-button', 'n_clicks'),
         State('poi-sliders', 'children')
         )
@@ -417,7 +422,7 @@ def update_store(clicks, children):
     ranges = [i['props']['children']['props']['children'][0]['props']['children'][1]['props']['children'][0]['props']['children'][0]['props']['drag_value'] for i in children if i['props']['children']!=None]
     return ranges
 
-@app.callback(Output('poi-datafile', 'children'),
+@callback(Output('poi-datafile', 'children'),
     Output('poi-store', 'data'),
     Input('upload-poi-data', 'last_modified'),
     State('upload-poi-data', 'contents'),
@@ -456,7 +461,7 @@ def poi(date, contents, filename):
                             },)
         return table, data
 
-@app.callback(#Output('poi-metrics', 'children'),
+@callback(#Output('poi-metrics', 'children'),
     Output('poi-metrics-store', 'data'),
     Input('ranges-store', 'data'),
     State('poi-store', 'data'),
@@ -497,7 +502,7 @@ def metrics(poi_ranges, poi_data, raw_data, additional_tirs, lv1_hypo, lv2_hypo,
 
 
 # Update
-@app.callback(
+@callback(
     Output('poi-metrics', 'children'),
     Input('poi-metrics-store', 'data'),
     Input('poi-unit-options', 'value'),
@@ -519,7 +524,7 @@ def update_poi_metrics_table(metrics_data, units, period):
     table = section_external_factors.create_data_table(sub_df)
     return table
 
-if __name__ == '__main__':
+'''if __name__ == '__main__':
     # DASH_PORT is set to 80 in Dockerfile
     port = os.environ.get('DASH_PORT', 8050)
-    app.run_server(debug=True, host='0.0.0.0', port=port) #, dev_tools_ui=False)
+    app.run_server(debug=True, host='0.0.0.0', port=port) #, dev_tools_ui=False)'''
