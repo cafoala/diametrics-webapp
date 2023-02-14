@@ -12,12 +12,22 @@ poi_template = pd.DataFrame([['ID must match your IDs in the webapp',	'dd/mm/yy/
 def create_period_of_interest():
     return html.Div([
         html.H2('Exploring specific periods of interest'),
-        html.P('This section enables you to take a more in depth look at different periods of interest in your data. \
-            For this to work you\'ll need to upload a file that includes the ID of the participant, the start and end times of the period \
-            of interest and an optional label. From there, you\'ll get a breakdown of the metrics of glycemic control\
-            for all of the periods you\'ve entered.\
-            For this part you need to pay close attention to the INSTRUCTIONS because there\'s lots of ways to mess this up. Good luck brave warrior.'),
-        
+        dbc.Alert(
+                [
+                    html.I(className="bi bi-info-circle-fill me-2"),
+                    'This section enables you to take a more in depth look at \
+                        different periods of interest in your data. \
+                            For this to work you\'ll need to upload a file \
+                            that includes the ID of the participant, the start \
+                                and end times of the period of interest and an \
+                                    optional label. From there, you\'ll get a \
+                                        breakdown of the metrics of glycemic \
+                                            control for all of the periods \
+                                                you\'ve entered.'
+                ],
+                color="info",
+                className="d-flex align-items-center",
+        ),
         dbc.Card(dbc.CardBody([
             html.H4('1.Upload external data'),
             html.P('For this to work you\'ll need to upload a file that includes the ID of the participant, the start and end times of the period \
