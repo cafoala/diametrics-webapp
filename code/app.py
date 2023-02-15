@@ -2,7 +2,6 @@ from dash import Dash, html, dcc, callback, Input, Output
 import dash
 import os
 import dash_bootstrap_components as dbc
-import home_layout
 import layout
 
 external_stylesheets = [dbc.themes.BOOTSTRAP, dbc.icons.BOOTSTRAP]
@@ -11,6 +10,7 @@ colors = {
     'text': '#7FDBFF'
 }
 app = Dash(__name__, external_stylesheets=external_stylesheets, use_pages=True)
+app.config.suppress_callback_exceptions = True
 
 # the style arguments for the sidebar. We use position:fixed and a fixed width
 SIDEBAR_STYLE = {
@@ -61,10 +61,11 @@ app.layout = html.Div([
               Input('url', 'pathname'))
 def display_page(pathname):
     if pathname == '/':
-         return home_layout.jumbotron
+         return layout.jumbotron
     elif pathname == '/dashboard':
          return layout.content
     else:
+
         return '404'
 
 if __name__ == '__main__':
