@@ -17,4 +17,4 @@ EXPOSE ${PORT}
 ENV DASH_PORT ${PORT}
 
 ENTRYPOINT [ "python" ]
-CMD ["-u", "tabs-app.py"]
+CMD ["-u", "app.py"]
