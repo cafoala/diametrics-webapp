@@ -12,8 +12,9 @@ COPY requirements.txt /app/
 RUN pip install --no-cache-dir --upgrade pip &&\
     pip install --no-cache-dir --trusted-host pypi.python.org -r requirements.txt
 
-EXPOSE 80
-ENV DASH_PORT 80
+ENV PORT=8080
+EXPOSE ${PORT}
+ENV DASH_PORT ${PORT}
 
 ENTRYPOINT [ "python" ]
 CMD ["-u", "tabs-app.py"]
