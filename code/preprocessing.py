@@ -24,7 +24,7 @@ def preprocess_df(df, filename):
     if df_transformed.usable:
         # Check that the whole datetime works
         try:
-            df_transformed.data['time'] = pd.to_datetime(df_transformed.data['time'])
+            df_transformed.data['time'] = pd.to_datetime(df_transformed.data['time'], dayfirst=True)
             df_transformed.data = df_transformed.data.sort_values(['time'])
             df_transformed.data['glc'] = pd.to_numeric(df_transformed.data['glc'])
             if 'scan_glc' in df_transformed.data.columns:
