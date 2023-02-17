@@ -35,7 +35,8 @@ def parse_contents(contents, filename, date):
         elif 'xls' in filename:
             # Assume that the user uploaded an excel file
             df = pd.read_excel(io.BytesIO(decoded), header=None)
-
+            #df = pd.read_excel(
+             #   io.StringIO(decoded.decode('utf-8')), header=None)
         elif 'txt' or 'tsv' in filename:
             # Assume that the user upl, delimiter = r'\s+'oaded an excel file
             df = pd.read_table(

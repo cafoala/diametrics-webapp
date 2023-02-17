@@ -8,3 +8,5 @@ scipy
 scikit-learn
 dash_extensions
 dash_mantine_components
+dash-player
+openpyxl
