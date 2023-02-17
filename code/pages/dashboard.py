@@ -37,7 +37,7 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)#, suppress_
 app.config.suppress_callback_exceptions = True
 
 app.layout = layout.create_tabs_layout()'''
-layout = layout.create_tabs_layout()
+layout = layout.content #.create_tabs_layout()
 
 
 @callback(Output('card-tabs', 'active_tab'),
