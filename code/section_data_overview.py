@@ -31,16 +31,14 @@ def parse_contents(contents, filename, date):
         if 'csv' in filename:
             # Assume that the user uploaded a CSV file
             df = pd.read_csv(
-                io.StringIO(decoded.decode('utf-8')), header=None)
+                io.StringIO(decoded.decode('utf-8')), header=None, names = [i for i in range(0, 20)])
         elif 'xls' in filename:
             # Assume that the user uploaded an excel file
-            df = pd.read_excel(io.BytesIO(decoded), header=None)
-            #df = pd.read_excel(
-             #   io.StringIO(decoded.decode('utf-8')), header=None)
+            df = pd.read_excel(io.BytesIO(decoded), header=None, names = [i for i in range(0, 20)])
         elif 'txt' or 'tsv' in filename:
             # Assume that the user upl, delimiter = r'\s+'oaded an excel file
             df = pd.read_table(
-                io.StringIO(decoded.decode('utf-8'))) # , delimiter = r'\s+', header=None
+                io.StringIO(decoded.decode('utf-8')), header=None, names = [i for i in range(0, 20)])
 
     except Exception as e:
         data_dictionary = {'Usable': False, 'Filename': filename, 

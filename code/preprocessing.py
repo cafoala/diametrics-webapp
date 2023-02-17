@@ -10,16 +10,14 @@ def calculate_time_interval(df):
     diff_mins = int(diff[0].total_seconds()/60)
     return diff_mins
 
-
 # let's assume we're getting 1 file in and it's already been confirmed that it's a df
 def preprocess_df(df, filename):
     data_dictionary = {}
     # Replace high and low values for different devices 
     # ?DOUBLE CHECK THESE VALUES?
+    print(df.head())
     df.replace({'High': 22.2, 'Low': 2.2, 'HI':22.2, 'LO':2.2, 'hi':22.2, 'lo':2.2}, inplace=True)
     df_transformed = transformData.transformData(df)
-    if df_transformed.data.empty:
-        df_transformed.usable = False
 
     if df_transformed.usable:
         # Check that the whole datetime works

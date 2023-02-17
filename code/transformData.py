@@ -8,6 +8,7 @@ class transformData:
         self.interval = None
         self.data = None
         self.id = None
+        print(df.head())
         if self.assert_flash_libre(df):
             try:
                 self.convert_flash_libre(df)
@@ -31,8 +32,8 @@ class transformData:
         header_mmol_2 = ['Device Timestamp', 'Historic Glucose mmol/L', 'Scan Glucose mmol/L']
         header_mg = ['Meter Timestamp', 'Historic Glucose(mg/dL)', 'Scan Glucose(mg/dL)']
         header_mg_2 = ['Device Timestamp', 'Historic Glucose mg/dL', 'Scan Glucose mg/dL']
-
-        if set(header_mmol).issubset(set(df.iloc[2])) or set(header_mg).issubset(set(df.iloc[2])):
+        header_row = set(df.iloc[2])
+        if (set(header_mmol).issubset(header_row)) or (set(header_mg).issubset(header_row)) or (set(header_mmol_2).issubset(header_row)) or (set(header_mg_2).issubset(header_row)):
             # Set that it's usable
             self.usable = True # might not be
             # Set device name
