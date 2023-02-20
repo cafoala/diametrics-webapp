@@ -26,6 +26,10 @@ from dash_extensions.enrich import Output, DashProxy, Input, MultiplexerTransfor
 logging.basicConfig(level=logging.DEBUG)
 
 
+app = dash.get_app()
+# 1) configure the upload folder
+du.configure_upload(app, r"C:\tmp\Uploads")
+
 dash.register_page(__name__)
 '''external_stylesheets = [dbc.themes.BOOTSTRAP, dbc.icons.BOOTSTRAP]
 colors = {
@@ -111,7 +115,6 @@ def show_metrics_tab(children):
     return False, False, False
 
 
-
 for i in [#['data-tab', 'upload-next-button'],#['other-metrics-tab', 'data-overview-next-button'], 
                 ['metrics-tab', 'analysis-options-next-button']]:#, ['indiv-vis', 'analysis-options-next-button'],
                 #['external-tab', 'analysis-options-next-button']]:
@@ -128,7 +131,7 @@ for i in [#['data-tab', 'upload-next-button'],#['other-metrics-tab', 'data-overv
 
 ## FILELIST ## 
 # List the filenames
-@callback(Output('filelist', 'children'),
+'''@callback(Output('filelist', 'children'),
         Input('upload-data', 'contents'),
         State('upload-data', 'filename'),
     prevent_initial_call=True)
@@ -136,10 +139,21 @@ def list_files(list_of_contents, list_of_names):
     if list_of_contents is not None:
 
         file_list = section_upload_content.create_file_list(list_of_names)
-        return file_list#, False
+        return file_list#, False'''
+
+@du.callback(
+    output=Output('filelist', 'children'),
+    id='dash-uploader',
+)
+def callback_on_completion(status: du.UploadStatus):
+    filenames = [x.name for x in status.uploaded_files]
+    file_list = section_upload_content.create_file_list(filenames)
+    return file_list
+    #return html.Ul([html.Li(str(x)) for x in status.uploaded_files])
+
 
 ## DATA TABLE ##                
-@callback([Output('raw-data-store', 'data'),
+'''@callback([Output('raw-data-store', 'data'),
     Output('data-tbl-div', 'children')],
     Input('upload-next-button', 'n_clicks'),
     State('upload-data', 'last_modified'),
@@ -152,6 +166,16 @@ def preprocess_data(n_clicks, list_of_dates, list_of_contents, list_of_names):
     children = [
         section_data_overview.parse_contents(c, n, d) for c, n, d in
         zip(list_of_contents, list_of_names, list_of_dates)]
+    data_table = section_data_overview.create_data_table(children)
+    return (children, data_table)'''
+
+
+@du.callback([Output('raw-data-store', 'data'),
+    Output('data-tbl-div', 'children')],
+    id='dash-uploader')
+def preprocess_data(status: du.UploadStatus):
+    children = section_data_overview.read_files(status.uploaded_files)
+    print('HERE!')
     data_table = section_data_overview.create_data_table(children)
     return (children, data_table)
 

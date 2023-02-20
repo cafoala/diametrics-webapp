@@ -8,7 +8,6 @@ class transformData:
         self.interval = None
         self.data = None
         self.id = None
-        print(df.head())
         if self.assert_flash_libre(df):
             try:
                 self.convert_flash_libre(df)

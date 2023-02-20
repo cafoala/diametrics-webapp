@@ -62,25 +62,6 @@ video_section = html.Div([dp.DashPlayer(url=video_path, controls=True),
                             dp.DashPlayer(url='https://youtu.be/d5pb9TgCGc0', controls=True),
                                 html.P('hello')])
 
-upload_section= html.Div([
-        dbc.Row([
-                dbc.Col(html.Div([
-                    html.H2('Upload files'),
-                    html.P('To begin, use the button to select your CGM files'),
-                    ]
-                #style={'textAlign': 'left'}
-                ), width=8),
-                dbc.Col(dcc.Upload(dbc.Button('Select Files', color="secondary"),
-                                multiple=True,
-                                id='upload-data',))
-        ]),
-        dbc.Row([
-                dbc.Col(html.Div(id='filelist'))
-            ]),
-    
-       
-    ],    
-),
 # the style arguments for the sidebar. We use position:fixed and a fixed width
 SIDEBAR_STYLE = {
     "position": "fixed",
@@ -166,7 +147,7 @@ content = html.Div([
                         ], style={'text-align': 'right'})
                     ])], 
                         label="2. Check data", tab_id="data-tab",id="data-tab", 
-                        disabled=True, active_label_style={"color": "#FB79B3"}),
+                        disabled=False, active_label_style={"color": "#FB79B3"}),
                 dbc.Tab(
                     [dbc.Card(dbc.CardBody(
                         [section_analysis_options.get_analysis_options_layout()]),

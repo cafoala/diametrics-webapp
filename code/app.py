@@ -3,6 +3,7 @@ import dash
 import os
 import dash_bootstrap_components as dbc
 import layout
+import dash_uploader as du
 image_path = 'assets/logo.png'
 
 external_stylesheets = [dbc.themes.BOOTSTRAP, dbc.icons.BOOTSTRAP]
@@ -12,6 +13,10 @@ colors = {
 }
 app = Dash(__name__, external_stylesheets=external_stylesheets, use_pages=True)
 app.config.suppress_callback_exceptions = True
+
+app.title = 'Diametrics'
+app._favicon = (os.path.join('assets', 'favicon.ico'))
+
 
 # the style arguments for the sidebar. We use position:fixed and a fixed width
 SIDEBAR_STYLE = {
@@ -75,4 +80,4 @@ def display_page(pathname):
 if __name__ == '__main__':
     # DASH_PORT is set to 80 in Dockerfile
     port = os.environ.get('DASH_PORT', 8050)
-    app.run_server(debug=False, host='0.0.0.0', port=port) #, dev_tools_ui=False)
+    app.run_server(debug=True, host='0.0.0.0', port=port) #, dev_tools_ui=False)
