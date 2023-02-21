@@ -11,7 +11,8 @@ colors = {
     'background': '#111111',
     'text': '#7FDBFF'
 }
-app = Dash(__name__, external_stylesheets=external_stylesheets, use_pages=True)
+
+app = Dash(__name__, external_stylesheets = external_stylesheets, use_pages=True)
 app.config.suppress_callback_exceptions = True
 
 app.title = 'Diametrics'
@@ -74,7 +75,6 @@ def display_page(pathname):
     elif pathname == '/instructions':
         return layout.video_section
     else:
-
         return '404'
 
 if __name__ == '__main__':

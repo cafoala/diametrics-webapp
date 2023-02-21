@@ -1,0 +1,12 @@
+wheel
+pandas
+dash
+dash-bootstrap-components
+dash-uploader==0.7.0a1
+packaging
+scipy
+scikit-learn
+dash_extensions
+dash_mantine_components
+dash-player
+openpyxl
