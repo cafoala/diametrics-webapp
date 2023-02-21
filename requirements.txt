@@ -2,7 +2,7 @@ wheel
 pandas
 dash
 dash-bootstrap-components
-dash-uploader
+dash-uploader==0.7.0a1
 packaging
 scipy
 scikit-learn
