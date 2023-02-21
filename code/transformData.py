@@ -9,22 +9,23 @@ class transformData:
         self.data = None
         self.id = None
         if self.assert_flash_libre(df):
+            print('it\'s a libre')
             try:
                 self.convert_flash_libre(df)
             except:
-                print('idk')
+                print('Can\'t convert to libre')
         elif self.assert_dexcom(df):
-            print('it\s a dexcom')
+            print('it\'s a dexcom')
             try:
                 self.convert_dexcom(df)
             except:
-                print('still dk') 
+                print('unkown device') 
         else:
             # output can return whether it's usable or not usable
             # can we also store feedback of why it didn't work?
             self.autoprocess(df)
-            # 
-    
+            
+
     def assert_flash_libre(self, df):
         #check if cols align
         header_mmol = ['Meter Timestamp', 'Historic Glucose(mmol/L)', 'Scan Glucose(mmol/L)']
@@ -66,7 +67,9 @@ class transformData:
 
         # Rename cols
         df.columns = ['time', 'glc', 'scan_glc']
-        self.data = df
+        
+        # only keep time and glc for now
+        self.data = df[['time', 'glc']]
 
     # Newer libre!
     '''

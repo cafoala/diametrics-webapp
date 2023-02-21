@@ -147,7 +147,7 @@ content = html.Div([
                         ], style={'text-align': 'right'})
                     ])], 
                         label="2. Check data", tab_id="data-tab",id="data-tab", 
-                        disabled=False, active_label_style={"color": "#FB79B3"}),
+                        disabled=True, active_label_style={"color": "#FB79B3"}),
                 dbc.Tab(
                     [dbc.Card(dbc.CardBody(
                         [section_analysis_options.get_analysis_options_layout()]),
@@ -155,8 +155,7 @@ content = html.Div([
                     dbc.Row([
                         dbc.Col([                
                             #dbc.Button('Back', id='calculate-metrics-back-button', color='secondary')   
-                            dbc.Button('Back', id='analysis-options-back-button', color='secondary')   
-
+                            dbc.Button('Back', id='analysis-options-back-button', color='secondary')
                         ]),
                         dbc.Col([                
                             #dbc.Button('Next', id='calculate-metrics', color='secondary')  

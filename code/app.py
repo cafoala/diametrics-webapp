@@ -4,7 +4,7 @@ import os
 import dash_bootstrap_components as dbc
 import layout
 import dash_uploader as du
-image_path = 'assets/logo.png'
+image_path = 'assets/logo_circle.png'
 
 external_stylesheets = [dbc.themes.BOOTSTRAP, dbc.icons.BOOTSTRAP]
 colors = {
@@ -63,7 +63,8 @@ sidebar = html.Div(
 
 content = html.Div(id='content', style=CONTENT_STYLE)
 app.layout = html.Div([
-	dcc.Location(id="url"), sidebar, content])
+	dcc.Location(id="url"), sidebar, content
+    ])
 
 @callback(Output('content', 'children'),
               Input('url', 'pathname'))

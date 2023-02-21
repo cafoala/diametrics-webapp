@@ -5,7 +5,7 @@ import transformData
 import metrics_helper
 
 def calculate_time_interval(df):
-    diff = df.dropna(subset=['time','glc'])
+    df = df.dropna(subset=['time','glc'])
     diff = df.time.diff().mode()
     diff_mins = int(diff[0].total_seconds()/60)
     return diff_mins
@@ -17,10 +17,10 @@ def preprocess_df(df, filename):
     # ?DOUBLE CHECK THESE VALUES?
     df.replace({'High': 22.2, 'Low': 2.2, 'HI':22.2, 'LO':2.2, 'hi':22.2, 'lo':2.2}, inplace=True)
     df_transformed = transformData.transformData(df)
-
     if df_transformed.usable:
         # Check that the whole datetime works
         try:
+            df_transformed.data = df_transformed.data.dropna(subset=['time', 'glc'])
             df_transformed.data['time'] = pd.to_datetime(df_transformed.data['time'], dayfirst=True)
             df_transformed.data = df_transformed.data.sort_values(['time'])
             df_transformed.data['glc'] = pd.to_numeric(df_transformed.data['glc'])

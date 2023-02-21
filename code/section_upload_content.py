@@ -18,14 +18,14 @@ def get_upload_layout():
                         className="d-flex align-items-center",
                 ))]),
 
-                dbc.Row([dbc.Col(width=2),
-                        dbc.Col(html.Div(du.Upload(text='Drag and drop or click to select files', 
-                                        max_files=1000, id='dash-uploader', 
-                                        text_completed='Upload file complete: '))),
-                        dbc.Col(width=2),
-                        ]),
-                html.Div(id='filelist'),
-                html.Div(id='callback-output')
+        dbc.Row([dbc.Col(width=2),
+                dbc.Col(html.Div(du.Upload(text='Drag and drop or click to select files', 
+                                max_files=1000, id='dash-uploader', 
+                                text_completed='Upload file complete: '))),
+                dbc.Col(width=2),
+                ]),
+        html.Div(id='filelist'),
+        html.Div(id='callback-output')
         ])
 
 def create_file_list(list_of_names):

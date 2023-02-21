@@ -9,7 +9,9 @@ from datetime import timedelta
 
 def get_datatable_layout():
     return html.Div([
-                html.H2('Data overview'),
+        dbc.Row([dbc.Col(
+                html.H2('Data overview'), width=4),
+                dbc.Col(
                 dbc.Alert(
                 [
                         html.I(className="bi bi-info-circle-fill me-2"),
@@ -17,7 +19,7 @@ def get_datatable_layout():
                 ],
                 color="info",
                 className="d-flex align-items-center",
-                ),
+                ))]),
                 html.Div(dbc.Spinner(spinner_style={"width": "3rem", "height": "3rem"}),
                             style={'textAlign':'center'}, id='data-tbl-div'),
             ])
