@@ -150,12 +150,12 @@ def get_analysis_options_layout():
         start_collapsed=True,
         )
     )
-
    
     analysis_layout = html.Div([
         dbc.Row([
-                dbc.Col(html.Div([
-                    html.H2('Select your analysis options'),
+                dbc.Col(#html.Div([
+                    html.H2('Select your analysis options')),
+                dbc.Col(
                     dbc.Alert(
                     [
                             html.I(className="bi bi-info-circle-fill me-2"),
@@ -163,11 +163,9 @@ def get_analysis_options_layout():
                     ],
                     color="info",
                     className="d-flex align-items-center",
-                    ),
-                        ]
-                #style={'textAlign': 'left'}
-                )),
-            ]),
+                    )),
+                        ]),
+           # ]),
         dbc.Row([
                 dbc.Col(html.Div(accordion,id='options-accordion'))
             ]),

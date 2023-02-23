@@ -25,7 +25,6 @@ def get_upload_layout():
                 dbc.Col(width=2),
                 ]),
         html.Div(id='filelist'),
-        html.Div(id='callback-output')
         ])
 
 def create_file_list(list_of_names):
@@ -33,6 +32,7 @@ def create_file_list(list_of_names):
         data.columns = ['Selected files:']
         return html.Div([
             #html.H5(''),
+            html.Br(),
             html.Div(dash_table.DataTable(data=data.to_dict('records'),
                 style_table={
                         'overflowX': 'auto',

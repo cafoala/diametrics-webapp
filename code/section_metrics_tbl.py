@@ -40,18 +40,25 @@ def get_metrics_layout():
     'Glycemic episodes', 'AUC', 'MAGE', 'LBGI/HBGI']'''
     
     metrics_layout = html.Div([
-        html.H2('Metrics of Glycemic Control'),
+        dbc.Row([
+            dbc.Col(
+                html.H2('Metrics of Glycemic Control')),
+            dbc.Col(
+                html.Div(id='asterix-day-time', style={'textAlign': 'right'})
+            )
+        ]),
         dbc.Row([
                 dbc.Col(width=5),
                 dbc.Col(units, width=3),
                 dbc.Col(time_period, width=3),
         ]),
-
-        html.Div(id='asterix-day-time', style={'textAlign': 'right'}),
-        dbc.Row([
-                dbc.Col(dbc.Spinner(spinner_style={"width": "3rem", "height": "3rem"}), 
-                 id='test-table'),
-        ], style={'textAlign': 'center'}),
+        html.Div(dbc.Spinner(spinner_style={"width": "3rem", "height": "3rem"}), 
+                 id='test-table', style={'textAlign': 'center'})
+       
+        #dbc.Row([
+         #       dbc.Col(dbc.Spinner(spinner_style={"width": "3rem", "height": "3rem"}), 
+          #       id='test-table'),
+        #], style={'textAlign': 'center'}),
     ])
     return metrics_layout
 

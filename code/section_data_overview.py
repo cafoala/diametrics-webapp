@@ -108,7 +108,7 @@ def create_data_table(children):
                     },
                     style_table={
                         'overflowX': 'auto',
-                        'maxHeight': '45vh',
+                        'maxHeight': '50vh',
                         },
                     
                     style_header={
