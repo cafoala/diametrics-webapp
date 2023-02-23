@@ -83,7 +83,9 @@ def create_pie_chart(df):
     
     fig = go.Figure()
     fig.add_trace(go.Pie(values=values, labels=labels, marker_colors=colors, opacity=0.5),)
-
+    fig.update_layout(
+        title = 'Percentage time in range')
+        
     return html.Div([
             dcc.Graph(
                         id='pie-chart',

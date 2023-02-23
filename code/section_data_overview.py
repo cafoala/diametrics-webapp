@@ -76,7 +76,8 @@ def read_files(files):
 
 def create_data_table(children):
     data_details = pd.DataFrame.from_dict(children)
-    data_details = data_details[['Filename', 'Usable', 'ID', 'Start DateTime', 'End DateTime', 'Days', 'Data Sufficiency (%)']] #'Device', 'Interval', 'Units',
+    print(data_details)
+    data_details = data_details[['Filename', 'Usable', 'Device', 'ID', 'Start DateTime', 'End DateTime', 'Days', 'Data Sufficiency (%)']] #'Device', 'Interval', 'Units',
     data_details['Usable'] = data_details['Usable'].replace({True:'Yes', False:'No'})
 
     #days = data_details['Days'].apply(lambda x: x.split(' ')[0]).replace({'N/A':0}).astype(int)

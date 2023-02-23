@@ -50,13 +50,13 @@ def preprocess_df(df, filename):
             return data_dictionary
         except Exception as ex:
             # log that there is a non-dt item in the col
-            data_dictionary = {'Usable': False, 'Filename': filename,
+            data_dictionary = {'Usable': False, 'Filename': filename, 'Device':device,
                 'ID': 'N/A', 'Start DateTime': 'N/A', 'End DateTime': 'N/A',
                 'Days': 'N/A', 'Data Sufficiency (%)':'N/A'}
             return data_dictionary
     else:
         # Log the errors?
-        data_dictionary = {'Usable': False, 'Filename': filename,
+        data_dictionary = {'Usable': False, 'Filename': filename, 'Device':device,
             'ID': 'N/A', 'Start DateTime': 'N/A', 'End DateTime': 'N/A',
             'Days': 'N/A', 'Data Sufficiency (%)':'N/A'}
         return data_dictionary
