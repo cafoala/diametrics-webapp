@@ -52,7 +52,7 @@ def get_analysis_options_layout():
                     ]),
                 ])
                 ],
-                title="Day/night time",
+                title="Change the times for day and night",
             ),
             dbc.AccordionItem(
                 [
@@ -61,9 +61,9 @@ def get_analysis_options_layout():
                                 won't replace them. To see the standard ranges see the THEORY SECTION"),
                     #html.Div(id='tir-sliders'),
                     html.Div(id='tir-sliders'),
-                    dbc.Button("Add another threshold", id='add-tir-slider', color='primary'),
+                    dbc.Button("Add another range", id='add-tir-slider', color='primary'),
                 ],
-                title="Time in range thresholds",
+                title="Adjust the percentage time in range thresholds",
             ),
             dbc.AccordionItem(
                 [
@@ -143,7 +143,7 @@ def get_analysis_options_layout():
                         ]),
                     ])
                 ],
-                title="Glycemic events",
+                title="Adjust the thresholds for glycemic events",
             ),
             
         ],

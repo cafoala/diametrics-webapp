@@ -137,16 +137,16 @@ def calculate_unique_tirs(glc_series, thresholds, units):
 def calculate_glycemic_episodes(df, hypo_lv1_thresh=3.9, hypo_lv2_thresh=3, hyper_lv1_thresh=10, hyper_lv2_thresh=13.9, mins=15, long_mins=120):
     total_hypos, lv1_hypos, lv2_hypos, prolonged_hypos, avg_length_hypos, total_time_hypos = glycemic_events_helper.calculate_episodes(df, True, hypo_lv1_thresh, hypo_lv2_thresh, mins, long_mins)
     total_hypers, lv1_hypers, lv2_hypers, prolonged_hypers, avg_length_hypers, total_time_hypers = glycemic_events_helper.calculate_episodes(df, False, hyper_lv1_thresh, hyper_lv2_thresh, mins, long_mins)
-    results = {'Total number of hypoglycemic events': total_hypos, 
+    results = {'Total number hypoglycemic events': total_hypos, 
                 'Number LV1 hypoglycemic events': lv1_hypos, 
                 'Number LV2 hypoglycemic events':lv2_hypos, 
-                'Number of prolonged hypoglycemic events':prolonged_hypos, 
+                'Number prolonged hypoglycemic events':prolonged_hypos, 
                 'Avg. length of hypoglycemic events': avg_length_hypos, 
                 'Total time spent in hypoglycemic events':total_time_hypos,
-                'Total number of hyperglycemic events':total_hypers, 
-                'Number of LV1 hyperglycemic events':lv1_hypers,
-                'Number of LV2 hyperglycemic events':lv2_hypers,
-                'Prolonged hyperglycemic events':prolonged_hypers, 
+                'Total number hyperglycemic events':total_hypers, 
+                'Number LV1 hyperglycemic events':lv1_hypers,
+                'Number LV2 hyperglycemic events':lv2_hypers,
+                'Number prolonged hyperglycemic events':prolonged_hypers, 
                 'Avg. length of hyperglycemic events':avg_length_hypers,
                 'Total time spent in hyperglycemic events':total_time_hypers}
     return results

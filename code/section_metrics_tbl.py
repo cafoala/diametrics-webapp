@@ -49,16 +49,15 @@ def get_metrics_layout():
         ]),
         dbc.Row([
                 dbc.Col(width=5),
-                dbc.Col(units, width=3),
-                dbc.Col(time_period, width=3),
+                dbc.Col(units, width=3, style={'textAlign': 'right'}),
+                dbc.Col(time_period, width=3, style={'textAlign': 'right'}),
         ]),
-        html.Div(dbc.Spinner(spinner_style={"width": "3rem", "height": "3rem"}), 
-                 id='test-table', style={'textAlign': 'center'})
-       
-        #dbc.Row([
-         #       dbc.Col(dbc.Spinner(spinner_style={"width": "3rem", "height": "3rem"}), 
-          #       id='test-table'),
-        #], style={'textAlign': 'center'}),
+        html.Div([
+            html.Br(),
+            html.Br(),
+            dbc.Spinner(spinner_style={"width": "3rem", "height": "3rem"})
+                  ], 
+        id='test-table', style={'textAlign': 'center'})
     ])
     return metrics_layout
 
@@ -201,11 +200,14 @@ def create_metrics_table(df):
         'AUC', 'MAGE', 'LBGI', 'HBGI']   
     return html.Div([
             dbc.Row(data_table),
+            html.Br(),
+            html.Hr(),
+            html.H3('Overview figures'),
             dbc.Row([
-                dbc.Col(html.H4('Overview figures')),
+                dbc.Col(),
                 dbc.Col(dcc.Dropdown(options,
                     'Time in range',
-                    id='yaxis-column')
+                    id='yaxis-column'), width=3
                 ),
             ]),
             dbc.Row([

@@ -4,13 +4,17 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 import dash_bootstrap_components as dbc
+
 colors = ['blue', 'purple', 'grey', 'pink', 'red']
+
 def create_indiv_layout():
     figs_layout = html.Div([
         html.H2('Closer look at individual participants'),
-        html.Div(id='subject-id-div'),
+        dbc.Row([dbc.Col(), dbc.Col(id='subject-id-div', width=3)]),
         html.Div(dbc.Spinner(spinner_style={"width": "3rem", "height": "3rem"}), id='amb-glc-profile'),
+        html.Hr(),
         html.Div(id='pie-chart'),
+        html.Hr(),
         html.Div(id='glc-trace'),
     ])
     return figs_layout

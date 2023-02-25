@@ -435,16 +435,17 @@ for id in all_sliders_poi:
 
 
 @callback(Output('ranges-store', 'data'),
-        Input('periodic-metrics-button', 'n_clicks'),
-        State('poi-sliders', 'children')
+          Output('poi-collapse-3', 'is_open'),
+            Input('periodic-metrics-button', 'n_clicks'),
+            State('poi-sliders', 'children')
         )
 def update_store(clicks, children):
     if clicks is None:
         raise PreventUpdate
     if children is None:
-        return None
+        return None, False
     ranges = [i['props']['children']['props']['children'][0]['props']['children'][1]['props']['children'][0]['props']['children'][0]['props']['drag_value'] for i in children if i['props']['children']!=None]
-    return ranges
+    return ranges, False
 
 @callback(Output('poi-datafile', 'children'),
     Output('poi-store', 'data'),
@@ -479,10 +480,27 @@ def poi(date, contents, filename):
         df['endDatetime'] = pd.to_datetime(df['endDatetime']).round('S').astype(str)
         df['ID'] = df['ID'].astype(str)
         table = dash_table.DataTable(id='poi-data', data=df.to_dict('records'), 
-                style_table={
-                            'overflowX': 'auto',
-                            'height': 300,
-                            },)
+                                            style_data={
+                                                            'whiteSpace': 'normal',
+                                                            'height': 'auto',
+                                                            #'width':'200px'
+                                                        },
+                                            style_cell={
+                                                    'whiteSpace': 'normal',
+                                                    'font-family':'sans-serif',
+                                                    'textAlign':'center',
+                                                    'backgroundColor':'white'
+                                            },
+                                            style_table={
+                                                'overflowX': 'auto',
+                                                'maxHeight': '20vh',
+                                                },
+                                            
+                                            style_header={
+                                                'backgroundColor': 'rgb(210, 210, 210)',
+                                                'color': 'black',
+                                                #'fontWeight': 'bold'
+                                            },)
         return table, data
 
 @callback(#Output('poi-metrics', 'children'),
@@ -547,6 +565,12 @@ def update_poi_metrics_table(metrics_data, units, period):
     sub_df = sub_df.drop(columns=['units']) #'period', 
     table = section_external_factors.create_data_table(sub_df)
     return table
+
+@callback(Output('poi-2-collapse', 'is_open'),
+          Input('poi-data', 'data'),
+          )
+def open_collapse(data):
+    return True
 
 '''if __name__ == '__main__':
     # DASH_PORT is set to 80 in Dockerfile

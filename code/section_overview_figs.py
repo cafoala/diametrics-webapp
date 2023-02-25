@@ -3,22 +3,25 @@ import plotly.express as px
 import pandas as pd
 
 def create_bargraph(df, y_axis):
+    print(y_axis)
+    print(df.columns)
     if y_axis=='Time in range':
         y_value = ['TIR level 2 hypoglycemia', 
         'TIR level 1 hypoglycemia', 'TIR normal', 
         'TIR level 1 hyperglycemia', 
         'TIR level 2 hyperglycemia']
     elif y_axis == 'Total glycemic events':
-        y_value=['Total hypos','Total hypers']
+        y_value=['Total number hypoglycemic events', 
+                    'Total number hyperglycemic events']
     elif y_axis =='Hypoglycemic events':
-        y_value=['LV1 hypos',
-        'LV2 hypos']
+        y_value=['Number LV1 hypoglycemic events', 
+                    'Number LV2 hypoglycemic events']
     elif y_axis =='Hyperglycemic events':
-        y_value=['LV1 hypers', 
-        'LV2 hypers']
+        y_value=['Number LV1 hyperglycemic events', 
+                    'Number LV2 hyperglycemic events',]
     elif y_axis == 'Prolonged glycemic events':
-        y_value=['Prolonged hypos', 
-        'Prolonged hypers']
+        y_value=['Number prolonged hypoglycemic events',
+                    'Number prolonged hyperglycemic events']
     else:
         y_value=y_axis
     fig = px.bar(df, x='ID', y=y_value)

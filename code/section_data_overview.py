@@ -10,18 +10,21 @@ from datetime import timedelta
 def get_datatable_layout():
     return html.Div([
         dbc.Row([dbc.Col(
-                html.H2('Data overview'), width=4),
+                    html.H2('Data overview'), 
+                width=4),
                 dbc.Col(
-                dbc.Alert(
-                [
-                        html.I(className="bi bi-info-circle-fill me-2"),
-                        'The table below will show an overview of your data. You can edit the IDs and the start and end time',
-                ],
-                color="info",
-                className="d-flex align-items-center",
-                ))]),
-                html.Div(dbc.Spinner(spinner_style={"width": "3rem", "height": "3rem"}),
-                            style={'textAlign':'center'}, id='data-tbl-div'),
+                    dbc.Alert(
+                    [
+                            html.I(className="bi bi-info-circle-fill me-2"),
+                            'The table below will show an overview of your data. You can edit the IDs and the start and end time',
+                    ],
+                    color="info",
+                    className="d-flex align-items-center",
+                    )
+                )
+            ]),
+        html.Div(dbc.Spinner(spinner_style={"width": "3rem", "height": "3rem"}),
+                    style={'textAlign':'center'}, id='data-tbl-div'),
             ])
 
 def parse_contents(contents, filename, date):
@@ -76,7 +79,6 @@ def read_files(files):
 
 def create_data_table(children):
     data_details = pd.DataFrame.from_dict(children)
-    print(data_details)
     data_details = data_details[['Filename', 'Usable', 'Device', 'ID', 'Start DateTime', 'End DateTime', 'Days', 'Data Sufficiency (%)']] #'Device', 'Interval', 'Units',
     data_details['Usable'] = data_details['Usable'].replace({True:'Yes', False:'No'})
 
@@ -158,9 +160,7 @@ def merge_glc_data(table_data, raw_data):
         if subject['Units']=='mg/dL':
             data_sub['glc'] = data_sub['glc']*0.0557
         data_sub['ID'] = row['ID']
-        data_sub = data_sub#.to_dict('records')
         results = results.append(data_sub)
-
     results = results.to_dict('records')
     return results
 
@@ -190,8 +190,8 @@ def create_conditional_formatting(rows):
                                 'filter_query': '{{Days}} = {}'.format('N/A'),
                             },
                             'column_id': 'Usable',
-                            'backgroundColor': 'rgb(254, 217, 166)',
-                            #'color': 'white'
+                            'backgroundColor': 'tomato',
+                            'color': 'white'
                         },
                     ]
     return style_conds

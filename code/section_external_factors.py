@@ -7,93 +7,115 @@ import metrics_experiment
 import metrics_helper
 from datetime import timedelta
 
-poi_template = pd.DataFrame([['ID must match your IDs in the webapp',	'dd/mm/yy/ HH:MM',	'dd/mm/yy/ HH:MM',	'This can be used to label repeating periods']], columns= ['ID', 'startDateTime', 'endDateTime', 'label'])
+poi_template = pd.DataFrame([['ID must match your IDs in the webapp', 
+                              'dd/mm/yy/ HH:MM', 'dd/mm/yy/ HH:MM',	
+                              'This can be used to label repeating periods']],
+                              columns= ['ID', 'startDateTime', 'endDateTime', 'label'])
 
 def create_period_of_interest():
     return html.Div([
-        html.H2('Exploring specific periods of interest'),
-        dbc.Alert(
-                [
-                    html.I(className="bi bi-info-circle-fill me-2"),
-                    'This section enables you to take a more in depth look at \
-                        different periods of interest in your data. \
-                            For this to work you\'ll need to upload a file \
-                            that includes the ID of the participant, the start \
-                                and end times of the period of interest and an \
-                                    optional label. From there, you\'ll get a \
-                                        breakdown of the metrics of glycemic \
-                                            control for all of the periods \
-                                                you\'ve entered.'
-                ],
-                color="info",
-                className="d-flex align-items-center",
-        ),
+        dbc.Row([
+            dbc.Col(
+                html.H2('Exploring specific periods of interest')
+            ),
+            dbc.Col(
+                dbc.Alert(
+                    [
+                        html.I(className="bi bi-info-circle-fill me-2"),
+                        'This section enables you to take a more in depth look at \
+                            different periods of interest in your data. For more info \
+                                and examples see instructions'
+                    ],
+                    color="info",
+                    className="d-flex align-items-center")
+            )
+        ]),
         dbc.Card(dbc.CardBody([
             html.H4('1.Upload external data'),
-            html.P('For this to work you\'ll need to upload a file that includes the ID of the participant, the start and end times of the period \
-                of interest and an optional label.'),
-            dcc.Upload(dbc.Button('Upload file', color="secondary"),
-                            multiple=False, id='upload-poi-data',),
-            html.Div(id='poi-datafile'),
+            dbc.Collapse([
+                html.P('For this to work you\'ll need to upload a file that includes the ID of the participant, the start and end times of the period \
+                    of interest and an optional label.'),
+                dcc.Upload(children=html.Div(
+                        [
+                            'Drag and Drop or ',
+                            html.A('Select Files')
+                        ]),
+                        style={
+                            'width': '100%',
+                            'height': '60px',
+                            'lineHeight': '60px',
+                            'borderWidth': '1px',
+                            'borderStyle': 'dashed',
+                            'borderRadius': '5px',
+                            'textAlign': 'center',
+                            'margin': '10px'
+                        },id='upload-poi-data',),
+                html.Div(id='poi-datafile'),
+        ], is_open=True),
         ])),
+
         dbc.Card(dbc.CardBody([
             html.H4('2. Select windows around events'),
-            html.P("Use the sliders and buttons below to select time period that you're interested in. \
-                                        The default is set to calculate the period of interest only \
-                                            but alongside this you can add periods before or after."),
-            dbc.Row([
-                dbc.Card([dbc.CardBody([
-                    html.H5('Day/night breakdown'),
-                    html.P('Select the periods you\'re intererest in for the day/night breakdown'),
-                    dbc.Checklist(options=[{'label':'All 24hrs after event', 'value':1},
-                                    {'label':'Night after event','value':2}], 
-                                    id='day-night-poi-checklist', value=[]),])]),
-                dbc.Card([dbc.CardBody([
-                    #html.H5('Number of hours after analysis'),
-                    html.Div(id='poi-sliders'),
-                    dbc.Button("Add another range", id='add-poi-slider', color='primary'),
-                ])]),
-            ])
+            dbc.Collapse([
+                html.P("Use the sliders and buttons below to select time period that you're \
+                            interested in. The default is set to calculate the period of interest only \
+                                but alongside this you can add periods before or after."),
+                dbc.Accordion([
+                    dbc.AccordionItem([
+                        html.Div(id='poi-sliders'),
+                        dbc.Button("Add another range", id='add-poi-slider', color='primary'),
+                    ], title='Specific number of hours around event'),
+                    dbc.AccordionItem([
+                        html.P('Select the periods you\'re interested in around the event'),
+                        dbc.Checklist(options=[{'label':'All 24hrs after event', 'value':1},
+                                        {'label':'Night after event','value':2}], 
+                                        id='day-night-poi-checklist', value=[]),
+                    ], title='Set periods around event'),
+                ], start_collapsed=True),
+                dbc.Row(dbc.Button('Calculate metrics', color="secondary", id='periodic-metrics-button',)),
+            ], id='poi-2-collapse', is_open=False),
         ])),
+        
         dbc.Card(dbc.CardBody([
             html.H4('3. Calculate metrics'),
-            dbc.Button('Calculate', color="secondary", id='periodic-metrics-button',),
-            dbc.Row([
-            dbc.Col(width=6),
-            dbc.Col([
-                dbc.RadioItems(
-                    id="poi-unit-options",
-                    className="btn-group",
-                    inputClassName="btn-check",
-                    labelClassName="btn btn-outline-primary",
-                    labelCheckedClassName="active",
-                    options=[
-                        {"label": 'mmol/L', "value": 'mmol/L'},
-                        {"label": "mg/dL", "value": 'mg/dL'},
-                        #{"label": "Both", "value": 'both'},
-                    ],
-                    value='mmol/L',
-                    style={'textAlign': 'center'}
-                ),
+            dbc.Collapse([
+                dbc.Row([
+                dbc.Col(width=6),
+                dbc.Col([
+                    dbc.RadioItems(
+                        id="poi-unit-options",
+                        className="btn-group",
+                        inputClassName="btn-check",
+                        labelClassName="btn btn-outline-primary",
+                        labelCheckedClassName="active",
+                        options=[
+                            {"label": 'mmol/L', "value": 'mmol/L'},
+                            {"label": "mg/dL", "value": 'mg/dL'},
+                            #{"label": "Both", "value": 'both'},
+                        ],
+                        value='mmol/L',
+                        style={'textAlign': 'center'}
+                    ),
+                ]),
+                dbc.Col([
+                    dbc.RadioItems(
+                        id="poi-period-options",
+                        className="btn-group",
+                        inputClassName="btn-check",
+                        labelClassName="btn btn-outline-primary",
+                        labelCheckedClassName="active",
+                        options=[
+                            {"label": 'Events', "value": 'Events'},
+                            {"label": "Day/night", "value": 'Day/night'},
+                        ],
+                        value='Events',
+                        style={'textAlign': 'center'}
+                    ),
+                ])
             ]),
-            dbc.Col([
-                dbc.RadioItems(
-                    id="poi-period-options",
-                    className="btn-group",
-                    inputClassName="btn-check",
-                    labelClassName="btn btn-outline-primary",
-                    labelCheckedClassName="active",
-                    options=[
-                        {"label": 'Events', "value": 'Events'},
-                        {"label": "Day/night", "value": 'Day/night'},
-                    ],
-                    value='Events',
-                    style={'textAlign': 'center'}
-                ),
-            ])
-        ]),
-            html.Div(id='poi-metrics')
-        ])),
+                html.Div(id='poi-metrics')
+            ], id='poi-collapse-3')
+            ])),
     ])
 
 def create_range_slider(n_clicks, children):
@@ -167,6 +189,7 @@ def drag_values(drag):
         else:
             last = f'{last_num}hrs after'
     return first, last, first_num, last_num
+
 
 def parse_file(contents, filename, date):
     content_type, content_string = contents.split(',')
@@ -279,19 +302,27 @@ def create_data_table(data):
                             else {"name": i, "id": i, "hideable": True, "selectable": True}
                             for i in df.columns
                 ],
-                style_cell={
-                            'whiteSpace': 'normal',
-                            'font-family':'sans-serif'
-                },
                 style_data={
-                            'whiteSpace': 'normal',
-                            'height': 'auto',
-                            'width':'200px'
-                        },
+                                'whiteSpace': 'normal',
+                                'height': 'auto',
+                                #'width':'200px'
+                            },
+                style_cell={
+                        'whiteSpace': 'normal',
+                        'font-family':'sans-serif',
+                        'textAlign':'center',
+                        'backgroundColor':'white'
+                },
                 style_table={
                     'overflowX': 'auto',
-                    'height': 300,
+                    'maxHeight': '30vh',
                     },
+                
+                style_header={
+                    'backgroundColor': 'rgb(210, 210, 210)',
+                    'color': 'black',
+                    #'fontWeight': 'bold'
+                },
                 #editable=True,              # allow editing of data inside all cells                        
                 filter_action="native",     # allow filtering of data by user ('native') or not ('none')
                 sort_action="native",       # enables data to be sorted per-column by user or not ('none')
