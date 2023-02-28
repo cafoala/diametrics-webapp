@@ -144,8 +144,7 @@ def get_analysis_options_layout():
                     ])
                 ],
                 title="Adjust the thresholds for glycemic events",
-            ),
-            
+            ),    
         ],
         start_collapsed=True,
         )

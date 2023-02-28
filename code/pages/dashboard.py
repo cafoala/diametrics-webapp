@@ -443,9 +443,9 @@ def update_store(clicks, children):
     if clicks is None:
         raise PreventUpdate
     if children is None:
-        return None, False
+        raise PreventUpdate
     ranges = [i['props']['children']['props']['children'][0]['props']['children'][1]['props']['children'][0]['props']['children'][0]['props']['drag_value'] for i in children if i['props']['children']!=None]
-    return ranges, False
+    return ranges, True
 
 @callback(Output('poi-datafile', 'children'),
     Output('poi-store', 'data'),
@@ -476,8 +476,8 @@ def poi(date, contents, filename):
         return table, None
     else:
         df = pd.DataFrame.from_dict(data)
-        df['startDatetime'] = pd.to_datetime(df['startDatetime']).round('S').astype(str)
-        df['endDatetime'] = pd.to_datetime(df['endDatetime']).round('S').astype(str)
+        df['Start of event'] = pd.to_datetime(df['Start of event']).round('S').astype(str)
+        df['End of event'] = pd.to_datetime(df['End of event']).round('S').astype(str)
         df['ID'] = df['ID'].astype(str)
         table = dash_table.DataTable(id='poi-data', data=df.to_dict('records'), 
                                             style_data={
@@ -506,6 +506,7 @@ def poi(date, contents, filename):
 @callback(#Output('poi-metrics', 'children'),
     Output('poi-metrics-store', 'data'),
     Input('ranges-store', 'data'),
+    State('set-periods-poi-checklist', 'value'),
     State('poi-store', 'data'),
     State('raw-data-store', 'data'),
     State('tir-store', 'data'),
@@ -515,12 +516,12 @@ def poi(date, contents, filename):
     State('lv2-hyper-slider', 'value'),
     State('short-events-mins', 'value'),
     State('prolonged-events-mins', 'value'),
-    State('start-day-time', 'value'),
-    State('end-day-time', 'value'),
+    #State('start-day-time', 'value'),
+    #State('end-day-time', 'value'),
     State('start-night-time', 'value'),
     State('end-night-time', 'value'),
     prevent_initial_call=True)
-def metrics(poi_ranges, poi_data, raw_data, additional_tirs, lv1_hypo, lv2_hypo, lv1_hyper, lv2_hyper, short_mins, long_mins, day_start, day_end, night_start, night_end):
+def metrics(poi_ranges, set_periods, poi_data, raw_data, additional_tirs, lv1_hypo, lv2_hypo, lv1_hyper, lv2_hyper, short_mins, long_mins, night_start, night_end): # day_start, day_end, night_start, night_end
     if poi_ranges is None:
         raise PreventUpdate
     if poi_data is None:
@@ -539,7 +540,9 @@ def metrics(poi_ranges, poi_data, raw_data, additional_tirs, lv1_hypo, lv2_hypo,
             is_open=True,
             color='danger'
         ),
-    metrics = section_external_factors.calculate_periodic_metrics(poi_ranges, poi_data, raw_data, additional_tirs, lv1_hypo, lv2_hypo, lv1_hyper, lv2_hyper, short_mins, long_mins, day_start, day_end, night_start, night_end)
+    #print(set_periods)
+    metrics = section_external_factors.calculate_periodic_metrics(poi_ranges, set_periods, poi_data, raw_data, additional_tirs, lv1_hypo, lv2_hypo, lv1_hyper, lv2_hyper, short_mins, long_mins, night_start, night_end) #, day_start, day_end, night_start, night_end
+    #print(metrics)
     return metrics
 
 
@@ -548,17 +551,14 @@ def metrics(poi_ranges, poi_data, raw_data, additional_tirs, lv1_hypo, lv2_hypo,
     Output('poi-metrics', 'children'),
     Input('poi-metrics-store', 'data'),
     Input('poi-unit-options', 'value'),
-    Input('poi-period-options', 'value'),
     prevent_initial_call=True
     )
-def update_poi_metrics_table(metrics_data, units, period): 
+def update_poi_metrics_table(metrics_data, units): 
     df = pd.DataFrame.from_dict(metrics_data)
     if units == 'mmol/L':
-        #sub_df = np.round(df[(df['period']==period)&(df['units']==units)], 2)
         sub_df = np.round(df[df['units']==units], 2)
         
     else:
-        #sub_df = np.round(df[(df['period']==period)&(df['units']==units)], 1)
         sub_df = np.round(df[df['units']==units], 1)
 
     sub_df = section_metrics_tbl.change_headings(sub_df, units)

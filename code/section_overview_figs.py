@@ -3,8 +3,6 @@ import plotly.express as px
 import pandas as pd
 
 def create_bargraph(df, y_axis):
-    print(y_axis)
-    print(df.columns)
     if y_axis=='Time in range':
         y_value = ['TIR level 2 hypoglycemia', 
         'TIR level 1 hypoglycemia', 'TIR normal', 
