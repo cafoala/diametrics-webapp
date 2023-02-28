@@ -165,10 +165,14 @@ def create_metrics_table(df):
                             for i in df.columns
                 ],
                 data=df.to_dict('records'),
+                
                 style_cell={
-                            'whiteSpace': 'normal',
-                            'font-family':'sans-serif'
+                        'whiteSpace': 'normal',
+                        'font-family':'sans-serif',
+                        'textAlign':'center',
+                        'backgroundColor':'white'
                 },
+
                 style_data={
                             'whiteSpace': 'normal',
                             'height': 'auto',

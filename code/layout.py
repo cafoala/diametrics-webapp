@@ -8,9 +8,9 @@ import section_overview_figs
 import section_individual_figs
 import section_external_factors
 import dash_player as dp
+import instructions
 
 image_path = 'assets/logo.png'
-video_path = 'assets/test.mp4'
 
 navbar = dbc.NavbarSimple(
     children=[
@@ -58,9 +58,7 @@ jumbotron = html.Div(
     className="p-3 bg-light rounded-3",
 )
 
-video_section = html.Div([dp.DashPlayer(url=video_path, controls=True),
-                            dp.DashPlayer(url='https://youtu.be/d5pb9TgCGc0', controls=True),
-                                html.P('hello')])
+instruction_section = instructions.layout
 
 # the style arguments for the sidebar. We use position:fixed and a fixed width
 SIDEBAR_STYLE = {

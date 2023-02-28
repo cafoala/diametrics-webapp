@@ -1,3 +1,7 @@
+.accordion-button {
+  font-size: x-large;
+}
+
 .radio-group .form-check {
     padding-left: 0;
   }

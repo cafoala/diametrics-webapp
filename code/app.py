@@ -74,7 +74,8 @@ def display_page(pathname):
     elif pathname == '/dashboard':
          return layout.content
     elif pathname == '/instructions':
-        return layout.video_section
+        return layout.instruction_section
+
     else:
         return '404'
 
