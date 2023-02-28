@@ -30,11 +30,12 @@ layout = html.Div([
                         html.P('The Diametrics dashboard is navigated using the tabs at the top of the page. The first 4 tabs must be run consecutively, and you won’t be able to open the next one before the previous one is completed. The final 2 tabs can be accessed once the standard metrics in tab 4 have been calculated. For a more detailed description of each tab see the description below.'),
                     ),
                     dbc.Col(
-                        dp.DashPlayer(url=video_path, controls=True),
+                        dp.DashPlayer(url='https://www.youtube.com/watch?v=dOphbyjhACM', controls=True),
                     )
                 ])
             ], title='Changing tabs'),
             dbc.AccordionItem([
+                dp.DashPlayer(url='https://youtu.be/d5pb9TgCGc0', controls=True),
                 dbc.Row([
                     dbc.Col(
                         html.P('To upload data either select or drag and drop your CGM files into the dashed box. Currently, the filetypes we accept are csv, excel or text. There is no upper limit to the size of the file or the number of files you upload. You may run into problems if the total size of all your files is more than what the browser can handle. \
@@ -43,7 +44,7 @@ layout = html.Div([
                                 Once the upload is complete, you’ll find a list of files underneath for you to double check that the files you’ve uploaded are correct. ')
                     ), 
                     dbc.Col(
-                        dp.DashPlayer(url=video_path, controls=True),
+                        dp.DashPlayer(url='https://youtu.be/d5pb9TgCGc0', controls=True),
                     )
                 ])
             ], title='Uploading data'),
