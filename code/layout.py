@@ -104,6 +104,7 @@ sidebar = html.Div(
 )
 
 content = html.Div([
+    dcc.Store(storage_type='memory', id='file-store'),
     dcc.Store(storage_type='memory', id='raw-data-store'),
     dcc.Store(storage_type='memory', id='processed-data-store'),
     dcc.Store(storage_type='memory', id='tir-store'),

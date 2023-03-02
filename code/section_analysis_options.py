@@ -4,7 +4,6 @@ import dash_bootstrap_components as dbc
 import dash_mantine_components as dmc
 import datetime
 
-
 def get_analysis_options_layout():
     accordion = html.Div(
         dbc.Accordion([
