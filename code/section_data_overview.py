@@ -47,7 +47,7 @@ def parse_contents(contents, filename, date):
 
     except Exception as e:
         data_dictionary = {'Usable': False, 'Filename': filename, 
-           # 'Device':'N/A', 'Interval': 'N/A', 'data': 'N/A',
+            'Device':'N/A', #'Interval': 'N/A', 'data': 'N/A',
             'ID': 'N/A', 'Start DateTime': 'N/A', 'End DateTime': 'N/A',
             'Days': 'N/A', 'Data Sufficiency (%)':'N/A'}
         return data_dictionary
@@ -67,18 +67,19 @@ def read_files(files):
             elif 'txt' or 'tsv' in filename:
                 # Assume that the user upl, delimiter = r'\s+'oaded an excel file
                 df = pd.read_table(file, header=None, names = [i for i in range(0, 20)])
+            processed_files.append(preprocessing.preprocess_df(df, filename))
 
         except Exception as e:
             data_dictionary = {'Usable': False, 'Filename': filename, 
-            # 'Device':'N/A', 'Interval': 'N/A', 'data': 'N/A',
+             'Device':'N/A', #'Interval': 'N/A', 'data': 'N/A',
                 'ID': 'N/A', 'Start DateTime': 'N/A', 'End DateTime': 'N/A',
                 'Days': 'N/A', 'Data Sufficiency (%)':'N/A'}
             processed_files.append(data_dictionary)
-        processed_files.append(preprocessing.preprocess_df(df, filename))
     return processed_files
 
 def create_data_table(children):
     data_details = pd.DataFrame.from_dict(children)
+    print(data_details)
     data_details = data_details[['Filename', 'Usable', 'Device', 'ID', 'Start DateTime', 'End DateTime', 'Days', 'Data Sufficiency (%)']] #'Device', 'Interval', 'Units',
     data_details['Usable'] = data_details['Usable'].replace({True:'Yes', False:'No'})
 
