@@ -16,8 +16,7 @@ def get_upload_layout():
                         ],
                         color="info",
                         className="d-flex align-items-center",
-                ))]),
-
+                ))]), 
         dbc.Row([
                 dbc.Col(width=2),
                 dbc.Col([dcc.Upload(
@@ -42,6 +41,39 @@ def get_upload_layout():
                 ]),
                 dbc.Col(width=2),
                 ]),
+        html.Br(),
+        dbc.Row([
+                dbc.Col([
+                        html.H4('Date format:'),
+                        dbc.RadioItems(
+                                id="datetime-format",
+                                class_name="btn-group",
+                                inputClassName="btn-check",
+                                labelClassName="btn btn-outline-primary",
+                                labelCheckedClassName="active",
+                                options=[
+                                        {"label": "European", "value": 'euro'},
+                                        {"label": "American", "value": 'amer'},
+                                ],
+                                value='euro',
+                        )
+                ]),
+                dbc.Col([
+                        html.H4('Device:'),
+                        dbc.RadioItems(
+                                id="device",
+                                class_name="btn-group",
+                                inputClassName="btn-check",
+                                labelClassName="btn btn-outline-primary",
+                                labelCheckedClassName="active",
+                                options=[
+                                        {"label": "FreeStyle Libre", "value": 'libre'},
+                                        {"label": "Dexcom", "value": 'dexcom'},
+                                ],
+                                value='libre',
+                        )
+                ]),
+        ]),
         html.Div(id='filelist'),
         ])
 
