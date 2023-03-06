@@ -131,7 +131,7 @@ for i in [#['data-tab', 'upload-next-button'],#['other-metrics-tab', 'data-overv
 
 ## FILELIST ## 
 # List the filenames
-'''@callback(Output('filelist', 'children'),
+@callback(Output('filelist', 'children'),
         Input('upload-data', 'contents'),
         State('upload-data', 'filename'),
     prevent_initial_call=True)
@@ -139,9 +139,9 @@ def list_files(list_of_contents, list_of_names):
     if list_of_contents is not None:
 
         file_list = section_upload_content.create_file_list(list_of_names)
-        return file_list#, False'''
+        return file_list
 
-@du.callback(
+'''@du.callback(
     output=Output('filelist', 'children'),
     id='dash-uploader',
 )
@@ -149,7 +149,7 @@ def callback_on_completion(status: du.UploadStatus):
     filenames = [x.name for x in status.uploaded_files]
     file_list = section_upload_content.create_file_list(filenames)
     return file_list
-    #return html.Ul([html.Li(str(x)) for x in status.uploaded_files])
+    #return html.Ul([html.Li(str(x)) for x in status.uploaded_files])'''
 
 
 ## DATA TABLE ##                
