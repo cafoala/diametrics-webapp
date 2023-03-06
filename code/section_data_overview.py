@@ -95,6 +95,8 @@ def read_files_2(file, filename):
             # Assume that the user upl, delimiter = r'\s+'oaded an excel file
             df = pd.read_table(
                 io.StringIO(decoded.decode('utf-8')), header=None, names = [i for i in range(0, 20)])
+        
+        return preprocessing.preprocess_df(df, filename)
 
     except Exception as e:
         data_dictionary = {'Usable': False, 'Filename': filename, 
@@ -102,7 +104,6 @@ def read_files_2(file, filename):
             'ID': 'N/A', 'Start DateTime': 'N/A', 'End DateTime': 'N/A',
             'Days': 'N/A', 'Data Sufficiency (%)':'N/A'}
         return data_dictionary
-    return preprocessing.preprocess_df(df, filename)
 
 def create_data_table(children):
     data_details = pd.DataFrame.from_dict(children)
