@@ -18,10 +18,28 @@ def get_upload_layout():
                         className="d-flex align-items-center",
                 ))]),
 
-        dbc.Row([dbc.Col(width=2),
-                dbc.Col(html.Div(du.Upload(text='Drag and drop or click to select files', 
-                                max_files=1000, id='dash-uploader', 
-                                text_completed='Upload file complete: '))),
+        dbc.Row([
+                dbc.Col(width=2),
+                dbc.Col([dcc.Upload(
+                        id='upload-data',
+                        children=html.Div([
+                        'Drag and Drop or ',
+                        html.A('Select Files')
+                        ]),
+                        style={
+                        'width': '100%',
+                        'height': '60px',
+                        'lineHeight': '60px',
+                        'borderWidth': '1px',
+                        'borderStyle': 'dashed',
+                        'borderRadius': '5px',
+                        'textAlign': 'center',
+                        'margin': '10px'
+                        },
+                        # Allow multiple files to be uploaded
+                        multiple=True
+                ),
+                ]),
                 dbc.Col(width=2),
                 ]),
         html.Div(id='filelist'),
