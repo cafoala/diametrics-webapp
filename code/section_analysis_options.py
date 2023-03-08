@@ -98,7 +98,7 @@ def get_analysis_options_layout():
                         ], width=3),
                                
                         dbc.Col([dbc.Card(dbc.CardBody([
-                            html.H5('Hypoglycemia threshold'),
+                            html.H5('Hypoglycemia threshold (mmol/L)'),
                             html.H6('Level 1', style={'textAlign': 'right'}),
                             dcc.Slider(2.2, 22.2, step=0.1, value=3.9, 
                                         id='lv1-hypo-slider',
@@ -120,7 +120,7 @@ def get_analysis_options_layout():
                         ]),
                     
                         dbc.Col([dbc.Card(dbc.CardBody([
-                                html.H5('Hyperglycemia threshold',style={'textAlign': 'right'}),
+                                html.H5('Hyperglycemia threshold (mmol/L)',style={'textAlign': 'right'}),
 
                                 html.H6('Level 1'),
                                 dcc.Slider(2.2, 22.2, step=0.1, value=10.0, 
@@ -144,6 +144,38 @@ def get_analysis_options_layout():
                     ])
                 ],
                 title="Adjust the thresholds for glycemic events",
+            ),    
+dbc.AccordionItem(
+                [
+                    html.P("Use the sliders below to select the thresholds for level 1 and level 2 hypoglycemic episodes"),
+                    dbc.Checklist(options=[{'label':'Remove LO/HI values', 'value':1},
+                                        {'label':'Cap the glucose at selected cut-off','value':2}], 
+                                        id='lo-hi-cutoff-checklist', value=[]),
+                    dbc.Row([
+                        
+                        dbc.Col([dbc.Card(dbc.CardBody([
+                            html.H5('Low cut-off (mmol/L)'),
+                            dcc.Slider(1.1,5.3, step=0.1, value=2.1, 
+                                        id='lo-cutoff-slider',
+                                        tooltip={"placement": "bottom", "always_visible": True},
+                                        marks={1.1:{'label': '1.1'},
+                                                5.3:{'label': '5.3'}}
+                            )
+                        ]))]),
+                        dbc.Col([dbc.Card(dbc.CardBody([
+                            html.H5('High cut-off (mmol/L)'),
+                            dcc.Slider(19.0, 29.1, step=0.1, value=22.2,
+                                        id='hi-cutoff-slider',
+                                        tooltip={"placement": "bottom", "always_visible": True},
+                                        marks={19:{'label': '19.0'},
+                                                29.1:{'label': '29.1'}}
+                                       )
+                                ])),
+                        ]),
+                    
+                    ])
+                ],
+                title="Adjust the low/high glucose cut-off",
             ),    
         ],
         start_collapsed=True,

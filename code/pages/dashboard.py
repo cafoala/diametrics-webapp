@@ -176,12 +176,14 @@ def preprocess_data(n_clicks, list_of_dates, list_of_contents, list_of_names):
     State('upload-data', 'contents'),
     State('upload-data', 'filename'),
     State('datetime-format', 'value'),
+    State('device-button', 'value'),
+    State('units-first-button', 'value'),
     prevent_initial_call=True)
-def preprocess_data(n_clicks, list_of_dates, list_of_contents, list_of_names, dt_format):
+def preprocess_data(n_clicks, list_of_dates, list_of_contents, list_of_names, dt_format, device, units):
     if n_clicks is None or list_of_dates is None:
         raise PreventUpdate
     children = [
-        section_data_overview.read_files_2(c, n) for c, n in
+        section_data_overview.read_files_2(c, n, dt_format, device, units) for c, n in
                                                     zip(list_of_contents, list_of_names)]
     data_table = section_data_overview.create_data_table(children)
     return (children, data_table)
@@ -328,8 +330,14 @@ def display_day_time(day_start, day_end, night_start, night_end):
         State('end-day-time', 'value'),
         State('start-night-time', 'value'),
         State('end-night-time', 'value'),
+        State('lo-cutoff-slider', 'value'),
+        State('hi-cutoff-slider', 'value'),
+        State('lo-hi-cutoff-checklist', 'value'),
         prevent_initial_call=True)
-def calculate_metrics(additional_tirs, processed_data, edited_data, lv1_hypo, lv2_hypo, lv1_hyper, lv2_hyper, short_mins, long_mins, n_clicks, raw_data, day_start, day_end, night_start, night_end):
+def calculate_metrics(additional_tirs, processed_data, edited_data, lv1_hypo, lv2_hypo, 
+                      lv1_hyper, lv2_hyper, short_mins, long_mins, n_clicks, raw_data, 
+                      day_start, day_end, night_start, night_end, lo_cutoff, hi_cutoff, 
+                      lo_hi_cutoff_checklist):
     if n_clicks is None or raw_data is None:
         # prevent the None callbacks is important with the store component.
         # you don't want to update the store for nothing.
@@ -337,7 +345,11 @@ def calculate_metrics(additional_tirs, processed_data, edited_data, lv1_hypo, lv
     times = [i[11:16] for i in [day_start, day_end, night_start, night_end]]
     #all_results = section_metrics_tbl.calculate_metrics(raw_data, edited_data, times[0], times[1], times[2], times[3], additional_tirs, lv1_hypo, lv2_hypo,  lv1_hyper, lv2_hyper)
         
-    all_results = section_metrics_tbl.calculate_metrics(processed_data, times[0], times[1], times[2], times[3], additional_tirs, lv1_hypo, lv2_hypo,  lv1_hyper, lv2_hyper, short_mins, long_mins, )
+    all_results = section_metrics_tbl.calculate_metrics(processed_data, times[0], times[1], 
+                                                        times[2], times[3], additional_tirs, 
+                                                        lv1_hypo, lv2_hypo,  lv1_hyper, lv2_hyper, 
+                                                        short_mins, long_mins, lo_cutoff, hi_cutoff, 
+                                                        lo_hi_cutoff_checklist)
 
     #metrics = pd.DataFrame.from_dict(all_results).round(2) # this is stupid - already a dict
     
@@ -388,11 +400,16 @@ def create_individual_figs(ts, metrics):
     Input('subject-id', 'value'),
     #State('raw-data-store', 'data'),
     State('processed-data-store', 'data'),
+    State('lo-cutoff-slider', 'value'),
+    State('hi-cutoff-slider', 'value'),
+    State('lo-hi-cutoff-checklist', 'value'),
     #prevent_initial_call=True
 )
-def update_indiv_figs(subject_id, data):
+def update_indiv_figs(subject_id, data, low_cutoff, high_cutoff, checklist):
     #subject_data = next(item for item in data if item["ID"] == subject_id)
-    subject_data = pd.DataFrame(data)
+    #subject_data = pd.DataFrame(data)
+    subject_data = section_metrics_tbl.replace_cutoffs(data, low_cutoff, high_cutoff, checklist)
+
     df = subject_data.loc[subject_data['ID']==subject_id]
     #df = pd.DataFrame.from_dict(subject_data['data'])
     agp = section_individual_figs.create_amb_glc_profile(df)

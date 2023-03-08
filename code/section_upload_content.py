@@ -23,7 +23,7 @@ def get_upload_layout():
                         id='upload-data',
                         children=html.Div([
                         'Drag and Drop or ',
-                        html.A('Select Files')
+                html.A('Select Files')
                         ]),
                         style={
                         'width': '100%',
@@ -61,7 +61,7 @@ def get_upload_layout():
                 dbc.Col([
                         html.H4('Device:'),
                         dbc.RadioItems(
-                                id="device",
+                                id="device-button",
                                 class_name="btn-group",
                                 inputClassName="btn-check",
                                 labelClassName="btn btn-outline-primary",
@@ -71,6 +71,21 @@ def get_upload_layout():
                                         {"label": "Dexcom", "value": 'dexcom'},
                                 ],
                                 value='libre',
+                        )
+                ]),
+                dbc.Col([
+                        html.H4('Units:'),
+                        dbc.RadioItems(
+                                id="units-first-button",
+                                class_name="btn-group",
+                                inputClassName="btn-check",
+                                labelClassName="btn btn-outline-primary",
+                                labelCheckedClassName="active",
+                                options=[
+                                        {"label": "mmol/L", "value": 'mmol/L'},
+                                        {"label": "mg/dL", "value": 'mg/dL'},
+                                ],
+                                value='mmol/L',
                         )
                 ]),
         ]),

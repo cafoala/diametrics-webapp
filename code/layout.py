@@ -120,6 +120,7 @@ content = html.Div([
      #   dbc.CardBody([
     dbc.Tabs(
             [
+                # Upload section
                 dbc.Tab(
                     [dbc.Card(dbc.CardBody(
                         [section_upload_content.get_upload_layout()]),
@@ -131,6 +132,7 @@ content = html.Div([
                         ])],
                         label="1. Upload files", tab_id="upload-tab",
                         id='upload-tab', active_label_style={"color": "#FB79B3"}),
+                # Data overview
                 dbc.Tab(
                     [dbc.Card(dbc.CardBody(
                         [section_data_overview.get_datatable_layout()]),
@@ -146,23 +148,23 @@ content = html.Div([
                     ])], 
                         label="2. Check data", tab_id="data-tab",id="data-tab", 
                         disabled=True, active_label_style={"color": "#FB79B3"}),
+                # Analysis options
                 dbc.Tab(
                     [dbc.Card(dbc.CardBody(
                         [section_analysis_options.get_analysis_options_layout()]),
                         style={'height':'75vh','overflowY': 'scroll'}),
                     dbc.Row([
                         dbc.Col([                
-                            #dbc.Button('Back', id='calculate-metrics-back-button', color='secondary')   
                             dbc.Button('Back', id='analysis-options-back-button', color='secondary')
                         ]),
                         dbc.Col([                
-                            #dbc.Button('Next', id='calculate-metrics', color='secondary')  
                             dbc.Button('Next', id='analysis-options-next-button', color='secondary')   
                         ], style={'text-align': 'right'})
                     ])],
                         label="3. Analysis options", tab_id="other-metrics-tab", 
-                        id='other-metrics-tab', disabled=True, 
+                        id='other-metrics-tab', disabled=False, 
                         active_label_style={"color": "#FB79B3"}),
+                # Standard metrics
                 dbc.Tab(
                     [dbc.Card(dbc.CardBody(
                         [section_metrics_tbl.get_metrics_layout()]),
@@ -180,6 +182,7 @@ content = html.Div([
                         label="4. Standard metrics", tab_id="metrics-tab", 
                         id='metrics-tab', disabled=True, 
                         active_label_style={"color": "#FB79B3"}),
+                # Visualisatons
                 dbc.Tab(
                     [dbc.Card(dbc.CardBody(
                         section_individual_figs.create_indiv_layout()),
@@ -195,6 +198,7 @@ content = html.Div([
                         label="Visualisations", 
                         tab_id="indiv-vis", id='indiv-vis', disabled=True, 
                         active_label_style={"color": "#FB79B3"}),
+                # PoI
                 dbc.Tab(
                     [dbc.Card(
                         dbc.CardBody(

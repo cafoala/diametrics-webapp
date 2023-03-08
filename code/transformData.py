@@ -1,38 +1,44 @@
 import pandas as pd
 import autoprocessing
 
+
 class transformData:
-    def __init__(self, df):
+    def __init__(self, df, device):
         self.usable = False
         self.device = 'Unknown'
         self.interval = None
         self.data = None
         self.id = None
-        if self.assert_flash_libre(df):
-            print('it\'s a libre')
+        if device == 'libre':
+            #if self.assert_flash_libre(df):
+             #   print('it\'s a libre')
             try:
                 self.convert_flash_libre(df)
             except:
                 print('Can\'t convert to libre')
-        elif self.assert_dexcom(df):
+        elif device =='dexcom': #self.assert_dexcom(df):
             print('it\'s a dexcom')
             try:
                 self.convert_dexcom(df)
             except:
                 print('unkown device') 
-        else:
+        #else:
             # output can return whether it's usable or not usable
             # can we also store feedback of why it didn't work?
-            self.autoprocess(df)
+             
+         #   self.autoprocess(df)
             
 
     def assert_flash_libre(self, df):
         #check if cols align
-        header_mmol = ['Meter Timestamp', 'Historic Glucose(mmol/L)', 'Scan Glucose(mmol/L)']
-        header_mmol_2 = ['Device Timestamp', 'Historic Glucose mmol/L', 'Scan Glucose mmol/L']
-        header_mg = ['Meter Timestamp', 'Historic Glucose(mg/dL)', 'Scan Glucose(mg/dL)']
-        header_mg_2 = ['Device Timestamp', 'Historic Glucose mg/dL', 'Scan Glucose mg/dL']
+        header_mmol = ['Meter Timestamp', 'Historic Glucose(mmol/L)']#, 'Scan Glucose(mmol/L)']
+        header_mg = ['Meter Timestamp', 'Historic Glucose(mg/dL)']#, 'Scan Glucose(mg/dL)']
+
+        header_mmol_2 = ['Device Timestamp', 'Historic Glucose mmol/L']#, 'Scan Glucose mmol/L']
+        header_mg_2 = ['Device Timestamp', 'Historic Glucose mg/dL']#, 'Scan Glucose mg/dL']
+        
         header_row = set(df.iloc[2])
+        
         if (set(header_mmol).issubset(header_row)) or (set(header_mg).issubset(header_row)) or (set(header_mmol_2).issubset(header_row)) or (set(header_mg_2).issubset(header_row)):
             # Set that it's usable
             self.usable = True # might not be
@@ -67,9 +73,11 @@ class transformData:
 
         # Rename cols
         df.columns = ['time', 'glc', 'scan_glc']
-        
         # only keep time and glc for now
         self.data = df[['time', 'glc']]
+        self.interval = 15
+        self.usable = True
+        self.device = 'FreeStyle Libre'
 
     # Newer libre!
     '''
@@ -104,7 +112,15 @@ class transformData:
         df = df.loc[:,('GlucoseDisplayTime', 'GlucoseValue')]
         # Rename cols
         df.columns = ['time', 'glc']
+        # Replace low high values
+        df = df.replace({'High': 22.3, 'Low': 2.1, 'HI':22.3, 'LO':2.1, 'hi':22.3, 'lo':2.1})
         self.data = df
+        self.usable = True
+        # Set device name
+        self.device = 'Dexcom'
+        # set time interval to 15mins
+        self.interval = 5
+
 
     def autoprocess(self, df):
         self.device = 'Unknown'
