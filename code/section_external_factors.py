@@ -7,6 +7,7 @@ import metrics_experiment
 import metrics_helper
 from datetime import timedelta
 import numpy as np
+import section_metrics_tbl
 
 poi_template = pd.DataFrame([['ID must match your IDs in the webapp', 
                               'dd/mm/yy/ HH:MM', 'dd/mm/yy/ HH:MM',	
@@ -214,7 +215,6 @@ def drag_values(drag):
         if abs(first_num) == 1:
             first = f'{abs(first_num)}hr before'
         else:
-            print(f'first: {first_num}')
             first = f'{abs(first_num)}hrs before'
     elif drag[0]>2:
         first_num= np.round(drag[0]-2, 2)
@@ -262,7 +262,10 @@ def get_drag_times(first_num, last_num, start, end):
         last_time = start-timedelta(hours=abs(last_num))
     return first_time, last_time
 
-def periodic_calculations(info, glc_data, id_raw_data, first_time, last_time, start, end, additional_tirs, lv1_hypo, lv2_hypo, lv1_hyper, lv2_hyper, short_mins, long_mins): #, day_start, day_end, night_start, night_end
+def periodic_calculations(info, glc_data, id_raw_data, first_time, 
+                          last_time, start, end, additional_tirs, 
+                          lv1_hypo, lv2_hypo, lv1_hyper, lv2_hyper, 
+                          short_mins, long_mins):
 
     sub_df = glc_data[(glc_data['time']>=first_time)&(glc_data['time']<last_time)]
     
@@ -300,34 +303,48 @@ def periodic_calculations(info, glc_data, id_raw_data, first_time, last_time, st
         return info, info_mg
     
 
-def calculate_periodic_metrics(poi_ranges, set_periods, poi_data, raw_data, additional_tirs, lv1_hypo, lv2_hypo, lv1_hyper, lv2_hyper, short_mins, long_mins, night_start, night_end): #day_start, day_end, night_start, night_end
+def calculate_periodic_metrics(poi_ranges, set_periods, poi_data, raw_data, 
+                               additional_tirs, lv1_hypo, lv2_hypo, lv1_hyper, 
+                               lv2_hyper, short_mins, long_mins, night_start, 
+                               night_end, low_cutoff, high_cutoff, checklist):
     results = []
     
     for i in poi_data:
         ID = i['ID']
         start =  pd.to_datetime(i['Start of event']).round('S')
         end = pd.to_datetime(i['End of event']).round('S')
-        #label = i['label']
+        info = {'ID':ID, 'Start of event':start, 
+                'End of event':end, 'Period':'CGM file not available'}
+        info_mg = info.copy()
+        info['units'] = 'mmol/L'
+        info_mg['units'] = 'mg/dL'
+
         try:
             id_raw_data = next(item for item in raw_data if item['ID'] == ID)
         except:
-            # Add sumink
+            ##### Add sumink #####
+            results.append(info)
+            results.append(info_mg)
             continue
         if not id_raw_data['Usable']:
             # Return ID with sumink or uvver
+            results.append(info)
+            results.append(info_mg)
             continue
         glc_data = pd.DataFrame.from_dict(id_raw_data['data'])
         glc_data['time'] = pd.to_datetime(glc_data['time'])
-
+        
+        # Replace lo/hi values
+        glc_data = section_metrics_tbl.replace_cutoffs(glc_data, low_cutoff, 
+                                                     high_cutoff, checklist)
 
         for drag in poi_ranges:
-            #print(drag)
             # First num values
             first, last, first_num, last_num = drag_values(drag)
-            first_time, last_time = get_drag_times(first_num, last_num, start, end)
+            first_time, last_time = get_drag_times(first_num, last_num, 
+                                                   start, end)
 
-            info = {'ID':ID, 'Start of event':start, 
-                'End of event':end, 'Period': f'{first} to {last}'}
+            info['Period'] = f'{first} to {last}'
             metrics, metrics_mg = periodic_calculations(info, glc_data, id_raw_data, 
                                                         first_time, last_time, start, 
                                                         end, additional_tirs, lv1_hypo, 
@@ -339,9 +356,7 @@ def calculate_periodic_metrics(poi_ranges, set_periods, poi_data, raw_data, addi
 
         
         if 1 in set_periods:
-            print('1 in')
-            info = {'ID':ID, 'Start of event':start, 
-                'End of event':end, 'Period': f'24hrs after'}
+            info['Period'] = f'24hrs after'
             first_time = end
             last_time = end + timedelta(hours=24)
             metrics, metrics_mg = periodic_calculations(info, glc_data, id_raw_data,
@@ -354,10 +369,7 @@ def calculate_periodic_metrics(poi_ranges, set_periods, poi_data, raw_data, addi
         
         
         if 2 in set_periods:
-            print('2 in')
-            info = {'ID':ID, 'Start of event':start, 
-                'End of event':end, 'Period': f'Night after'}
-
+            info['Period'] = f'Night after event'
             night_start_minutes = int(night_start[14:16])
             night_start_hours = int(night_start[11:13])
 
@@ -379,7 +391,6 @@ def calculate_periodic_metrics(poi_ranges, set_periods, poi_data, raw_data, addi
             results.append(metrics)
             results.append(metrics_mg)
     all_metrics = pd.DataFrame.from_dict(results)
-    
     poi_data = pd.DataFrame.from_dict(poi_data)
     poi_data['Start of event'] = pd.to_datetime(poi_data['Start of event'])#.round('S')
     poi_data['End of event'] = pd.to_datetime(poi_data['End of event'])#.round('S')

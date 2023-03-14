@@ -131,7 +131,7 @@ for i in [#['data-tab', 'upload-next-button'],#['other-metrics-tab', 'data-overv
 
 ## FILELIST ## 
 # List the filenames
-'''@callback(Output('filelist', 'children'),
+@callback(Output('filelist', 'children'),
         Input('upload-data', 'contents'),
         State('upload-data', 'filename'),
     prevent_initial_call=True)
@@ -139,10 +139,9 @@ def list_files(list_of_contents, list_of_names):
     if list_of_contents is not None:
 
         file_list = section_upload_content.create_file_list(list_of_names)
-        return file_list'''
+        return file_list
 
-
-@du.callback(
+'''@du.callback(
     output=Output('filelist', 'children'),
     id='dash-uploader',
 )
@@ -171,16 +170,6 @@ def preprocess_data(n_clicks, list_of_dates, list_of_contents, list_of_names, dt
     data_table = section_data_overview.create_data_table(children)
     return (children, data_table)'''
 
-'''
-@du.callback([Output('raw-data-store', 'data'),
-    Output('data-tbl-div', 'children'),],
-    id='dash-uploader')
-def preprocess_data(status: du.UploadStatus):
-    if not status.is_completed:
-        raise PreventUpdate
-    children = section_data_overview.read_files(status.uploaded_files)
-    data_table = section_data_overview.create_data_table(children)
-    return (children, data_table)'''
 
 @du.callback([Output('raw-data-store', 'data'),
     Output('data-tbl-div', 'children'),],
@@ -191,23 +180,6 @@ def preprocess_data(status: du.UploadStatus):
     children = section_data_overview.read_files(status.uploaded_files)
     data_table = section_data_overview.create_data_table(children)
     return (children, data_table)
-
-'''@callback(Output('raw-data-store', 'data'),
-    Output('data-tbl-div', 'children'),
-    Input('datetime-format', 'value'),
-    State('dash-uploader', 'uploaded_files'),
-    State('dash-uploader', 'is_completed'),
-    prevent_initial_call=True)
-def preprocess_data(format, completed, uploaded_files):
-    print(format)
-    print(completed)
-    print(uploaded_files)
-    if uploaded_files is None:
-        raise PreventUpdate
-    print(uploaded_files)
-    children = section_data_overview.read_files(uploaded_files)
-    data_table = section_data_overview.create_data_table(children)
-    return (children, data_table)'''
 
 @callback(
     Output('data-tbl', 'data'),
@@ -330,8 +302,14 @@ def display_day_time(day_start, day_end, night_start, night_end):
         State('end-day-time', 'value'),
         State('start-night-time', 'value'),
         State('end-night-time', 'value'),
+        State('lo-cutoff-slider', 'value'),
+        State('hi-cutoff-slider', 'value'),
+        State('lo-hi-cutoff-checklist', 'value'),
         prevent_initial_call=True)
-def calculate_metrics(additional_tirs, processed_data, edited_data, lv1_hypo, lv2_hypo, lv1_hyper, lv2_hyper, short_mins, long_mins, n_clicks, raw_data, day_start, day_end, night_start, night_end):
+def calculate_metrics(additional_tirs, processed_data, edited_data, lv1_hypo, lv2_hypo, 
+                      lv1_hyper, lv2_hyper, short_mins, long_mins, n_clicks, raw_data, 
+                      day_start, day_end, night_start, night_end, lo_cutoff, hi_cutoff, 
+                      lo_hi_cutoff_checklist):
     if n_clicks is None or raw_data is None:
         # prevent the None callbacks is important with the store component.
         # you don't want to update the store for nothing.
@@ -339,7 +317,11 @@ def calculate_metrics(additional_tirs, processed_data, edited_data, lv1_hypo, lv
     times = [i[11:16] for i in [day_start, day_end, night_start, night_end]]
     #all_results = section_metrics_tbl.calculate_metrics(raw_data, edited_data, times[0], times[1], times[2], times[3], additional_tirs, lv1_hypo, lv2_hypo,  lv1_hyper, lv2_hyper)
         
-    all_results = section_metrics_tbl.calculate_metrics(processed_data, times[0], times[1], times[2], times[3], additional_tirs, lv1_hypo, lv2_hypo,  lv1_hyper, lv2_hyper, short_mins, long_mins, )
+    all_results = section_metrics_tbl.calculate_metrics(processed_data, times[0], times[1], 
+                                                        times[2], times[3], additional_tirs, 
+                                                        lv1_hypo, lv2_hypo,  lv1_hyper, lv2_hyper, 
+                                                        short_mins, long_mins, lo_cutoff, hi_cutoff, 
+                                                        lo_hi_cutoff_checklist)
 
     #metrics = pd.DataFrame.from_dict(all_results).round(2) # this is stupid - already a dict
     
@@ -390,11 +372,16 @@ def create_individual_figs(ts, metrics):
     Input('subject-id', 'value'),
     #State('raw-data-store', 'data'),
     State('processed-data-store', 'data'),
+    State('lo-cutoff-slider', 'value'),
+    State('hi-cutoff-slider', 'value'),
+    State('lo-hi-cutoff-checklist', 'value'),
     #prevent_initial_call=True
 )
-def update_indiv_figs(subject_id, data):
+def update_indiv_figs(subject_id, data, low_cutoff, high_cutoff, checklist):
     #subject_data = next(item for item in data if item["ID"] == subject_id)
-    subject_data = pd.DataFrame(data)
+    #subject_data = pd.DataFrame(data)
+    subject_data = section_metrics_tbl.replace_cutoffs(data, low_cutoff, high_cutoff, checklist)
+
     df = subject_data.loc[subject_data['ID']==subject_id]
     #df = pd.DataFrame.from_dict(subject_data['data'])
     agp = section_individual_figs.create_amb_glc_profile(df)
@@ -532,8 +519,7 @@ def poi(date, contents, filename):
                                             },)
         return table, data
 
-@callback(#Output('poi-metrics', 'children'),
-    Output('poi-metrics-store', 'data'),
+@callback(Output('poi-metrics-store', 'data'),
     Input('ranges-store', 'data'),
     State('set-periods-poi-checklist', 'value'),
     State('poi-store', 'data'),
@@ -545,12 +531,16 @@ def poi(date, contents, filename):
     State('lv2-hyper-slider', 'value'),
     State('short-events-mins', 'value'),
     State('prolonged-events-mins', 'value'),
-    #State('start-day-time', 'value'),
-    #State('end-day-time', 'value'),
     State('start-night-time', 'value'),
     State('end-night-time', 'value'),
+    State('lo-cutoff-slider', 'value'),
+    State('hi-cutoff-slider', 'value'),
+    State('lo-hi-cutoff-checklist', 'value'),
     prevent_initial_call=True)
-def metrics(poi_ranges, set_periods, poi_data, raw_data, additional_tirs, lv1_hypo, lv2_hypo, lv1_hyper, lv2_hyper, short_mins, long_mins, night_start, night_end): # day_start, day_end, night_start, night_end
+def metrics(poi_ranges, set_periods, poi_data, raw_data, 
+            additional_tirs, lv1_hypo, lv2_hypo, lv1_hyper, 
+            lv2_hyper, short_mins, long_mins, night_start, 
+            night_end, low_cutoff, high_cutoff, checklist):
     if poi_ranges is None:
         raise PreventUpdate
     if poi_data is None:
@@ -569,9 +559,7 @@ def metrics(poi_ranges, set_periods, poi_data, raw_data, additional_tirs, lv1_hy
             is_open=True,
             color='danger'
         ),
-    #print(set_periods)
-    metrics = section_external_factors.calculate_periodic_metrics(poi_ranges, set_periods, poi_data, raw_data, additional_tirs, lv1_hypo, lv2_hypo, lv1_hyper, lv2_hyper, short_mins, long_mins, night_start, night_end) #, day_start, day_end, night_start, night_end
-    #print(metrics)
+    metrics = section_external_factors.calculate_periodic_metrics(poi_ranges, set_periods, poi_data, raw_data, additional_tirs, lv1_hypo, lv2_hypo, lv1_hyper, lv2_hyper, short_mins, long_mins, night_start, night_end, low_cutoff, high_cutoff, checklist)
     return metrics
 
 

@@ -1,38 +1,45 @@
 import pandas as pd
 import autoprocessing
 
+
 class transformData:
-    def __init__(self, df):
+    def __init__(self, df, device):
         self.usable = False
         self.device = 'Unknown'
         self.interval = None
         self.data = None
         self.id = None
-        if self.assert_flash_libre(df):
-            print('it\'s a libre')
+
+        if device == 'FreeStyle Libre':
+            #if self.assert_flash_libre(df):
+             #   print('it\'s a libre')
             try:
                 self.convert_flash_libre(df)
             except:
                 print('Can\'t convert to libre')
-        elif self.assert_dexcom(df):
+        elif device =='Dexcom': #self.assert_dexcom(df):
             print('it\'s a dexcom')
             try:
                 self.convert_dexcom(df)
             except:
-                print('unkown device') 
-        else:
+                print('Cant convert') 
+        #else:
             # output can return whether it's usable or not usable
             # can we also store feedback of why it didn't work?
-            self.autoprocess(df)
+             
+         #   self.autoprocess(df)
             
 
     def assert_flash_libre(self, df):
         #check if cols align
-        header_mmol = ['Meter Timestamp', 'Historic Glucose(mmol/L)', 'Scan Glucose(mmol/L)']
-        header_mmol_2 = ['Device Timestamp', 'Historic Glucose mmol/L', 'Scan Glucose mmol/L']
-        header_mg = ['Meter Timestamp', 'Historic Glucose(mg/dL)', 'Scan Glucose(mg/dL)']
-        header_mg_2 = ['Device Timestamp', 'Historic Glucose mg/dL', 'Scan Glucose mg/dL']
+        header_mmol = ['Meter Timestamp', 'Historic Glucose(mmol/L)']#, 'Scan Glucose(mmol/L)']
+        header_mg = ['Meter Timestamp', 'Historic Glucose(mg/dL)']#, 'Scan Glucose(mg/dL)']
+
+        header_mmol_2 = ['Device Timestamp', 'Historic Glucose mmol/L']#, 'Scan Glucose mmol/L']
+        header_mg_2 = ['Device Timestamp', 'Historic Glucose mg/dL']#, 'Scan Glucose mg/dL']
+        
         header_row = set(df.iloc[2])
+        
         if (set(header_mmol).issubset(header_row)) or (set(header_mg).issubset(header_row)) or (set(header_mmol_2).issubset(header_row)) or (set(header_mg_2).issubset(header_row)):
             # Set that it's usable
             self.usable = True # might not be
@@ -67,23 +74,23 @@ class transformData:
 
         # Rename cols
         df.columns = ['time', 'glc', 'scan_glc']
-        
         # only keep time and glc for now
         self.data = df[['time', 'glc']]
+        self.interval = 15
+        self.usable = True
+        #self.device = 'FreeStyle Libre'
 
-    # Newer libre!
-    '''
-    'Device', 'Serial Number', 'Device Timestamp', 'Record Type',
-        'Historic Glucose mmol/L', 'Scan Glucose mmol/L',
-    '''
+
 
     def assert_dexcom(self, df):
-        header =['GlucoseDisplayTime', 'GlucoseValue',	'MeterInternalTime', 'MeterDisplayTime', 'MeterValue']
-        if set(header).issubset(set(df.columns)):
+        header =['GlucoseDisplayTime', 'GlucoseValue']#,	'MeterInternalTime', 'MeterDisplayTime', 'MeterValue']
+        header_row = set(df.iloc[0])
+
+        if set(header).issubset(header_row):
             # Set that it's usable
             self.usable = True # might not be
             # Set device name
-            self.device = 'Dexcom'
+            #self.device = 'Dexcom'
             # set time interval to 15mins
             self.interval = 5
             # Set ID if it's not empty
@@ -94,17 +101,26 @@ class transformData:
             return False
 
     def convert_dexcom(self, df):
-        # Drop top rows
-        #df = df.iloc[2:]
         # Set first row as column headers
-        #df.columns = df.iloc[0]
+        df.columns = df.iloc[0]
+        # Drop top rows
+        df = df.iloc[1:]
+
         #df.drop(index=[2], inplace=True)
         df.reset_index(inplace=True, drop=True)
         # Keep important columns
         df = df.loc[:,('GlucoseDisplayTime', 'GlucoseValue')]
         # Rename cols
         df.columns = ['time', 'glc']
+        # Replace low high values
+        #df = df.replace({'High': 22.3, 'Low': 2.1, 'HI':22.3, 'LO':2.1, 'hi':22.3, 'lo':2.1})
         self.data = df
+        self.usable = True
+        # Set device name
+        #self.device = 'Dexcom'
+        # set time interval to 5mins
+        self.interval = 5
+
 
     def autoprocess(self, df):
         self.device = 'Unknown'

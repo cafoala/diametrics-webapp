@@ -17,35 +17,62 @@ def get_upload_layout():
                         color="info",
                         className="d-flex align-items-center",
                 ))]),
-        html.Br(),
+
         dbc.Row([dbc.Col(width=2),
-                dbc.Col([
-                        html.Div(du.Upload(text='Drag and drop or click to select files', 
+                dbc.Col(html.Div(du.Upload(text='Drag and drop or click to select files', 
                                 max_files=1000, id='dash-uploader', 
-                                text_completed='Upload file complete: ')),
-                        dcc.Upload(
-                                id='upload-data',
-                                children=html.Div([
-                                'Drag and Drop or ',
-                                html.A('Select Files')
-                                ]),
-                                style={
-                                'width': '100%',
-                                'height': '60px',
-                                'lineHeight': '60px',
-                                'borderWidth': '1px',
-                                'borderStyle': 'dashed',
-                                'borderRadius': '5px',
-                                'textAlign': 'center',
-                                'margin': '10px'
-                                },
-                                # Allow multiple files to be uploaded
-                                multiple=True
-                        ),
-                        ]),
-                
+                                text_completed='Upload file complete: '))),
                 dbc.Col(width=2),
                 ]),
+        html.Br(),
+        dbc.Row([
+                dbc.Col([
+                        html.H5('Device:'),
+                        dbc.RadioItems(
+                                id="device-button",
+                                class_name="btn-group",
+                                inputClassName="btn-check",
+                                labelClassName="btn btn-outline-primary",
+                                labelCheckedClassName="active",
+                                options=[
+                                        {"label": "FreeStyle Libre", "value": 'FreeStyle Libre'},
+                                        {"label": "Dexcom", "value": 'Dexcom'},
+                                        {"label": "Medtronic", "value": 'Medtronic', 'disabled':True},
+                                ],
+                                value='FreeStyle Libre',
+                        )
+                ], width=5),
+                dbc.Col([
+                        html.H5('Date format:'),
+                        dbc.RadioItems(
+                                id="datetime-format",
+                                class_name="btn-group",
+                                inputClassName="btn-check",
+                                labelClassName="btn btn-outline-primary",
+                                labelCheckedClassName="active",
+                                options=[
+                                        {"label": "European", "value": 'euro'},
+                                        {"label": "American", "value": 'amer'},
+                                ],
+                                value='euro',
+                        )
+                ]),
+                dbc.Col([
+                        html.H5('Units:'),
+                        dbc.RadioItems(
+                                id="units-first-button",
+                                class_name="btn-group",
+                                inputClassName="btn-check",
+                                labelClassName="btn btn-outline-primary",
+                                labelCheckedClassName="active",
+                                options=[
+                                        {"label": "mmol/L", "value": 'mmol/L'},
+                                        {"label": "mg/dL", "value": 'mg/dL'},
+                                ],
+                                value='mmol/L',
+                        )
+                ]),
+        ]),
         html.Div(id='filelist'),
         ])
 

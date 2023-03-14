@@ -25,7 +25,7 @@ SIDEBAR_STYLE = {
     "top": 0,
     "left": 0,
     "bottom": 0,
-    "width": "25vh",
+    "width": "35vh",
     "padding": "2rem 1rem",
     "background-color": "#f8f9fa",
 }
@@ -33,7 +33,7 @@ SIDEBAR_STYLE = {
 # the styles for the main content position it to the right of the sidebar and
 # add some padding.
 CONTENT_STYLE = {
-    "margin-left": "30vh",
+    "margin-left": "40vh",
     "margin-right": "2rem",
     "padding": "1.5rem 1rem",
 }
@@ -50,7 +50,7 @@ sidebar = html.Div(
             [
                 dbc.NavLink("Home", href="/", active="exact"),
                 dbc.NavLink("Dashboard", href="/dashboard", active="exact"),
-                dbc.NavLink("Instructions", href="/instructions", active="exact"),
+                dbc.NavLink("Documentation", href="/documentation", active="exact", target="_blank"),
                 dbc.NavLink("About Us", href="/page-3", active="exact"),
                 dbc.NavLink("Contact", href="/contact", active="exact"),
             ],
@@ -73,7 +73,7 @@ def display_page(pathname):
          return layout.jumbotron
     elif pathname == '/dashboard':
          return layout.content
-    elif pathname == '/instructions':
+    elif pathname == '/documentation':
         return layout.instruction_section
 
     else:
