@@ -159,18 +159,36 @@ def callback_on_completion(status: du.UploadStatus):
     State('upload-data', 'last_modified'),
     State('upload-data', 'contents'),
     State('upload-data', 'filename'),
-    State('datetime-format', 'value'),
     prevent_initial_call=True)
-def preprocess_data(n_clicks, list_of_dates, list_of_contents, list_of_names, dt_format):
+def preprocess_data(n_clicks, list_of_dates, list_of_contents, list_of_names):
     if n_clicks is None or list_of_dates is None:
         raise PreventUpdate
     children = [
-        section_data_overview.read_files_2(c, n) for c, n in
-                                                    zip(list_of_contents, list_of_names)]
+        section_data_overview.parse_contents(c, n, d) for c, n, d in
+        zip(list_of_contents, list_of_names, list_of_dates)]
     data_table = section_data_overview.create_data_table(children)
     return (children, data_table)'''
 
+@callback([Output('raw-data-store', 'data'),
+    Output('data-tbl-div', 'children')],
+    Input('upload-next-button', 'n_clicks'),
+    State('upload-data', 'last_modified'),
+    State('upload-data', 'contents'),
+    State('upload-data', 'filename'),
+    State('datetime-format', 'value'),
+    State('device-button', 'value'),
+    State('units-first-button', 'value'),
+    prevent_initial_call=True)
+def preprocess_data(n_clicks, list_of_dates, list_of_contents, list_of_names, dt_format, device, units):
+    if n_clicks is None or list_of_dates is None:
+        raise PreventUpdate
+    children = [
+        section_data_overview.read_files_2(c, n, dt_format, device, units) for c, n in
+                                                    zip(list_of_contents, list_of_names)]
+    data_table = section_data_overview.create_data_table(children)
+    return (children, data_table)
 
+'''
 @du.callback([Output('raw-data-store', 'data'),
     Output('data-tbl-div', 'children'),],
     id='dash-uploader')
@@ -181,6 +199,16 @@ def preprocess_data(status: du.UploadStatus):
     data_table = section_data_overview.create_data_table(children)
     return (children, data_table)
 
+@du.callback([Output('raw-data-store', 'data'),
+    Output('data-tbl-div', 'children')],
+    id='dash-uploader')
+def preprocess_data(status: du.UploadStatus):
+    if not status.is_completed:
+        raise PreventUpdate
+    children = section_data_overview.read_files(status.uploaded_files)
+    data_table = section_data_overview.create_data_table(children)
+    return (children, data_table)
+'''
 @callback(
     Output('data-tbl', 'data'),
     Output('data-tbl', 'style_data_conditional'),
