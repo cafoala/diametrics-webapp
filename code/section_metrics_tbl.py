@@ -150,7 +150,6 @@ def calculate_metrics(processed_data, day_start, day_end, night_start,
                                 day_end, night_start, night_end, additional_tirs, 
                                 lv1_hypo, lv2_hypo, lv1_hyper, lv2_hyper, short_mins, long_mins))
     all_results = all_results.reset_index().drop(columns='level_1')
-    print(all_results)
     all_results = all_results.to_dict('records')
     return all_results
 
