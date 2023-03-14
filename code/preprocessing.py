@@ -54,7 +54,7 @@ def preprocess_df(df, filename, dt_format, device, units):
             
             data_dictionary['Usable'] = df_transformed.usable
             data_dictionary['Filename'] = filename
-            data_dictionary['Device'] = df_transformed.device
+            data_dictionary['Device'] = device #df_transformed.device
             data_dictionary['Interval'] = df_transformed.interval
             data_dictionary['Units'] = units
             data_dictionary['data'] = df_transformed.data.to_dict('records')

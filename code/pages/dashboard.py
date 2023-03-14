@@ -547,8 +547,7 @@ def poi(date, contents, filename):
                                             },)
         return table, data
 
-@callback(#Output('poi-metrics', 'children'),
-    Output('poi-metrics-store', 'data'),
+@callback(Output('poi-metrics-store', 'data'),
     Input('ranges-store', 'data'),
     State('set-periods-poi-checklist', 'value'),
     State('poi-store', 'data'),
@@ -560,12 +559,16 @@ def poi(date, contents, filename):
     State('lv2-hyper-slider', 'value'),
     State('short-events-mins', 'value'),
     State('prolonged-events-mins', 'value'),
-    #State('start-day-time', 'value'),
-    #State('end-day-time', 'value'),
     State('start-night-time', 'value'),
     State('end-night-time', 'value'),
+    State('lo-cutoff-slider', 'value'),
+    State('hi-cutoff-slider', 'value'),
+    State('lo-hi-cutoff-checklist', 'value'),
     prevent_initial_call=True)
-def metrics(poi_ranges, set_periods, poi_data, raw_data, additional_tirs, lv1_hypo, lv2_hypo, lv1_hyper, lv2_hyper, short_mins, long_mins, night_start, night_end): # day_start, day_end, night_start, night_end
+def metrics(poi_ranges, set_periods, poi_data, raw_data, 
+            additional_tirs, lv1_hypo, lv2_hypo, lv1_hyper, 
+            lv2_hyper, short_mins, long_mins, night_start, 
+            night_end, low_cutoff, high_cutoff, checklist):
     if poi_ranges is None:
         raise PreventUpdate
     if poi_data is None:
@@ -584,9 +587,7 @@ def metrics(poi_ranges, set_periods, poi_data, raw_data, additional_tirs, lv1_hy
             is_open=True,
             color='danger'
         ),
-    #print(set_periods)
-    metrics = section_external_factors.calculate_periodic_metrics(poi_ranges, set_periods, poi_data, raw_data, additional_tirs, lv1_hypo, lv2_hypo, lv1_hyper, lv2_hyper, short_mins, long_mins, night_start, night_end) #, day_start, day_end, night_start, night_end
-    #print(metrics)
+    metrics = section_external_factors.calculate_periodic_metrics(poi_ranges, set_periods, poi_data, raw_data, additional_tirs, lv1_hypo, lv2_hypo, lv1_hyper, lv2_hyper, short_mins, long_mins, night_start, night_end, low_cutoff, high_cutoff, checklist)
     return metrics
 
 

@@ -6,6 +6,7 @@ import dash_player as dp
 layout = html.Div([
     dbc.Card(dbc.CardBody([
         html.H2('How to use the Diametrics dashboard'),
+        # How to use dashboard
         dbc.Accordion([
             # Overview
             dbc.AccordionItem([
@@ -266,6 +267,7 @@ layout = html.Div([
                             html.Div([
                             dcc.Markdown([
                                 '''
+                                
                                 '''
                             ])
                             ])

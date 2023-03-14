@@ -162,7 +162,7 @@ content = html.Div([
                         ], style={'text-align': 'right'})
                     ])],
                         label="3. Analysis options", tab_id="other-metrics-tab", 
-                        id='other-metrics-tab', disabled=False, 
+                        id='other-metrics-tab', disabled=True, 
                         active_label_style={"color": "#FB79B3"}),
                 # Standard metrics
                 dbc.Tab(

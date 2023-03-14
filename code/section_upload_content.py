@@ -44,7 +44,23 @@ def get_upload_layout():
         html.Br(),
         dbc.Row([
                 dbc.Col([
-                        html.H4('Date format:'),
+                        html.H5('Device:'),
+                        dbc.RadioItems(
+                                id="device-button",
+                                class_name="btn-group",
+                                inputClassName="btn-check",
+                                labelClassName="btn btn-outline-primary",
+                                labelCheckedClassName="active",
+                                options=[
+                                        {"label": "FreeStyle Libre", "value": 'FreeStyle Libre'},
+                                        {"label": "Dexcom", "value": 'Dexcom'},
+                                        {"label": "Medtronic", "value": 'Medtronic', 'disabled':True},
+                                ],
+                                value='FreeStyle Libre',
+                        )
+                ], width=5),
+                dbc.Col([
+                        html.H5('Date format:'),
                         dbc.RadioItems(
                                 id="datetime-format",
                                 class_name="btn-group",
@@ -59,22 +75,7 @@ def get_upload_layout():
                         )
                 ]),
                 dbc.Col([
-                        html.H4('Device:'),
-                        dbc.RadioItems(
-                                id="device-button",
-                                class_name="btn-group",
-                                inputClassName="btn-check",
-                                labelClassName="btn btn-outline-primary",
-                                labelCheckedClassName="active",
-                                options=[
-                                        {"label": "FreeStyle Libre", "value": 'libre'},
-                                        {"label": "Dexcom", "value": 'dexcom'},
-                                ],
-                                value='libre',
-                        )
-                ]),
-                dbc.Col([
-                        html.H4('Units:'),
+                        html.H5('Units:'),
                         dbc.RadioItems(
                                 id="units-first-button",
                                 class_name="btn-group",

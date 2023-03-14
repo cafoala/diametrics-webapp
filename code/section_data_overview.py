@@ -87,7 +87,7 @@ def read_files_2(file, filename, dt_format, device, units):
                 io.StringIO(decoded.decode('utf-8')), header=None, names = [i for i in range(0, 20)])
         elif 'xls' in filename:
             # Assume that the user uploaded an excel file
-            df = pd.read_excel(io.BytesIO(decoded), header=None, names = [i for i in range(0, 20)])
+            df = pd.read_excel(io.BytesIO(decoded), header=None)#, names = [i for i in range(0, 20)])
         elif 'txt' or 'tsv' in filename:
             # Assume that the user upl, delimiter = r'\s+'oaded an excel file
             df = pd.read_table(

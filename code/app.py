@@ -25,7 +25,7 @@ SIDEBAR_STYLE = {
     "top": 0,
     "left": 0,
     "bottom": 0,
-    "width": "30vh",
+    "width": "35vh",
     "padding": "2rem 1rem",
     "background-color": "#f8f9fa",
 }
@@ -33,7 +33,7 @@ SIDEBAR_STYLE = {
 # the styles for the main content position it to the right of the sidebar and
 # add some padding.
 CONTENT_STYLE = {
-    "margin-left": "35vh",
+    "margin-left": "40vh",
     "margin-right": "2rem",
     "padding": "1.5rem 1rem",
 }
