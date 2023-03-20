@@ -83,7 +83,8 @@ def get_metrics_breakdown(df_id, day_start, day_end, night_start, night_end,
     all_results = all_results.append(all_mg)
 
     df_day, df_night = periods.get_day_night_breakdown(df_id, day_start, day_end, night_start, night_end)
-    
+    print(df_day.head())
+    print(df_night.head())
     # Daytime breakdown metrics 
     day, day_mg = metrics_experiment.calculate_all_metrics(df_day, 
                         #ID=ID, units=i['Units'], 
@@ -106,7 +107,7 @@ def get_metrics_breakdown(df_id, day_start, day_end, night_start, night_end,
     night, night_mg= metrics_experiment.calculate_all_metrics(df_night,
                         #ID=ID, units=i['Units'], 
                         additional_tirs=additional_tirs, lv1_hypo=lv1_hypo, 
-                        lv2_hypo=lv2_hypo, lv1_hyper=lv1_hyper, 
+                        lv2_hypo=lv2_hypo, lv1_hyper=lv1_hyper,
                         lv2_hyper=lv2_hyper, event_mins=short_mins,
                         event_long_mins=long_mins)
     
@@ -156,7 +157,7 @@ def calculate_metrics(processed_data, day_start, day_end, night_start,
 def change_headings(df, units):
     if units == 'mmol/L':
         return df.rename(columns={'Average glucose':'Average glucose (mmol/L)','SD':'SD (mmol/L)', 
-                    'Min. glucose':'Min. glucose (mmol/L)',
+                    'Min. glucose':'Min.glucose (mmol/L)',
                     'Max. glucose':'Max. glucose (mmol/L)', 'AUC':'AUC (mmol h/L)', 
                     'MAGE':'MAGE (mmol/L)', 'TIR normal':'Time in range 3.9-10mmol/L (%)',
                     'TIR level 1 hypoglycemia':'Time in range 3.0-3.9 mmol/L (%)', 

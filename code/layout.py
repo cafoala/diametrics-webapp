@@ -44,13 +44,19 @@ jumbotron = html.Div(
                 className="lead",
             ),
             html.Hr(className="my-2"),
+            dp.DashPlayer(url='https://www.youtube.com/watch?v=dOphbyjhACM', controls=True),
+
             html.P(
                 "Use utility classes for typography and spacing to suit the "
                 "larger container."
             ),
             html.P(
-                dbc.Button("Learn more", color="primary"), className="lead"
+                dbc.Button([dbc.NavItem(
+            [
+                dbc.NavLink("Documentation", href="/documentation", active="True", target="_blank"),
+            ])], color="primary"), className="lead"
             ),
+            
         ],
         fluid=True,
         className="py-3",

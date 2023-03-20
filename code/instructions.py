@@ -63,24 +63,26 @@ layout = html.Div([
                             '''
                             This section serves to give you an overview of the processed CGM files you uploaded and allows you to do some minor editing of the data. To get more information about each column, hover over the column name.
 
-                            If the data is not usable, you will see the **usable** column says No and the row is highlighted red. If the row is highlighted red in any case, it means that the analysis with this file cannot go any further and you will need to edit your file in some way. To better understand why your file isn’t working you can use the to list below to help you debug the potential cause of the error:
+                            If the data is not usable, you will see the **usable** column says No and the row is highlighted red. If the row is highlighted red in any case, it means that the analysis with this file cannot go any further and you will need to edit your file in some way. 
                             
-                            * Wrong file type (needs to be csv, excel or txt)
-                            * Unable to find the correct headings
-                            * Glucose data is in European format with , instead of . for decimal places (i.e. 3,9 rather than 3.9)
-                            * Other incorrect data in either the datetime or glucose columns (i.e. words, letters)
-                            * The date being in American format rather than European. Come on guys… we all know the day comes first!
+                            To better understand why your file isn’t working you can use the to list below to help you debug the potential cause of the error:
                             '''
                         )
                     ]),
                     dbc.Col([
-                        dp.DashPlayer(url='https://www.youtube.com/watch?v=dOphbyjhACM', controls=True),
+                        dp.DashPlayer(url='https://youtu.be/djpE5qRk5_Y', controls=True),
                     ])
                 ]),
                 html.Br(),
                 dbc.Row([
                     dcc.Markdown(
                         '''
+                        * Wrong file type (needs to be csv, excel or txt)
+                        * Unable to find the correct headings
+                        * Glucose data is in European format with , instead of . for decimal places (i.e. 3,9 rather than 3.9)
+                        * Other incorrect data in either the datetime or glucose columns (i.e. words, letters)
+                        * The date being in American format rather than European. Come on guys… we all know the day comes first!
+
                         The **Start DateTime** and **End DateTime** columns can be edited to adjust the period you want to analyse. The format for this will need to be either YYYY-MM-DD HH:MM or YYYY/MM/DD HH:MM. If edited, the Days and Data Sufficiency (%) columns will be updated automatically. If the entries are invalid, you’ll see **N/A** appear and the row will be highlighted red to show that it is no longer usable. The International consensus specifies that there should be a minimum of 2 weeks of data with 70-80% data sufficiency. If either the number of days or the data sufficiency are below this recommendation, they will be highlighted orange to let you know but you can still continue with your analysis.
 
                         The two devices that have been hardcoded into the program are Libre and Dexcom. This will show in the **Device** column. An autoprocessing tool has been added to process files that don’t fit into these formats however this will not work on all data. If the data has been autoprocessed then the device type will show as **Unknown**.
@@ -100,18 +102,20 @@ layout = html.Div([
 
                             ##### Day/night time
                             You can edit the day/night settings by clicking on the first drop-down bar. Here you can enter the times for the start and end of the day and night-time. The default times are set to 6am-12am for the day and 12am-6am for the night, as defined in the International Consensus. 
-                            The times you set don’t need to be the same for day and night, for example you can finish the day at 10pm and start the night at 2am (or vice versa). However, the times you set will remain the same across all files, at this stage you can’t tailor them to individuals. If you’re interested in more in-depth periodic analysis, then see the advanced analysis section.
                             
                             '''
                         ),
                     ]),
                     dbc.Col([
-                        dp.DashPlayer(url='https://www.youtube.com/watch?v=dOphbyjhACM', controls=True),
+                        dp.DashPlayer(url='https://youtu.be/8WSdy-Rqn5k', controls=True),
                     ])
                 ]),
                 dbc.Row([
                     dcc.Markdown(
                             '''
+                            The times you set don’t need to be the same for day and night, for example you can finish the day at 10pm and start the night at 2am (or vice versa). However, the times you set will remain the same across all files, at this stage you can’t tailor them to individuals. If you’re interested in more in-depth periodic analysis, then see the advanced analysis section.
+
+                                                        
                             ##### Time in range thresholds
                             The International Consensus suggests the calculate the percentage time in the following standard ranges:
                                 
@@ -143,18 +147,24 @@ layout = html.Div([
 
                             At the top of the tab, there are two sets of buttons. The first will change the units from mmol/L to mg/dL. The second set gives you a breakdown of the metrics for day and night times selected in the analysis options section. You can see the times that are being used below the buttons.
 
-                            You can sort or filter the rows based by specific columns. You can also hide columns by pressing the eye button to the left of the column name. If you want the columns back again you can click on the **Toggle Columns** button to select and deselect the ones you want in the table.
-
-                            To download the table, click the **Export** button. Be aware, it will download the table exactly as it looks on the screen so all of the filtering, sorting and column toggling you do will be in your final file.
-
-                            Below the table are two overview data visualisations. The first is a bar graph that shows the result of each metric for each individual. The default is set to time in range, broken down into the different ranges recommended by the International Consensus. The second visualisation in a boxplot to show the distribution of the metric between individuals in the data uploaded. Both of these visualisations are controlled with the dropdown selection to the right of the page. These figures reflect the data in the table, so will change when units or time period is changed with the buttons at the top.
                             '''
                         ),
                     ]),
                     dbc.Col([
-                        dp.DashPlayer(url='https://www.youtube.com/watch?v=dOphbyjhACM', controls=True),                        
+                        dp.DashPlayer(url='https://youtu.be/ypw4CTt7ou8', controls=True),                        
                     ])
-                ])
+                ]),
+                dbc.Row(
+                    dcc.Markdown(
+                        '''
+                        You can sort or filter the rows based by specific columns. You can also hide columns by pressing the eye button to the left of the column name. If you want the columns back again you can click on the **Toggle Columns** button to select and deselect the ones you want in the table.
+
+                        To download the table, click the **Export** button. Be aware, it will download the table exactly as it looks on the screen so all of the filtering, sorting and column toggling you do will be in your final file.
+
+                        Below the table are two overview data visualisations. The first is a bar graph that shows the result of each metric for each individual. The default is set to time in range, broken down into the different ranges recommended by the International Consensus. The second visualisation in a boxplot to show the distribution of the metric between individuals in the data uploaded. Both of these visualisations are controlled with the dropdown selection to the right of the page. These figures reflect the data in the table, so will change when units or time period is changed with the buttons at the top.
+                        
+                        '''
+                ))
             ], title='Standard metrics'),
             # Visualisations
             dbc.AccordionItem([
@@ -169,7 +179,7 @@ layout = html.Div([
                         ),
                     ]),
                     dbc.Col([
-                        dp.DashPlayer(url='https://www.youtube.com/watch?v=dOphbyjhACM', controls=True),
+                        dp.DashPlayer(url='https://youtu.be/kO4eb9xTl2E', controls=True),
                     ])
                 ])
             ], title='Visualisations'),

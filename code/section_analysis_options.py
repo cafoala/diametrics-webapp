@@ -55,9 +55,14 @@ def get_analysis_options_layout():
             ),
             dbc.AccordionItem(
                 [
-                    html.P("Use the slider below to select threshold that you're interested in. \
+                    html.P(["Use the slider below to select threshold that you're interested in. \
                             This will be added to the standard thresholds for time in range, it \
-                                won't replace them. To see the standard ranges see the THEORY SECTION"),
+                                won't replace them. To see the standard ranges see the THEORY SECTION",            
+                        dbc.Nav(
+                            [
+                                dbc.NavLink("Home", href="/", active="exact"),
+                            ])
+                    ]),
                     #html.Div(id='tir-sliders'),
                     html.Div(id='tir-sliders'),
                     dbc.Button("Add another range", id='add-tir-slider', color='primary'),
