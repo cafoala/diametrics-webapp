@@ -12,85 +12,89 @@ def get_upload_layout():
                 dbc.Col(dbc.Alert(
                         [
                                 html.I(className="bi bi-info-circle-fill me-2"),
-                                'To begin, use the button to select the CGM files you want to work with',
+                                'Your CGM files must match the company format and be in xls, csv or txt',
                         ],
                         color="info",
                         className="d-flex align-items-center",
                 ))]), 
         dbc.Row([
-                dbc.Col(width=2),
+                #dbc.Col(width=2),
                 dbc.Col([dcc.Upload(
                         id='upload-data',
                         children=html.Div([
                         'Drag and Drop or ',
-                html.A('Select Files')
-                        ]),
-                        style={
-                        'width': '100%',
-                        'height': '60px',
-                        'lineHeight': '60px',
-                        'borderWidth': '1px',
-                        'borderStyle': 'dashed',
-                        'borderRadius': '5px',
-                        'textAlign': 'center',
-                        'margin': '10px'
-                        },
-                        # Allow multiple files to be uploaded
-                        multiple=True
-                ),
-                ]),
-                dbc.Col(width=2),
-                ]),
-        html.Br(),
-        dbc.Row([
-                dbc.Col([
-                        html.H5('Device:'),
-                        dbc.RadioItems(
-                                id="device-button",
-                                class_name="btn-group",
-                                inputClassName="btn-check",
-                                labelClassName="btn btn-outline-primary",
-                                labelCheckedClassName="active",
-                                options=[
-                                        {"label": "FreeStyle Libre", "value": 'FreeStyle Libre'},
-                                        {"label": "Dexcom", "value": 'Dexcom'},
-                                        {"label": "Medtronic", "value": 'Medtronic', 'disabled':True},
-                                ],
-                                value='FreeStyle Libre',
-                        )
-                ], width=5),
-                dbc.Col([
-                        html.H5('Date format:'),
-                        dbc.RadioItems(
-                                id="datetime-format",
-                                class_name="btn-group",
-                                inputClassName="btn-check",
-                                labelClassName="btn btn-outline-primary",
-                                labelCheckedClassName="active",
-                                options=[
-                                        {"label": "European", "value": 'euro'},
-                                        {"label": "American", "value": 'amer'},
-                                ],
-                                value='euro',
-                        )
-                ]),
-                dbc.Col([
-                        html.H5('Units:'),
-                        dbc.RadioItems(
-                                id="units-first-button",
-                                class_name="btn-group",
-                                inputClassName="btn-check",
-                                labelClassName="btn btn-outline-primary",
-                                labelCheckedClassName="active",
-                                options=[
-                                        {"label": "mmol/L", "value": 'mmol/L'},
-                                        {"label": "mg/dL", "value": 'mg/dL'},
-                                ],
-                                value='mmol/L',
-                        )
-                ]),
+                        html.A('Select CGM Files here'),
+                                ]),
+                                style={
+                                'width': '100%',
+                                'height': '60px',
+                                'lineHeight': '60px',
+                                'borderWidth': '1px',
+                                'borderStyle': 'dashed',
+                                'borderRadius': '5px',
+                                'textAlign': 'center',
+                                'margin': '10px'
+                                },
+                                # Allow multiple files to be uploaded
+                                multiple=True
+                        ),
+                        #html.Br(),
+                        html.Div(id='filelist'),
+                ], width=8),
+                dbc.Col([dbc.Card(dbc.CardBody([
+                        html.H5('Options', style={'textAlign':'center'}),
+                        html.H6('Device'),
+                        html.Div(
+                                dbc.RadioItems(
+                                        id="device-button",
+                                        class_name="btn-group",
+                                        inputClassName="btn-check",
+                                        labelClassName="btn btn-outline-primary",
+                                        labelCheckedClassName="active",
+                                        options=[
+                                                {"label": "Libre", "value": 'FreeStyle Libre'},
+                                                {"label": "Dexcom", "value": 'Dexcom'},
+                                                {"label": "Medtronic", "value": 'Medtronic', 'disabled':True},
+                                        ],
+                                        value='FreeStyle Libre',
+                                ), className="radio-group"
+                        ),
+                        html.Br(),
+                        html.H6('Units'),
+                        html.Div(
+                                dbc.RadioItems(
+                                        id="units-first-button",
+                                        class_name="btn-group",
+                                        inputClassName="btn-check",
+                                        labelClassName="btn btn-outline-primary",
+                                        labelCheckedClassName="active",
+                                        options=[
+                                                {"label": "mmol/L", "value": 'mmol/L'},
+                                                {"label": "mg/dL", "value": 'mg/dL'},
+                                        ],
+                                        value='mmol/L',
+                                ), className="radio-group"
+                        ),         
+                        html.Br(),             
+                        html.H6('Date format'),
+                        html.Div([
+                                dbc.RadioItems(
+                                        id="datetime-format",
+                                        class_name="btn-group",
+                                        inputClassName="btn-check",
+                                        labelClassName="btn btn-outline-primary",
+                                        labelCheckedClassName="active",
+                                        options=[
+                                                {"label": "European", "value": 'euro'},
+                                                {"label": "American", "value": 'amer'},
+                                        ],
+                                        value='euro',
+                                )
+                        ], className="radio-group"),
+                        
+                ]))]) #, width=4
         ]),
-        html.Div(id='filelist'),
+        
         ])
 
 def create_file_list(list_of_names):

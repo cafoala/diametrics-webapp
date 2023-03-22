@@ -46,13 +46,21 @@ layout = html.Div([
 
                             The filename will be used to create a unique ID for each CGM file so ensure that the names are intuitive and unique.
                             
-                            Once the upload is complete, you’ll find a list of files underneath for you to double check that the files you’ve uploaded are correct. 
                             '''
                         )
                     ), 
                     dbc.Col(
-                        dp.DashPlayer(url='https://youtu.be/d5pb9TgCGc0', controls=True),
+                        dp.DashPlayer(url='https://youtu.be/YUWJX1EZmWI', controls=True),
                     )
+                ]),
+                dbc.Row([
+                    dcc.Markdown(
+                            '''
+
+                            
+                            Once the upload is complete, you’ll find a list of files underneath for you to double check that the files you’ve uploaded are correct. 
+                            '''
+                        )
                 ])
             ], title='Uploading data'),
             # Data overview
@@ -196,9 +204,7 @@ layout = html.Div([
 
                             The file can be in a few different formats, but it’s essential that you match the column names up perfectly to the ones described below.
 
-                            ###### ID
-                            There needs to be an ID column in your file, and this must **exactly match** an ID from the files you uploaded in the first section. So if you uploaded a file called ‘trialX_P03.csv’, then the ID you would need to put in is ‘trialX_P03’. 
-
+                            
 
                             '''
                         ),
@@ -211,6 +217,9 @@ layout = html.Div([
                 dbc.Row([
                     dcc.Markdown([
                             '''
+                            ###### ID
+                            There needs to be an ID column in your file, and this must **exactly match** an ID from the files you uploaded in the first section. So if you uploaded a file called ‘trialX_P03.csv’, then the ID you would need to put in is ‘trialX_P03’. 
+
                             ###### Start and end time
                             We need to know the start and end time of the period so we need the start date and time, and either the end date and time or the duration.
 
