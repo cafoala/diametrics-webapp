@@ -29,9 +29,9 @@ layout = html.Div([
                             '''
                         ),
                     ),
-                    dbc.Col(
-                        dp.DashPlayer(url='https://www.youtube.com/watch?v=dOphbyjhACM', controls=True),
-                    )
+                    #dbc.Col(
+                     #   dp.DashPlayer(url='https://www.youtube.com/watch?v=dOphbyjhACM', controls=True),
+                    #)
                 ])
             ], title='Changing tabs'),
             # Uploading data
@@ -262,7 +262,7 @@ layout = html.Div([
                 ])
 
             ], title='Advanced analysis')
-        ], start_collapsed=True),
+        ], start_collapsed=False),
         html.Br(),
         html.H2('FAQs'),
         dbc.Accordion([
@@ -297,129 +297,150 @@ layout = html.Div([
         html.Br(),
         html.H2('Theory and code'),
         dbc.Accordion([
+            # Time in range
             dbc.AccordionItem([
-                    dbc.Row([
-                        dbc.Col([
-                            dcc.Markdown(
-                                '''
-                                Bla bla bla
-                                '''
-                            )
-                        ]),
-                        dbc.Col([
-                            html.Div([
+                        html.Div([
                             dcc.Markdown([
                                 '''
-                                ```
-                                def mage_helper(df):
-                                    # Find peaks and troughs using scipy signal
-                                    peaks, properties = signal.find_peaks(df['glc'], prominence=df['glc'].std())
-                                    troughs, properties = signal.find_peaks(-df['glc'], prominence=df['glc'].std())
-                                    # Create dataframe with peaks and troughs in order
-                                    single_indexes = df.iloc[np.concatenate((peaks, troughs, [0, -1]))]
-                                    single_indexes.sort_values('time', inplace=True)
-                                    # Make a difference column between the peaks and troughs
-                                    single_indexes['diff'] = single_indexes['glc'].diff()
-                                    # Calculate the positive and negative mage and mean
-                                    mage_positive = single_indexes[single_indexes['diff'] > 0]['diff'].mean()
-                                    mage_negative = single_indexes[single_indexes['diff'] < 0]['diff'].mean()
-                                    if pd.notnull(mage_positive) & pd.notnull(mage_negative):
-                                        mage_mean = statistics.mean([mage_positive, abs(mage_negative)])
-                                    elif pd.notnull(mage_positive):
-                                        mage_mean = mage_positive
-                                    elif pd.notnull(mage_negative):
-                                        mage_mean = abs(mage_negative)
-                                    else:
-                                        mage_mean = 0  # np.nan
-                                    return {'MAGE':mage_mean}
-                                ```
+                                The percentage time in range is calculated for the 5 ranges specified in the international consensus by default, with the ability to add more in the ‘analysis options’ section of the dashboard.
+                                
+                                The ranges are:
+                                * Time in normal range (3.9-10.0 mmol/L)
+                                * Time in level 1 hypoglycemia (3.0-3.9 mmol/L)
+                                * Time in level 2 hypoglycemia (<3.0 mmol/L)
+                                * Time in level 1 hyperglycemia (10.0-13.9 mmol/L)
+                                * Time in level 2 hyperglycemia (>13.9 mmol/L)
+                                
+                                The time in range is calculated as a percentage of the readings in the specified range over the total number of readings * 100.
                                 '''
-                            ])
+                            ]),
+                            html.Div(['Further information can be found in the ', dcc.Link("International Consensus on the Use of Continuous Glucose Monitoring", "https://diabetesjournals.org/care/article/40/12/1631/37000/International-Consensus-on-Use-of-Continuous"),
                             ])
                         ])
-                    ])
                 ], title='Percentage time in range'),
-                dbc.AccordionItem([
+            # Glyc var
+            dbc.AccordionItem([
+                html.Div([
                     dcc.Markdown(
                         '''
-                        Bla bla bla
-                        '''
-                    )
-                ], title='Glycemic variability'),
-                dbc.AccordionItem([
-                    dcc.Markdown(
-                        '''
-                        Bla bla bla
-                        '''
-                    )
-                ], title='Glycemic events'),
-                dbc.AccordionItem([
-                    dcc.Markdown(
-                        '''
-                        Bla bla bla
-                        '''
-                    )
-                ], title='BGI (blood glucose index)'),
-                dbc.AccordionItem([
-                    dcc.Markdown(
-                        '''
-                        Bla bla bla
-                        '''
-                    )
-                ], title='AUC (area under the curve)'),
-                dbc.AccordionItem([
-                    dcc.Markdown(
-                        '''
-                        MAGE is a metric.... don't ask me what it is or why it exists.... here's how i calculated it though
+                        The average glucose is calculated as the mean glucose reading of all the readings using a Pandas function.
                         
-                        ```
-                        def mage_helper(df):
-                            # Find peaks and troughs using scipy signal
-                            peaks, properties = signal.find_peaks(df['glc'], prominence=df['glc'].std())
-                            troughs, properties = signal.find_peaks(-df['glc'], prominence=df['glc'].std())
-                            # Create dataframe with peaks and troughs in order
-                            single_indexes = df.iloc[np.concatenate((peaks, troughs, [0, -1]))]
-                            single_indexes.sort_values('time', inplace=True)
-                            # Make a difference column between the peaks and troughs
-                            single_indexes['diff'] = single_indexes['glc'].diff()
-                            # Calculate the positive and negative mage and mean
-                            mage_positive = single_indexes[single_indexes['diff'] > 0]['diff'].mean()
-                            mage_negative = single_indexes[single_indexes['diff'] < 0]['diff'].mean()
-                            if pd.notnull(mage_positive) & pd.notnull(mage_negative):
-                                mage_mean = statistics.mean([mage_positive, abs(mage_negative)])
-                            elif pd.notnull(mage_positive):
-                                mage_mean = mage_positive
-                            elif pd.notnull(mage_negative):
-                                mage_mean = abs(mage_negative)
-                            else:
-                                mage_mean = 0  # np.nan
-                            return {'MAGE':mage_mean}
-                        ```
+                        Standard deviation (SD) is the standard deviation of all the glucose readings (obviously), once again calculated with a Pandas function.
+                        
+                        Coefficient of variation (CV) is 100 * SD / avg. glucose.
+                        
+                        eA1c is calculated as (avg. glucose + 2.59) / 1.59 for mmol/L. This is divided by 0.057 for mg/dL.
+                        
                         '''
-                    )
-                ], title='MAGE'),
+                    ),
+                    html.Div(['Further information can be found in the ', dcc.Link("International Consensus on the Use of Continuous Glucose Monitoring", "https://diabetesjournals.org/care/article/40/12/1631/37000/International-Consensus-on-Use-of-Continuous"),
+                    ])
+                ])
+                ], title='Avg. glucose, glycemic variability and eA1c'),
+            # Glycemic events
+            dbc.AccordionItem([
+                html.Div([
+                    dcc.Markdown(
+                        '''
+                        Hypo- and hyper-glycemic events are defined as 15 minutes or more below and above the relevant thresholds respectively.
+                        
+                        Since this metric is dependent on the progression of time, it is affected more greatly by missing data and discrepancies in recording interval. It also doesn’t help that the international consensus is incredibly vague about this metric.
+                        
+                        The way the hypoglycemic events were calculated is as follows, the same will be the case with hyperglycemic events, but just working above the thresholds rather than below.
+                        * Identify all times the glucose dips below 3.9mmol/L for at least 15 mins (2 readings for FreeStyle Libre, 4 for Dexcom and Medtronic)
+                        * If there is another dip below the threshold within the next 15 mins of the glucose coming back up then it is part of the same event
+                        * If 15 consecutive minutes of readings go below the level 2 hypoglycemia threshold (3.0mmol/L) then it is considered to be a level 2 event. If not, it’s just a level 1 event.
+                        * Only when the glucose rises above the threshold for 15 mins is the event over
+                        * The start time and end time of each episode are used to calculate the total time spent in hypoglycemia and the average length of event
+
+                        Things get a bit more complicated if there’s missing data. These are the assumptions that have been made in order to calculate the events and may result in very high time spent in events and average glucose readings.
+                        * If the glucose readings drop out during an event, if the first glucose reading after the drop out is also in hypoglycemia, this is considered to be part of the same episode. This is where you could end up with very long episodes if there’s a lot of missing data and it cuts out and cuts in in hypoglycemia. 
+                        * However, if the first glucose reading is not below the hypoglycemia threshold, the episode is considered to have ended with the last glucose reading
+                        * If there are, for example, 10 mins of readings in hypoglycemia and then the readings cut out for 15 mins, then come back in with 10 mins of hypoglycemia, this is not considered an episode because there aren’t 15 mins of consistent readings                        '''
+                    ),
+                    html.Div(['Further information can be found in the ', dcc.Link("International Consensus on the Use of Continuous Glucose Monitoring", "https://diabetesjournals.org/care/article/40/12/1631/37000/International-Consensus-on-Use-of-Continuous"),
+                    ])
+                ])
+                ], title='Glycemic events'),
+            # BGI
+            dbc.AccordionItem([
+                html.Div([
+                    dcc.Markdown(
+                        '''
+                        Blood glucose (BG) readings are transformed first, using one of the following two formulas:
+
+                            Transformed BG = 1.794*{log(BG)^1.026 - 1.861}
+                        for mmol/L.
+
+                            Transformed BG = 1.509*{log(BG)^1.084 - 5.381}
+                        for mg/dL.
+
+                        This makes the transformed BG symmetric around zero, ranging from 10^1/2 to
+                        10^1/2 . 
+                        Then, a risk value is assigned to each BG reading as follows.
+                        
+                        For the low blood glucose index (LBGI) that is as follows:
+
+                            If Transformed BG is < 0, Risk(BG) = 10*(Transformed BG)^2, otherwise Risk(BG) = 0
+                        Then take the mean of these values.
+                        
+                        For high bloood glucose index (HBGI):
+
+                            If Transformed BG is > 0, Risk(BG) = 10* (Transformed BG)^2, otherwise Risk(BG) = 0
+                        HBGI is the mean of all these readings.
+                        
+                        The paper can be found here: https://diabetesjournals.org/care/article/21/11/1870/23103/Assessment-of-risk-for-severe-hypoglycemia-among 
+
+                        '''
+                    ),
+                    html.Div(['Further information can be found in the ', dcc.Link("International Consensus on the Use of Continuous Glucose Monitoring", "https://diabetesjournals.org/care/article/40/12/1631/37000/International-Consensus-on-Use-of-Continuous"),
+                    ])
+                ])
+                ], title='BGI (blood glucose index)'),
+            # AUC
+            dbc.AccordionItem([
+                html.Div([
+                    dcc.Markdown(
+                        '''
+                        Area under the curve is calculated with SciKit Learn’s function that uses the trapezoidal rule (drawing a straight line between two points and calculating the area underneath).
+
+                        To get the data in the right format, the datetime needs to be rewritten as number of hours from the first reading (which is 0). E.g., for 15 minute Libre readings, the 1st reading would be 0, the next would be 0.25 etc.
+
+                        The trapezoidal rule is then used to give the average hourly AUC in either mmol h/L or mg h/dL.
+                        '''
+                    ),
+                    html.Div(['Further information can be found in the ', dcc.Link("International Consensus on the Use of Continuous Glucose Monitoring", "https://diabetesjournals.org/care/article/40/12/1631/37000/International-Consensus-on-Use-of-Continuous"),
+                    ])
+                ])
+                ], title='AUC (area under the curve)'),
+            # MAGE
+            dbc.AccordionItem([
+                html.Div([
+                    dcc.Markdown(
+                        '''
+                        The mean amplitude of glycemic excursion (MAGE) is calculated using Scipy’s signal class. The peaks and troughs with a prominence of greater than the standard deviation are selected.
+
+                        The difference between the peaks and troughs are then calculated separately for both the positive glucose and negative glucose differences. The mean is then calculated between the positive MAGE and the positive of the negative MAGE to calculate the final MAGE mean.
+                        '''
+                    ),
+                    html.Div(['Further information can be found in the ', dcc.Link("International Consensus on the Use of Continuous Glucose Monitoring", "https://diabetesjournals.org/care/article/40/12/1631/37000/International-Consensus-on-Use-of-Continuous"),
+                    ])
+                ])
+                ], title='MAGE (mean amplitude of glycemic excursion)'),
+            # Data sufficiency
             dbc.AccordionItem([
                     dcc.Markdown(
                         '''
-                        Bla bla bla
+                        The data sufficiency is calculated using the first and last reading of the CGM trace you uploaded, unless the start and end times are edited in the ‘data overview’ section, in which case those datetimes will be used. The number of expected readings during this period are calculated based on the interval. The data sufficiency is then calculated as the 100*non-null readings/expected readings.
+                        
+                        Example:
+                        * 48hrs and 17 mins of CGM data would be 2897 mins
+                        * For a  FreeStyle Libre we divide this by the interval of 15 mins to give the expected readings (193.1333…)
+                        * The number of non-null readings are counted for the period (186)
+                        * The data sufficiency is 100* 186/193.333 rounded to 2 decimal places (96.83%) 
                         '''
                     )
                 ], title='Data sufficiency'),
-            dbc.AccordionItem([
-                    dcc.Markdown(
-                        '''
-                        Bla bla bla
-                        '''
-                    )
-                ], title='Day and night'),
-            dbc.AccordionItem([
-                    dcc.Markdown(
-                        '''
-                        Bla bla bla
-                        '''
-                    )
-                ], title='Ambulatory glucose profile'),
             ], start_collapsed=True)
-    #])
     ]))
 ])

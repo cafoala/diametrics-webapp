@@ -83,43 +83,52 @@ def get_metrics_breakdown(df_id, day_start, day_end, night_start, night_end,
     all_results = all_results.append(all_mg)
 
     df_day, df_night = periods.get_day_night_breakdown(df_id, day_start, day_end, night_start, night_end)
-    print(df_day.head())
-    print(df_night.head())
-    # Daytime breakdown metrics 
-    day, day_mg = metrics_experiment.calculate_all_metrics(df_day, 
-                        #ID=ID, units=i['Units'], 
-                        additional_tirs=additional_tirs, lv1_hypo=lv1_hypo, 
-                        lv2_hypo=lv2_hypo, lv1_hyper=lv1_hyper, 
-                        lv2_hyper=lv2_hyper, event_mins=short_mins, 
-                        event_long_mins=long_mins)
-    
-    # mmol
-    day['period'] = 'Day'
-    day['units'] = 'mmol/L'
-    all_results = all_results.append(day)
+    if not df_day.empty:
+        # Daytime breakdown metrics 
+        day, day_mg = metrics_experiment.calculate_all_metrics(df_day, 
+                            #ID=ID, units=i['Units'], 
+                            additional_tirs=additional_tirs, lv1_hypo=lv1_hypo, 
+                            lv2_hypo=lv2_hypo, lv1_hyper=lv1_hyper, 
+                            lv2_hyper=lv2_hyper, event_mins=short_mins, 
+                            event_long_mins=long_mins)
+        # mmol
+        day['period'] = 'Day'
+        day['units'] = 'mmol/L'
+        
+        # mg
+        day_mg['period'] = 'Day'
+        day_mg['units'] = 'mg/dL'
+        
+    else:
+        night = pd.DataFrame({'period':['Night'], 'units':['mmol/L']})
+        night_mg = pd.DataFrame({'period':['Night'], 'units':['mg/dL']})
 
-    # mg
-    day_mg['period'] = 'Day'
-    day_mg['units'] = 'mg/dL'
+    if not df_night.empty:
+
+        # Night breakdown metrics
+        night, night_mg= metrics_experiment.calculate_all_metrics(df_night,
+                            #ID=ID, units=i['Units'], 
+                            additional_tirs=additional_tirs, lv1_hypo=lv1_hypo, 
+                            lv2_hypo=lv2_hypo, lv1_hyper=lv1_hyper,
+                            lv2_hyper=lv2_hyper, event_mins=short_mins,
+                            event_long_mins=long_mins)
+        # mmol  
+        night_mg['period'] = 'Night'
+        night_mg['units'] = 'mg/dL'  
+        
+        # mg
+        night_mg['period'] = 'Night'
+        night_mg['units'] = 'mg/dL'
+    else:
+        night = pd.DataFrame({'period':['Night'], 'units':['mmol/L']})
+        night_mg = pd.DataFrame({'period':['Night'], 'units':['mg/dL']})  
+    
+    
+    all_results = all_results.append(day)
     all_results = all_results.append(day_mg)
-    
-    # Night breakdown metrics
-    night, night_mg= metrics_experiment.calculate_all_metrics(df_night,
-                        #ID=ID, units=i['Units'], 
-                        additional_tirs=additional_tirs, lv1_hypo=lv1_hypo, 
-                        lv2_hypo=lv2_hypo, lv1_hyper=lv1_hyper,
-                        lv2_hyper=lv2_hyper, event_mins=short_mins,
-                        event_long_mins=long_mins)
-    
-    # mmol
-    night['period'] = 'Night'
-    night['units'] = 'mmol/L'
     all_results = all_results.append(night)
-    
-    # mg
-    night_mg['period'] = 'Night'
-    night_mg['units'] = 'mg/dL'
     all_results = all_results.append(night_mg)
+
     return all_results
 
 def replace_cutoffs(dict, lo_cutoff, hi_cutoff, lo_hi_cutoff_checklist):

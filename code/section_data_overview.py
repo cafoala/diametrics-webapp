@@ -179,6 +179,8 @@ def merge_glc_data(table_data, raw_data):
             continue
         subject = [i for i in raw_data if i['Filename']==row['Filename']][0]
         data = pd.DataFrame(subject['data'])
+        data['time'] = pd.to_datetime(data['time'])
+
         start = row['Start DateTime']
         end = row['End DateTime']
         data_sub = data.loc[(data['time']>=start)&(data['time']<=end)]

@@ -6,6 +6,7 @@ import io
 import metrics_experiment
 import metrics_helper
 from datetime import timedelta
+import datetime
 import numpy as np
 import section_metrics_tbl
 
@@ -145,9 +146,8 @@ def add_time_to_date(date, minutes):
     return datetime
 
 def combine_date_and_time(date, time):
-    datetime = date 
-    datetime.time = time
-    return datetime
+    dt = datetime.datetime.combine(date, time)
+    return dt
 
 def standardise_poi_df(df):
     cols = df.columns
@@ -257,9 +257,9 @@ def get_drag_times(first_num, last_num, start, end):
     elif last_num =='end':
         last_time = end
     elif last_num>0:
-        last_time = end+timedelta(hours=last_num)
+        last_time = end+timedelta(hours=float(last_num))
     else:
-        last_time = start-timedelta(hours=abs(last_num))
+        last_time = start-timedelta(hours=float(abs(last_num)))
     return first_time, last_time
 
 def periodic_calculations(info, glc_data, id_raw_data, first_time, 
@@ -311,10 +311,10 @@ def calculate_periodic_metrics(poi_ranges, set_periods, poi_data, raw_data,
     
     for i in poi_data:
         ID = i['ID']
-        start =  pd.to_datetime(i['Start of event']).round('S')
-        end = pd.to_datetime(i['End of event']).round('S')
-        info = {'ID':ID, 'Start of event':start, 
-                'End of event':end, 'Period':'CGM file not available'}
+        start_event =  pd.to_datetime(i['Start of event']).round('S')
+        end_event = pd.to_datetime(i['End of event']).round('S')
+        info = {'ID':ID, 'Start of event':start_event, 
+                'End of event':end_event, 'Period':'CGM file not available'}
         info_mg = info.copy()
         info['units'] = 'mmol/L'
         info_mg['units'] = 'mg/dL'
@@ -342,12 +342,13 @@ def calculate_periodic_metrics(poi_ranges, set_periods, poi_data, raw_data,
             # First num values
             first, last, first_num, last_num = drag_values(drag)
             first_time, last_time = get_drag_times(first_num, last_num, 
-                                                   start, end)
+                                                   start_event, end_event)
 
-            info['Period'] = f'{first} to {last}'
-            metrics, metrics_mg = periodic_calculations(info, glc_data, id_raw_data, 
-                                                        first_time, last_time, start, 
-                                                        end, additional_tirs, lv1_hypo, 
+            info_drag = info.copy()
+            info_drag['Period'] = f'{first} to {last}'
+            metrics, metrics_mg = periodic_calculations(info_drag, glc_data, id_raw_data, 
+                                                        first_time, last_time, start_event, 
+                                                        end_event, additional_tirs, lv1_hypo, 
                                                         lv2_hypo, lv1_hyper, lv2_hyper, 
                                                         short_mins, long_mins) 
             
@@ -356,12 +357,13 @@ def calculate_periodic_metrics(poi_ranges, set_periods, poi_data, raw_data,
 
         
         if 1 in set_periods:
-            info['Period'] = f'24hrs after'
-            first_time = end
-            last_time = end + timedelta(hours=24)
-            metrics, metrics_mg = periodic_calculations(info, glc_data, id_raw_data,
-                                                        first_time, last_time, start,
-                                                        end,additional_tirs, lv1_hypo, 
+            info_24 = info.copy()
+            info_24['Period'] = f'24hrs after'
+            first_time = end_event
+            last_time = end_event + timedelta(hours=24)
+            metrics, metrics_mg = periodic_calculations(info_24, glc_data, id_raw_data,
+                                                        first_time, last_time, start_event,
+                                                        end_event,additional_tirs, lv1_hypo, 
                                                         lv2_hypo, lv1_hyper, lv2_hyper,
                                                         short_mins, long_mins) 
             results.append(metrics)
@@ -369,23 +371,24 @@ def calculate_periodic_metrics(poi_ranges, set_periods, poi_data, raw_data,
         
         
         if 2 in set_periods:
-            info['Period'] = f'Night after event'
+            info_eve = info.copy()
+            info_eve['Period'] = f'Night after event'
             night_start_minutes = int(night_start[14:16])
             night_start_hours = int(night_start[11:13])
 
-            first_time = start.replace(hour=night_start_hours, minute=night_start_minutes)
+            first_time = start_event.replace(hour=night_start_hours, minute=night_start_minutes)
             if night_start_hours<12:
                 first_time += timedelta(hours=24)
 
             night_end_minutes = int(night_end[14:16])
             night_end_hours = int(night_end[11:13])
-            last_time = start.replace(hour=night_end_hours, minute=night_end_minutes)
+            last_time = start_event.replace(hour=night_end_hours, minute=night_end_minutes)
             if night_end_hours<12:
                 last_time += timedelta(hours=24)
     
-            metrics, metrics_mg = periodic_calculations(info, glc_data, id_raw_data,
-                                                        first_time, last_time, start,
-                                                        end,additional_tirs, lv1_hypo, 
+            metrics, metrics_mg = periodic_calculations(info_eve, glc_data, id_raw_data,
+                                                        first_time, last_time, start_event,
+                                                        end_event,additional_tirs, lv1_hypo, 
                                                         lv2_hypo, lv1_hyper, lv2_hyper,
                                                         short_mins, long_mins) 
             results.append(metrics)

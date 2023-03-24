@@ -28,7 +28,7 @@ def get_analysis_options_layout():
                                         ],
                                     ), style={'textAlign': 'center'})])]),
                         ]),
-                    ], style={'text-align': 'center'}),
+                    ], style={'textAlign': 'center'}),
 
                     dbc.Col([
                         dbc.Card([
