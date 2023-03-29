@@ -6,7 +6,7 @@ import periods
 
 
 def get_metrics_layout():
-    units = dbc.RadioItems(
+    units = html.Div(dbc.RadioItems(
                 id="unit-type-options",
                 className="btn-group",
                 inputClassName="btn-check",
@@ -19,9 +19,10 @@ def get_metrics_layout():
                 ],
                 value='mmol/L',
                 style={'textAlign': 'center'}
-            ),
+            ), className="radio-group"
+        )
 
-    time_period = dbc.RadioItems(
+    time_period = html.Div(dbc.RadioItems(
             id="period-type",
             class_name="btn-group",
             inputClassName="btn-check",
@@ -33,7 +34,9 @@ def get_metrics_layout():
                 {"label": "Night", "value": 'Night'},
             ],
             value='All',
-        ),
+        ), className="radio-group"
+                        )
+    
 
     
     '''options = ['Time in range', 'Average glucose', 'SD', 'CV', 'eA1c', 
@@ -100,8 +103,8 @@ def get_metrics_breakdown(df_id, day_start, day_end, night_start, night_end,
         day_mg['units'] = 'mg/dL'
         
     else:
-        night = pd.DataFrame({'period':['Night'], 'units':['mmol/L']})
-        night_mg = pd.DataFrame({'period':['Night'], 'units':['mg/dL']})
+        day = pd.DataFrame({'period':['Day'], 'units':['mmol/L']})
+        day_mg = pd.DataFrame({'period':['Day'], 'units':['mg/dL']})
 
     if not df_night.empty:
 
@@ -113,33 +116,31 @@ def get_metrics_breakdown(df_id, day_start, day_end, night_start, night_end,
                             lv2_hyper=lv2_hyper, event_mins=short_mins,
                             event_long_mins=long_mins)
         # mmol  
-        night_mg['period'] = 'Night'
-        night_mg['units'] = 'mg/dL'  
+        night['period'] = 'Night'
+        night['units'] = 'mmol/L'  
         
         # mg
         night_mg['period'] = 'Night'
         night_mg['units'] = 'mg/dL'
     else:
         night = pd.DataFrame({'period':['Night'], 'units':['mmol/L']})
-        night_mg = pd.DataFrame({'period':['Night'], 'units':['mg/dL']})  
-    
+        night_mg = pd.DataFrame({'period':['Night'], 'units':['mg/dL']})
     
     all_results = all_results.append(day)
     all_results = all_results.append(day_mg)
     all_results = all_results.append(night)
     all_results = all_results.append(night_mg)
-
     return all_results
 
 def replace_cutoffs(dict, lo_cutoff, hi_cutoff, lo_hi_cutoff_checklist):
     df = pd.DataFrame(dict)
     if not 1 in lo_hi_cutoff_checklist:
-        df['glc']= df['glc'].replace({'High': lo_cutoff, 'Low': lo_cutoff, 'high': hi_cutoff, 'low': lo_cutoff, 
-                             'HI':hi_cutoff, 'LO':lo_cutoff, 'hi':hi_cutoff, 'lo':lo_cutoff})
+        df['glc']= pd.to_numeric(df['glc'].replace({'High': lo_cutoff, 'Low': lo_cutoff, 'high': hi_cutoff, 'low': lo_cutoff, 
+                             'HI':hi_cutoff, 'LO':lo_cutoff, 'hi':hi_cutoff, 'lo':lo_cutoff}))
 
         if 2 in lo_hi_cutoff_checklist:
-            df[df['glc']>hi_cutoff] = hi_cutoff
-            df[df['glc']<lo_cutoff] = lo_cutoff
+            df['glc'][df['glc']>hi_cutoff] = hi_cutoff
+            df['glc'][df['glc']<lo_cutoff] = lo_cutoff
 
     df = df[pd.to_numeric(df['glc'], errors='coerce').notnull()]
     df['glc'] = pd.to_numeric(df['glc'])
@@ -171,8 +172,8 @@ def change_headings(df, units):
                     'MAGE':'MAGE (mmol/L)', 'TIR normal':'Time in range 3.9-10mmol/L (%)',
                     'TIR level 1 hypoglycemia':'Time in range 3.0-3.9 mmol/L (%)', 
                     'TIR level 2 hypoglycemia':'Time in range <3.0 mmol/L (%)',
-       'TIR level 1 hyperglycemia':'Time in range 10-13.9 mmol/L (%)', 
-       'TIR level 2 hyperglycemia':'Time in range >13.9 mmol/L (%)',})
+                    'TIR level 1 hyperglycemia':'Time in range 10-13.9 mmol/L (%)', 
+                    'TIR level 2 hyperglycemia':'Time in range >13.9 mmol/L (%)',})
     else:
         return df.rename(columns={'Average glucose':'Average glucose (mg/dL)','SD':'SD (mg/dL)', 
                     'Min. glucose':'Min. glucose (mg/dL)',
@@ -180,8 +181,8 @@ def change_headings(df, units):
                     'MAGE':'MAGE (mg/dL)', 'TIR normal':'Time in range 70-180mg/dL (%)',
                     'TIR level 1 hypoglycemia':'Time in range <70–54mg/dL (%)', 
                     'TIR level 2 hypoglycemia':'Time in range <54mg/dL (%)',
-       'TIR level 1 hyperglycemia':'Time in range 180-250mg/dL (%)', 
-       'TIR level 2 hyperglycemia':'Time in range >250mg/dL (%)',})
+                    'TIR level 1 hyperglycemia':'Time in range 180-250mg/dL (%)', 
+                    'TIR level 2 hyperglycemia':'Time in range >250mg/dL (%)',})
 
 def create_metrics_table(df):
     df = df.fillna('N/A')

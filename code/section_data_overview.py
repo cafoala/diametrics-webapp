@@ -46,6 +46,7 @@ def parse_contents(contents, filename, date):
                 io.StringIO(decoded.decode('utf-8')), header=None, names = [i for i in range(0, 20)])
 
     except Exception as e:
+        print(e)
         data_dictionary = {'Usable': False, 'Filename': filename, 
             'Device':'N/A', #'Interval': 'N/A', 'data': 'N/A',
             'ID': 'N/A', 'Start DateTime': 'N/A', 'End DateTime': 'N/A',
@@ -84,14 +85,18 @@ def read_files_2(file, filename, dt_format, device, units):
         if 'csv' in filename:
             # Assume that the user uploaded a CSV file
             df = pd.read_csv(
-                io.StringIO(decoded.decode('utf-8')), header=None, names = [i for i in range(0, 20)])
+                io.StringIO(decoded.decode('utf-8')), header=None, names = [i for i in range(0, 30)])
+            df.columns = df.iloc[0]
+            df = df.iloc[1:]
+            df = df.reset_index(drop=True)
+
         elif 'xls' in filename:
             # Assume that the user uploaded an excel file
-            df = pd.read_excel(io.BytesIO(decoded), header=None)#, names = [i for i in range(0, 20)])
+            df = pd.read_excel(io.BytesIO(decoded))#, header=None, names = [i for i in range(0, 20)])
         elif 'txt' or 'tsv' in filename:
             # Assume that the user upl, delimiter = r'\s+'oaded an excel file
             df = pd.read_table(
-                io.StringIO(decoded.decode('utf-8')), header=None, names = [i for i in range(0, 20)])
+                io.StringIO(decoded.decode('utf-8')))# header=None, ,names = [i for i in range(0, 40)
         
         return preprocessing.preprocess_df(df, filename, dt_format, device, units)
 
@@ -185,7 +190,7 @@ def merge_glc_data(table_data, raw_data):
         end = row['End DateTime']
         data_sub = data.loc[(data['time']>=start)&(data['time']<=end)]
         if subject['Units']=='mg/dL':
-            data_sub['glc'] = data_sub['glc']*0.0557
+            data_sub['glc'] = pd.to_numeric(data_sub['glc'])*0.0557
         data_sub['ID'] = row['ID']
         results = results.append(data_sub)
     results = results.to_dict('records')

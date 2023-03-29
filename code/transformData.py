@@ -1,6 +1,7 @@
 import pandas as pd
 import autoprocessing
-
+import datetime
+import numpy as np
 
 class transformData:
     def __init__(self, df, device):
@@ -21,46 +22,21 @@ class transformData:
             print('it\'s a dexcom')
             try:
                 self.convert_dexcom(df)
-            except:
-                print('Cant convert') 
-        #else:
-            # output can return whether it's usable or not usable
-            # can we also store feedback of why it didn't work?
-             
-         #   self.autoprocess(df)
-            
-
-    def assert_flash_libre(self, df):
-        #check if cols align
-        header_mmol = ['Meter Timestamp', 'Historic Glucose(mmol/L)']#, 'Scan Glucose(mmol/L)']
-        header_mg = ['Meter Timestamp', 'Historic Glucose(mg/dL)']#, 'Scan Glucose(mg/dL)']
-
-        header_mmol_2 = ['Device Timestamp', 'Historic Glucose mmol/L']#, 'Scan Glucose mmol/L']
-        header_mg_2 = ['Device Timestamp', 'Historic Glucose mg/dL']#, 'Scan Glucose mg/dL']
-        
-        header_row = set(df.iloc[2])
-        
-        if (set(header_mmol).issubset(header_row)) or (set(header_mg).issubset(header_row)) or (set(header_mmol_2).issubset(header_row)) or (set(header_mg_2).issubset(header_row)):
-            # Set that it's usable
-            self.usable = True # might not be
-            # Set device name
-            self.device = 'FreeStyle Libre'
-            # set time interval to 15mins
-            self.interval = 15
-            # Set ID if it's not empty
-            '''if pd.notnull(df.iloc[1,0]):
-                self.id = df.iloc[1,0]'''
-            return True
+            except Exception as ex:
+                print(ex)
         else:
-            return False
-
+            print('it\'s a medtronic')
+            try:
+                self.convert_medtronic(df)
+            except Exception as e:
+                print(e)
 
     def convert_flash_libre(self, df):
         # Drop top rows
-        df = df.iloc[2:]
+        df = df.iloc[1:]
         # Set first row as column headers
         df.columns = df.iloc[0]
-        df.drop(index=[2], inplace=True)
+        df.drop(index=[1], inplace=True)
         df.reset_index(inplace=True, drop=True)
         # Keep important columns
         if 'Historic Glucose(mmol/L)' in df.columns:
@@ -81,37 +57,56 @@ class transformData:
         #self.device = 'FreeStyle Libre'
 
 
-
-    def assert_dexcom(self, df):
-        header =['GlucoseDisplayTime', 'GlucoseValue']#,	'MeterInternalTime', 'MeterDisplayTime', 'MeterValue']
-        header_row = set(df.iloc[0])
-
-        if set(header).issubset(header_row):
-            # Set that it's usable
-            self.usable = True # might not be
-            # Set device name
-            #self.device = 'Dexcom'
-            # set time interval to 15mins
-            self.interval = 5
-            # Set ID if it's not empty
-            '''if pd.notnull(df.iloc[1,0]):
-                self.id = df.iloc[1,0]'''
-            return True
-        else:
-            return False
-
     def convert_dexcom(self, df):
         # Set first row as column headers
-        df.columns = df.iloc[0]
+        #df.columns = df.iloc[0]
         # Drop top rows
-        df = df.iloc[1:]
-
+        #df = df.iloc[1:]
+        filter_col = [col for col in df if col.startswith('Timestamp')]
         #df.drop(index=[2], inplace=True)
         df.reset_index(inplace=True, drop=True)
-        # Keep important columns
-        df = df.loc[:,('GlucoseDisplayTime', 'GlucoseValue')]
+        if 'GlucoseValue' in df.columns:
+            # Keep important columns
+            df = df.loc[:,('GlucoseDisplayTime', 'GlucoseValue')]
+        elif 'Glucose Value (mmol/L)' in df.columns:
+            df = df.loc[:,(filter_col[0], 'Glucose Value (mmol/L)')]
+            df = df.dropna(subset=[filter_col[0]])
+
+        elif 'Glucose Value (mg/dL)' in df.columns:
+            df = df.loc[:,(filter_col[0], 'Glucose Value (mg/dL)')]
+            df = df.dropna(subset=[filter_col[0]])
+        
         # Rename cols
         df.columns = ['time', 'glc']
+
+        # Replace low high values
+        #df = df.replace({'High': 22.3, 'Low': 2.1, 'HI':22.3, 'LO':2.1, 'hi':22.3, 'lo':2.1})
+        self.data = df
+        self.usable = True
+        # Set device name
+        #self.device = 'Dexcom'
+        # set time interval to 5mins
+        self.interval = 5
+
+    
+    def convert_medtronic(self, df):
+        # Set first row as column headers
+        df.columns = df.iloc[5]
+        # Drop top rows
+        df = df.iloc[6:]
+        #df.drop(index=[2], inplace=True)
+        df.reset_index(inplace=True, drop=True)
+        if 'BG Reading (mmol/L)' in df.columns:
+            # Keep important columns
+            df = df.loc[:,('Date', 'Time', 'BG Reading (mmol/L)')]
+        elif 'BG Reading (mg/dL)' in df.columns:
+            df = df.loc[:,('Date', 'Time', 'BG Reading (mg/dL)')]
+        
+        df.columns = ['date', 'time', 'glc']
+        df = df.dropna()
+        df['time'] = pd.to_datetime(df.apply(lambda x: combine_datetime(x['date'], x['time']), axis=1))
+        df = df.drop(columns='date')
+        # Rename cols
         # Replace low high values
         #df = df.replace({'High': 22.3, 'Low': 2.1, 'HI':22.3, 'LO':2.1, 'hi':22.3, 'lo':2.1})
         self.data = df
@@ -122,40 +117,10 @@ class transformData:
         self.interval = 5
 
 
-    def autoprocess(self, df):
-        self.device = 'Unknown'
-
-        # Calculate the max number of rows datetime and glucose should be the max... oh shit
-        max_rows = df.shape[0]
-        # Keep cols that have over 70% of max rows
-        cols_to_keep = df.count()[df.count() > max_rows * 0.7].index
-        # Select the central rows to avoid issues with headers and footers
-        middle_rows = autoprocessing.select_middle_rows(df, cols_to_keep, max_rows)
-        # Identify which cols are datetime and glucose
-        col_types = autoprocessing.identify_key_columns(middle_rows, cols_to_keep)
-        df_processed = autoprocessing.select_final_columns(df, col_types)
-        '''
-        if has_id:
-            df_processed = df_processed.join(df['ID'], how='left')
-        df_processed.reset_index(drop=True, inplace=True)
-        '''
-        if df_processed is not None:
-            self.data = df_processed
-            self.usable = True
-        else:
-            self.usable = False
-        
-    '''
-    def assert_continuous_libre():
-        #same as above
-
-    def assert_dexcom_pre_2015():
-        # same as above
-        # choose internal date 
-
-    def assert_medtronic():
-        # never seen one
-
-    def assert_nightscout():
-        # not even sure if this is a thing
-    '''
+def combine_datetime(date, time):
+    dt = f'{date} {time}'
+    try:
+        dt = pd.to_datetime(dt)
+    except:
+        dt = np.nan
+    return dt

@@ -154,12 +154,12 @@ dbc.AccordionItem(
                     html.P("Use the sliders below to select the thresholds for level 1 and level 2 hypoglycemic episodes"),
                     dbc.Checklist(options=[{'label':'Remove LO/HI values', 'value':1},
                                         {'label':'Cap the glucose at selected cut-off','value':2}], 
-                                        id='lo-hi-cutoff-checklist', value=[]),
+                                        id='lo-hi-cutoff-checklist', value=[2]),
                     dbc.Row([
                         
                         dbc.Col([dbc.Card(dbc.CardBody([
                             html.H5('Low cut-off (mmol/L)'),
-                            dcc.Slider(1.1,5.3, step=0.1, value=2.1, 
+                            dcc.Slider(1.1, 5.3, step=0.1, value=2.1, 
                                         id='lo-cutoff-slider',
                                         tooltip={"placement": "bottom", "always_visible": True},
                                         marks={1.1:{'label': '1.1'},
@@ -168,7 +168,7 @@ dbc.AccordionItem(
                         ]))]),
                         dbc.Col([dbc.Card(dbc.CardBody([
                             html.H5('High cut-off (mmol/L)'),
-                            dcc.Slider(19.0, 29.1, step=0.1, value=22.2,
+                            dcc.Slider(19.0, 29.1, step=0.1, value=22.3,
                                         id='hi-cutoff-slider',
                                         tooltip={"placement": "bottom", "always_visible": True},
                                         marks={19:{'label': '19.0'},

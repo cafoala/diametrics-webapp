@@ -40,23 +40,51 @@ jumbotron = html.Div(
         [
             html.H1("Welcome to Diametrics", className="display-3"),
             html.P(
-                "A no-code webtool for calculating the metrics of glycemic control and exploring continuous glucose monitoring (CGM) data",
+                "A no-code webtool for Diabetes researchers to calculate the metrics of glycemic control and exploring continuous glucose monitoring (CGM) data",
                 className="lead",
             ),
             html.Hr(className="my-2"),
-            dp.DashPlayer(url='https://www.youtube.com/watch?v=dOphbyjhACM', controls=True),
+            dbc.Row([
+                dbc.Col([            
+                    dp.DashPlayer(url='https://youtu.be/uUcuigkCrm0', controls=True, playing=True),
+                ]),
+                dbc.Col([
+            dbc.Card([
+                        dbc.CardHeader("You can use the Diametrics Dashboard to:"),
+                        dbc.CardBody([
+                            html.P(),
+                            html.Ul([html.Li("Calculate the standard metrics of glycemic control"), 
+                                    html.Li("Visualise your data"), 
+                                    html.Li("Explore and calculate metrics for specific periods of interest")]),
+                            html.Div([
+                                "For step-by-step instructions and examples of how to use Diametrics, see the ", 
+                                dcc.Link("documentation.", href='/documentation'),
+                            ]),
+                            html.Br(),
+                            html.Div([
+                                "To get started, ", 
+                                dcc.Link("click here", href='/dashboard'),
+                            ]),
+                    ])])    
+                ]),
+                
+                
+            ]),
+            html.Br(),
+            dbc.Card([
+                dbc.CardHeader('Created with support of'),
+                dbc.CardBody([
+                    dbc.Row([
+    
+                    dbc.Col(
+                    html.Img(src='assets/exeter_logo.svg', width='180px')),
+                    
+                    dbc.Col(html.Img(src='assets/turing_logo.svg', width='180px')),
 
-            html.P(
-                "Use utility classes for typography and spacing to suit the "
-                "larger container."
-            ),
-            html.P(
-                dbc.Button([dbc.NavItem(
-            [
-                dbc.NavLink("Documentation", href="/documentation", active="True", target="_blank"),
-            ])], color="primary"), className="lead"
-            ),
-            
+                    dbc.Col(html.Img(src='assets/extod_logo.svg', width='180px')),
+                    ])
+                ])], color="secondary") #, outline=True
+             
         ],
         fluid=True,
         className="py-3",
@@ -218,7 +246,7 @@ content = html.Div([
                     ])],
                         label="Advanced analysis", 
                         tab_id="external-tab", id='external-tab',
-                        disabled=False, active_label_style={"color": "#FB79B3"}
+                        disabled=True, active_label_style={"color": "#FB79B3"}
                 ),
 
             ],
@@ -229,6 +257,8 @@ content = html.Div([
         #])
    # ),
 ])#, style=CONTENT_STYLE)
+
+
 
 def create_tabs_layout():
     return html.Div([dcc.Location(id="url"), sidebar, content])

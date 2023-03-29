@@ -188,27 +188,7 @@ def preprocess_data(n_clicks, list_of_dates, list_of_contents, list_of_names, dt
     data_table = section_data_overview.create_data_table(children)
     return (children, data_table)
 
-'''
-@du.callback([Output('raw-data-store', 'data'),
-    Output('data-tbl-div', 'children'),],
-    id='dash-uploader')
-def preprocess_data(status: du.UploadStatus):
-    if not status.is_completed:
-        raise PreventUpdate
-    children = section_data_overview.read_files(status.uploaded_files)
-    data_table = section_data_overview.create_data_table(children)
-    return (children, data_table)
 
-@du.callback([Output('raw-data-store', 'data'),
-    Output('data-tbl-div', 'children')],
-    id='dash-uploader')
-def preprocess_data(status: du.UploadStatus):
-    if not status.is_completed:
-        raise PreventUpdate
-    children = section_data_overview.read_files(status.uploaded_files)
-    data_table = section_data_overview.create_data_table(children)
-    return (children, data_table)
-'''
 @callback(
     Output('data-tbl', 'data'),
     Output('data-tbl', 'style_data_conditional'),
@@ -564,11 +544,12 @@ def poi(date, contents, filename):
     State('lo-cutoff-slider', 'value'),
     State('hi-cutoff-slider', 'value'),
     State('lo-hi-cutoff-checklist', 'value'),
+    State('units-first-button', 'value'),
     prevent_initial_call=True)
 def metrics(poi_ranges, set_periods, poi_data, raw_data, 
             additional_tirs, lv1_hypo, lv2_hypo, lv1_hyper, 
             lv2_hyper, short_mins, long_mins, night_start, 
-            night_end, low_cutoff, high_cutoff, checklist):
+            night_end, low_cutoff, high_cutoff, checklist, units):
     if poi_ranges is None:
         raise PreventUpdate
     if poi_data is None:
@@ -587,7 +568,12 @@ def metrics(poi_ranges, set_periods, poi_data, raw_data,
             is_open=True,
             color='danger'
         ),
-    metrics = section_external_factors.calculate_periodic_metrics(poi_ranges, set_periods, poi_data, raw_data, additional_tirs, lv1_hypo, lv2_hypo, lv1_hyper, lv2_hyper, short_mins, long_mins, night_start, night_end, low_cutoff, high_cutoff, checklist)
+    metrics = section_external_factors.calculate_periodic_metrics(poi_ranges, set_periods, poi_data,
+                                                                  raw_data, additional_tirs, lv1_hypo,
+                                                                  lv2_hypo, lv1_hyper, lv2_hyper, 
+                                                                  short_mins, long_mins, night_start, 
+                                                                  night_end, low_cutoff, high_cutoff, 
+                                                                  checklist, units)
     return metrics
 
 

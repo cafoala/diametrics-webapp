@@ -54,7 +54,7 @@ def create_glucose_trace(df):
         #row=1, col=1
     ),
     fig.add_hrect(
-        y0="13.9", y1="23",
+        y0="13.9", y1="28",
         fillcolor=colors[4], opacity=0.2,
         layer="below", line_width=0,#annotation_text='Level 2 hyperglycemia (>13.9)', annotation_position="top left",
         #row=1, col=1

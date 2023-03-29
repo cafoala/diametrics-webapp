@@ -54,7 +54,7 @@ def get_upload_layout():
                                         options=[
                                                 {"label": "Libre", "value": 'FreeStyle Libre'},
                                                 {"label": "Dexcom", "value": 'Dexcom'},
-                                                {"label": "Medtronic", "value": 'Medtronic', 'disabled':True},
+                                                {"label": "Medtronic", "value": 'Medtronic'},
                                         ],
                                         value='FreeStyle Libre',
                                 ), className="radio-group"

@@ -3,8 +3,9 @@ import dash
 import os
 import dash_bootstrap_components as dbc
 import layout
+import about_us
+import contact
 import dash_uploader as du
-image_path = 'assets/logo_circle.png'
 
 external_stylesheets = [dbc.themes.BOOTSTRAP, dbc.icons.BOOTSTRAP]
 colors = {
@@ -40,7 +41,7 @@ CONTENT_STYLE = {
 
 sidebar = html.Div(
     [
-        html.Img(src=image_path, width='180px'),  
+        html.Img(src='assets/logo_circle.png', width='180px'),  
         html.H3("Diametrics", className="display-6"),
         html.Hr(),
         html.P("Calculate the metrics of glycemic control",
@@ -51,7 +52,7 @@ sidebar = html.Div(
                 dbc.NavLink("Home", href="/", active="exact"),
                 dbc.NavLink("Dashboard", href="/dashboard", active="exact"),
                 dbc.NavLink("Documentation", href="/documentation", active="exact", target="_blank"),
-                dbc.NavLink("About Us", href="/page-3", active="exact"),
+                dbc.NavLink("About Us", href="/about", active="exact"),
                 dbc.NavLink("Contact", href="/contact", active="exact"),
             ],
             vertical=True,
@@ -75,7 +76,10 @@ def display_page(pathname):
          return layout.content
     elif pathname == '/documentation':
         return layout.instruction_section
-
+    elif pathname == '/about':
+        return about_us.about_us_layout
+    elif pathname == '/contact':
+        return contact.contact_form()
     else:
         return '404'
 

@@ -85,7 +85,7 @@ def create_period_of_interest():
                 dbc.Row([
                     dbc.Col(width=8),
                     dbc.Col([
-                        dbc.RadioItems(
+                        html.Div(dbc.RadioItems(
                             id="poi-unit-options",
                             className="btn-group",
                             inputClassName="btn-check",
@@ -98,6 +98,7 @@ def create_period_of_interest():
                             ],
                             value='mmol/L',
                             style={'textAlign': 'center'}
+                        ), className="radio-group"
                         ),
                     ]),
                     
@@ -306,7 +307,7 @@ def periodic_calculations(info, glc_data, id_raw_data, first_time,
 def calculate_periodic_metrics(poi_ranges, set_periods, poi_data, raw_data, 
                                additional_tirs, lv1_hypo, lv2_hypo, lv1_hyper, 
                                lv2_hyper, short_mins, long_mins, night_start, 
-                               night_end, low_cutoff, high_cutoff, checklist):
+                               night_end, low_cutoff, high_cutoff, checklist, units):
     results = []
     
     for i in poi_data:
@@ -321,6 +322,7 @@ def calculate_periodic_metrics(poi_ranges, set_periods, poi_data, raw_data,
 
         try:
             id_raw_data = next(item for item in raw_data if item['ID'] == ID)
+            
         except:
             ##### Add sumink #####
             results.append(info)
@@ -337,6 +339,8 @@ def calculate_periodic_metrics(poi_ranges, set_periods, poi_data, raw_data,
         # Replace lo/hi values
         glc_data = section_metrics_tbl.replace_cutoffs(glc_data, low_cutoff, 
                                                      high_cutoff, checklist)
+        if units == 'mg/dL':
+                        glc_data['glc'] = glc_data['glc']*0.0557
 
         for drag in poi_ranges:
             # First num values
