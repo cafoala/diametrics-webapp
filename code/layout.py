@@ -82,6 +82,8 @@ jumbotron = html.Div(
                     dbc.Col(html.Img(src='assets/turing_logo.svg', width='180px')),
 
                     dbc.Col(html.Img(src='assets/extod_logo.svg', width='180px')),
+                    
+                    dbc.Col(html.Img(src='assets/motivate_logo.webp', width='180px'))
                     ])
                 ])], color="secondary") #, outline=True
              

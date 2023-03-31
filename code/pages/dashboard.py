@@ -335,6 +335,16 @@ def calculate_metrics(additional_tirs, processed_data, edited_data, lv1_hypo, lv
     
     return all_results#, collapse_table
 
+def get_rounded_colums(df, units):
+    if units=='mmol/L':
+        unit_round = 2
+    else:
+        unit_round= 1
+
+    rounded_df = df.round({'Average glucose':unit_round, 'SD':unit_round, 'CV (%)':2, 'eA1c (%)':2, 'Min. glucose':unit_round,
+       'Max. glucose':unit_round, 'AUC':unit_round, 'LBGI':2, 'HBGI':2, 'MAGE':unit_round,})
+    return rounded_df
+
 # Update
 @callback(
     Output('test-table', 'children'),
@@ -345,10 +355,14 @@ def calculate_metrics(additional_tirs, processed_data, edited_data, lv1_hypo, lv
     )
 def update_metrics_table(metrics_data, units, period): 
     df = pd.DataFrame.from_dict(metrics_data)
+    
     if units == 'mmol/L':
-        sub_df = np.round(df[(df['period']==period)&(df['units']==units)], 2)
+        sub_df = df[(df['period']==period)&(df['units']==units)]
     else:
-        sub_df = np.round(df[(df['period']==period)&(df['units']==units)], 1)
+        sub_df = df[(df['period']==period)&(df['units']==units)]
+    
+    sub_df = get_rounded_colums(sub_df, units)
+
     sub_df = section_metrics_tbl.change_headings(sub_df, units)
     sub_df = sub_df.drop(columns=['period', 'units'])
     metrics_table = section_metrics_tbl.create_metrics_table(sub_df)
@@ -587,11 +601,12 @@ def metrics(poi_ranges, set_periods, poi_data, raw_data,
 def update_poi_metrics_table(metrics_data, units): 
     df = pd.DataFrame.from_dict(metrics_data)
     if units == 'mmol/L':
-        sub_df = np.round(df[df['units']==units], 2)
+        sub_df = df[df['units']==units]
         
     else:
-        sub_df = np.round(df[df['units']==units], 1)
+        sub_df = df[df['units']==units]
 
+    sub_df = get_rounded_colums(sub_df, units)
     sub_df = section_metrics_tbl.change_headings(sub_df, units)
     sub_df = sub_df.drop(columns=['units']) #'period', 
     table = section_external_factors.create_data_table(sub_df)

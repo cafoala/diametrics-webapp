@@ -41,6 +41,7 @@ CONTENT_STYLE = {
 
 sidebar = html.Div(
     [
+        html.Br(),
         html.Img(src='assets/logo_circle.png', width='180px'),  
         html.H3("Diametrics", className="display-6"),
         html.Hr(),
@@ -49,11 +50,11 @@ sidebar = html.Div(
         ),
         dbc.Nav(
             [
-                dbc.NavLink("Home", href="/", active="exact"),
-                dbc.NavLink("Dashboard", href="/dashboard", active="exact"),
-                dbc.NavLink("Documentation", href="/documentation", active="exact", target="_blank"),
-                dbc.NavLink("About Us", href="/about", active="exact"),
-                dbc.NavLink("Contact", href="/contact", active="exact"),
+                dbc.NavLink(html.H6([html.I(className="bi bi-house"),"  Home"]), href="/", active="exact"),
+                dbc.NavLink(html.H6([html.I(className="bi bi-speedometer"), "  Dashboard"]), href="/dashboard", active="exact"),
+                dbc.NavLink(html.H6([html.I(className="bi bi-book"), "  Documentation"]), href="/documentation", active="exact", target="_blank"),
+                dbc.NavLink(html.H6([html.I(className="bi bi-file-earmark-person"), "  About Us"]), href="/about", active="exact"),
+                dbc.NavLink(html.H6([html.I(className="bi bi-envelope"), "  Contact"]), href="/contact", active="exact"),
             ],
             vertical=True,
             pills=True,
