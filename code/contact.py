@@ -2,60 +2,36 @@ import dash_bootstrap_components as dbc
 from dash import dcc, html
 import dash_player as dp
 
-email_input = dbc.Row([
-        dbc.Label("Email"
-                , html_for="example-email-row"
-                , width=2),
-        dbc.Col(dbc.Input(
-                type="email"
-                , id="example-email-row"
-                , placeholder="Enter email"
-            ),width=10,
-        )],className="mb-3"
-)
-user_input = dbc.Row([
-        dbc.Label("Password", html_for="example-name-row", width=2),
-        dbc.Col(
-            dbc.Input(
-                type="text"
-                , id="example-name-row"
-                , placeholder="Enter name"
-                , maxLength = 80
-            ),width=10
-        )], className="mb-3"
-)
-message = dbc.Row([
-        dbc.Label("Message"
-         , html_for="example-message-row", width=2)
-        ,dbc.Col(
-            dbc.Textarea(id = "example-message-row"
-                , className="mb-3"
-                , placeholder="Enter message"
-                , required = True)
-            , width=10)
-        ], className="mb-3")
+contact_info = html.Div([
+                    html.P("Contact Information", style={"font-size": "24px"}),
+                    dcc.Markdown('''Project Email: [diametrics@proton.me](mailto:diametrics@proton.me)''', style={"font-size": "16px"}),
+                    dcc.Markdown('''Cat's Email: [cr91@exeter.ac.uk](mailto:cr591@exeter.ac.uk)'''),#, style={"font-size": "16px"}),
+                    dcc.Markdown('''Cat's LinkedIn: [https://uk.linkedin.com/in/catherine-russon](https://uk.linkedin.com/in/catherine-russon)''')
+                ], style={
+                    "border": "2px solid #ccc",
+                    "border-radius": "5px",
+                    "padding": "10px",
+                    "margin": "10px",
+                })
 
 def contact_form():
-    markdown = ''' # Send a message if you have a comment, question, or concern. Thank you!'''   
-    form = html.Div([ dbc.Container([
-            dcc.Markdown(markdown)
-            , html.Br()
-            , dbc.Card(
-                dbc.CardBody([
-                     dbc.Form([email_input
-                        , user_input
-                        , message])
-                ,html.Div(id = 'div-button', children = [
-                    dbc.Button('Submit'
-                    , color = 'primary'
-                    , id='button-submit'
-                    , n_clicks=0)
-                ]) #end div
-                ])#end cardbody
-            )#end card
-            , html.Br()
-            , html.Br()
-        ])
+    markdown = '''
+    We welcome any feedback you have about Diametrics. This is a small project and any problems you find can help us to make the tool better!
+      
+
+    Send us an email if you have any comments, questions, or would like to be involved in the project. 
+    
+  
+    Thank you!
+    
+    '''   
+    form = html.Div([ 
+        html.H1('Contact'),
+        dbc.Card(dbc.CardBody([
+            
+            dcc.Markdown(markdown),
+            contact_info,
+        ]))
         ])
     
     return form

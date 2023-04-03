@@ -249,9 +249,9 @@ def get_drag_times(first_num, last_num, start, end):
     elif first_num =='end':
         first_time = end
     elif first_num>0:
-        first_time = end+timedelta(hours=first_num)
+        first_time = end+timedelta(hours=float(first_num))
     else:
-        first_time = start-timedelta(hours=abs(first_num))
+        first_time = start-timedelta(hours=float(abs(first_num)))
     # Last num value
     if last_num=='start':
         last_time = start
@@ -336,12 +336,15 @@ def calculate_periodic_metrics(poi_ranges, set_periods, poi_data, raw_data,
         glc_data = pd.DataFrame.from_dict(id_raw_data['data'])
         glc_data['time'] = pd.to_datetime(glc_data['time'])
         
+        glc_data['glc'] = pd.to_numeric(glc_data['glc'], errors='ignore')
+        if units == 'mg/dL':
+                        glc_data['glc'] = glc_data['glc'].apply(lambda x: x*0.0557 
+                                                                if (isinstance(x, int) or 
+                                                                    isinstance(x, float)) else x)
+
         # Replace lo/hi values
         glc_data = section_metrics_tbl.replace_cutoffs(glc_data, low_cutoff, 
                                                      high_cutoff, checklist)
-        if units == 'mg/dL':
-                        glc_data['glc'] = glc_data['glc']*0.0557
-
         for drag in poi_ranges:
             # First num values
             first, last, first_num, last_num = drag_values(drag)

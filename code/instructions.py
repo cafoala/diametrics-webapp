@@ -11,12 +11,12 @@ layout = html.Div([
             # Overview
             dbc.AccordionItem([
                         dbc.Row([
-                            dbc.Col([
+                            #dbc.Col([
                                 
-                            ]),
-                            dbc.Col([
-                                dp.DashPlayer(url='https://www.youtube.com/watch?v=dOphbyjhACM', controls=True),
-                            ])
+                            #]),
+                            #dbc.Col([
+                                dp.DashPlayer(url='https://youtu.be/EWoB2ALtBZs', controls=True),
+                            #])
                         ])
                     ], title='Overview'),
             # Changing tabs
@@ -50,7 +50,7 @@ layout = html.Div([
                         )
                     ), 
                     dbc.Col(
-                        dp.DashPlayer(url='https://youtu.be/YUWJX1EZmWI', controls=True),
+            #dp.DashPlayer(url='https://www.youtube.com/watch?v=dOphbyjhACM', controls=True),
                     )
                 ]),
                 dbc.Row([
@@ -204,14 +204,12 @@ layout = html.Div([
 
                             The file can be in a few different formats, but it’s essential that you match the column names up perfectly to the ones described below.
 
-                            
-
                             '''
                         ),
                         
                     ]),
                     dbc.Col([
-                        dp.DashPlayer(url='https://www.youtube.com/watch?v=dOphbyjhACM', controls=True),
+                        dp.DashPlayer(url='https://youtu.be/NGurTu6PS3s', controls=True),
                     ])
                 ]),
                 dbc.Row([
@@ -225,10 +223,10 @@ layout = html.Div([
 
                             The following combinations are your options:
 
-                            * startDateTime, endDateTime
-                            * ID, startDate, startTime, endDate, endTime, label
-                            * ID, startDateTime, duration, label
-                            * ID, startDate, startTime, duration, label
+                            * start_datetime, end_datetime, labels...
+                            * ID, start_date, start_time, end_date, end_time, labels...
+                            * ID, start_datetime, duration, labels...
+                            * ID, start_date, start_time, duration, labels...
 
                             The date entries need to be in the following formats:
 
@@ -263,13 +261,14 @@ layout = html.Div([
 
             ], title='Advanced analysis')
         ], start_collapsed=False),
+        
         html.Br(),
         html.H2('FAQs'),
         dbc.Accordion([
             dbc.AccordionItem([
                 dcc.Markdown(
                         '''
-                        Bla bla bla
+                        Coming soon! (Still need to make the video)
                         '''
                     )
             ], title='What if I\'ve uploaded the wrong data?'),
@@ -278,7 +277,7 @@ layout = html.Div([
                         dbc.Col([
                             dcc.Markdown(
                                 '''
-                                Bla bla bla
+                                Coming soon! (Still need to make the video)
                                 '''
                             )
                         ]),
@@ -293,7 +292,7 @@ layout = html.Div([
                         ])
                     ])
                 ], title='How to divide a single CGM file into several sub-periods?'),
-        ], start_collapsed=True),    
+        ], start_collapsed=True), 
         html.Br(),
         html.H2('Theory and code'),
         dbc.Accordion([

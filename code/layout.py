@@ -49,35 +49,39 @@ jumbotron = html.Div(
                     dp.DashPlayer(url='https://youtu.be/uUcuigkCrm0', controls=True, playing=True),
                 ]),
                 dbc.Col([
-            dbc.Card([
-                        dbc.CardHeader("You can use the Diametrics Dashboard to:"),
+                    dbc.Card([
+                        dbc.CardHeader(html.H4("Get started")),
                         dbc.CardBody([
-                            html.P(),
-                            html.Ul([html.Li("Calculate the standard metrics of glycemic control"), 
-                                    html.Li("Visualise your data"), 
-                                    html.Li("Explore and calculate metrics for specific periods of interest")]),
+                            html.P('You can use Diametrics to:'),
+                            html.H6(
+                                html.Ul([
+                                    html.Li("Calculate the standard metrics of glycemic control"), 
+                                    html.Br(),
+                                    html.Li("Visualise your data"),
+                                    html.Br(),
+                                    html.Li("Explore and calculate metrics for specific periods of interest")]),),
                             html.Div([
-                                "For step-by-step instructions and examples of how to use Diametrics, see the ", 
-                                dcc.Link("documentation.", href='/documentation'),
-                            ]),
-                            html.Br(),
-                            html.Div([
-                                "To get started, ", 
-                                dcc.Link("click here", href='/dashboard'),
-                            ]),
-                    ])])    
+                                "For step-by-step instructions and examples, see the ", 
+                                dcc.Link("documentation", href='/documentation'),
+                            
+                                " or jump straight into the ", 
+                                dcc.Link("dashboard", href='/dashboard'),
+                                " right away!"
+                            ]),                      
+                        ]),
+                        
+      
+ 
                 ]),
-                
-                
+                ])
             ]),
             html.Br(),
             dbc.Card([
-                dbc.CardHeader('Created with support of'),
+                dbc.CardHeader('Created with support from'),
                 dbc.CardBody([
                     dbc.Row([
     
-                    dbc.Col(
-                    html.Img(src='assets/exeter_logo.svg', width='180px')),
+                    dbc.Col(html.Img(src='assets/exeter_logo.svg', width='180px')),
                     
                     dbc.Col(html.Img(src='assets/turing_logo.svg', width='180px')),
 

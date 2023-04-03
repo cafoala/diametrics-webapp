@@ -6,6 +6,8 @@ import layout
 import about_us
 import contact
 import dash_uploader as du
+import ssl
+import smtplib
 
 external_stylesheets = [dbc.themes.BOOTSTRAP, dbc.icons.BOOTSTRAP]
 colors = {
@@ -43,11 +45,13 @@ sidebar = html.Div(
     [
         html.Br(),
         html.Img(src='assets/logo_circle.png', width='180px'),  
+        html.Br(),
         html.H3("Diametrics", className="display-6"),
         html.Hr(),
         html.P("Calculate the metrics of glycemic control",
             className="lead"
         ),
+        html.Br(),
         dbc.Nav(
             [
                 dbc.NavLink(html.H6([html.I(className="bi bi-house"),"  Home"]), href="/", active="exact"),
@@ -83,6 +87,7 @@ def display_page(pathname):
         return contact.contact_form()
     else:
         return '404'
+
 
 if __name__ == '__main__':
     # DASH_PORT is set to 80 in Dockerfile
