@@ -59,7 +59,7 @@ about_us_layout = html.Div([
                         
                         This project was selected and funded by Emily Paremain at [The Alan Turing Institute](https://www.turing.ac.uk/) at University of Exeter. 
                         
-                        The University of Exeter [Research Software Engineering](https://www.exeter.ac.uk/research/idsai/team/researchsoftwareengineers/) team, led by Katie Hesketh, provided technical support and guidance. 
+                        The University of Exeter [Research Software Engineering](https://www.exeter.ac.uk/research/idsai/team/researchsoftwareengineers/) team, led by Katie Finch, provided technical support and guidance. 
                         
                         A massive thank you to the participants of the [Exercise in Type 1 Diabetes (EXTOD)](https://extod.org/) and [Motivate](https://www.motivateljmu.com/) trials, whose data we wouldn\'t have been able to build this WebApp!
                         
