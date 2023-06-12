@@ -135,7 +135,7 @@ def get_metrics_breakdown(df_id, day_start, day_end, night_start, night_end,
 def replace_cutoffs(dict, lo_cutoff, hi_cutoff, lo_hi_cutoff_checklist):
     df = pd.DataFrame(dict)
     if not 1 in lo_hi_cutoff_checklist:
-        df['glc']= pd.to_numeric(df['glc'].replace({'High': lo_cutoff, 'Low': lo_cutoff, 'high': hi_cutoff, 'low': lo_cutoff, 
+        df['glc']= pd.to_numeric(df['glc'].replace({'High': hi_cutoff, 'Low': lo_cutoff, 'high': hi_cutoff, 'low': lo_cutoff, 
                              'HI':hi_cutoff, 'LO':lo_cutoff, 'hi':hi_cutoff, 'lo':lo_cutoff}))
 
         if 2 in lo_hi_cutoff_checklist:
