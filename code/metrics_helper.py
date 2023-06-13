@@ -333,7 +333,7 @@ def lv2_calc(df, time, glc, lv2_threshold):
     return lv2
 
 
-def helper_missing(df, gap_size, start_time=None, end_time=None):
+def helper_missing(df, start_time=None, end_time=None):
     """
     Helper for percent_missing function
     """
@@ -346,7 +346,7 @@ def helper_missing(df, gap_size, start_time=None, end_time=None):
     df = df.loc[(df['time'] >= start_time) & (df['time'] <= end_time)]
 
     # Calculate the interval size
-    gap_size = gap_size or df['time'].diff().mode().iloc[0]
+    gap_size = df['time'].diff().mode().iloc[0]
     # If it doesn't conform to 5 or 15 then don't count it
     if ((timedelta(minutes=4) < gap_size) & (gap_size < timedelta(minutes=6))):
         freq = '5min'

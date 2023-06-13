@@ -34,7 +34,7 @@ def preprocess_df(df, filename, dt_format, device, units):
             if df_transformed.interval is None:
                 df_transformed.interval = calculate_time_interval(df_transformed.data)
             
-            data_stats = metrics_helper.helper_missing(df_transformed.data, df_transformed.interval)
+            data_stats = metrics_helper.helper_missing(df_transformed.data)
             days = str(pd.to_datetime(data_stats['End DateTime']) - pd.to_datetime(data_stats['Start DateTime']))
             
             data_dictionary['Usable'] = df_transformed.usable

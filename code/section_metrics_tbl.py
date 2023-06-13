@@ -73,23 +73,31 @@ def get_metrics_breakdown(df_id, day_start, day_end, night_start, night_end,
     df_id['time'] = pd.to_datetime(df_id['time'])
 
     info = metrics_helper.helper_missing(df_id)
+    info = pd.DataFrame.from_dict(info, orient='index').T
     
     # Total df
     all, all_mg = metrics_experiment.calculate_all_metrics(df_id, 
                         #ID='blob', units=i['Units'], 
-                        additional_tirs=additional_tirs, lv1_hypo=lv1_hypo, 
-                        lv2_hypo=lv2_hypo, lv1_hyper=lv1_hyper, 
-                        lv2_hyper=lv2_hyper, event_mins=short_mins, event_long_mins=long_mins)
+                        additional_tirs=additional_tirs,
+                        lv1_hypo=lv1_hypo, 
+                        lv2_hypo=lv2_hypo, 
+                        lv1_hyper=lv1_hyper, 
+                        lv2_hyper=lv2_hyper, 
+                        event_mins=short_mins, 
+                        event_long_mins=long_mins)
+    
     # mmol
     all['period'] = 'All'
     all['units'] = 'mmol/L'
-    all = {**info, **all}
+    #all = {**info, **all}
+    all = pd.concat([info, all],axis=1)
+
     all_results = all_results.append(all)
 
     # mg
     all_mg['period'] = 'All'
     all_mg['units'] = 'mg/dL'
-    all_mg = {**info, **all_mg}
+    all_mg = pd.concat([info, all_mg],axis=1)
     all_results = all_results.append(all_mg)
 
     df_day, df_night = periods.get_day_night_breakdown(df_id, day_start, day_end, night_start, night_end)
@@ -104,21 +112,21 @@ def get_metrics_breakdown(df_id, day_start, day_end, night_start, night_end,
         # mmol
         day['period'] = 'Day'
         day['units'] = 'mmol/L'
-        day = {**info, **day}
+        day = pd.concat([info, day],axis=1)
 
         
         # mg
         day_mg['period'] = 'Day'
         day_mg['units'] = 'mg/dL'
-        day_mg = {**info, **day_mg}
+        day_mg = pd.concat([info, day_mg],axis=1)
 
         
     else:
         day = pd.DataFrame({'period':['Day'], 'units':['mmol/L']})
-        day = {**info, **day}
+        day = pd.concat([info, day],axis=1)
         
         day_mg = pd.DataFrame({'period':['Day'], 'units':['mg/dL']})
-        day_mg = {**info, **day_mg}
+        day_mg = pd.concat([info, day_mg],axis=1)
     if not df_night.empty:
 
         # Night breakdown metrics
@@ -131,16 +139,16 @@ def get_metrics_breakdown(df_id, day_start, day_end, night_start, night_end,
         # mmol  
         night['period'] = 'Night'
         night['units'] = 'mmol/L'  
-        night = {**info, **night}
+        night = pd.concat([info, night],axis=1)
         # mg
         night_mg['period'] = 'Night'
         night_mg['units'] = 'mg/dL'
-        night_mg = {**info, **night_mg}
+        night_mg = pd.concat([info, night_mg],axis=1)
     else:
         night = pd.DataFrame({'period':['Night'], 'units':['mmol/L']})
-        night = {**info, **night}
+        night = pd.concat([info, night],axis=1)
         night_mg = pd.DataFrame({'period':['Night'], 'units':['mg/dL']})
-        night_mg = {**info, **night_mg}
+        night_mg = pd.concat([info, night_mg],axis=1)
     
     all_results = all_results.append(day)
     all_results = all_results.append(day_mg)

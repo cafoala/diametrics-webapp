@@ -2,7 +2,9 @@ import pandas as pd
 import metrics_helper
 import numpy as np
 
-def calculate_all_metrics(df, return_df=True,units='mmol/L', additional_tirs=None, lv1_hypo=3.9, lv2_hypo=3.0, lv1_hyper=10, lv2_hyper=13.9,  event_mins=15, event_long_mins=120):
+def calculate_all_metrics(df, return_df=True,units='mmol/L', additional_tirs=None, 
+                          lv1_hypo=3.9, lv2_hypo=3.0, lv1_hyper=10, lv2_hyper=13.9,  
+                          event_mins=15, event_long_mins=120):
     factor = 0.0557
     if metrics_helper.check_df(df):
         # create a list to add the results to
