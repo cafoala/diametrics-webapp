@@ -2,6 +2,7 @@ from dash import dcc, html, dash_table
 import dash_bootstrap_components as dbc
 import pandas as pd
 import metrics_experiment
+import metrics_helper
 import periods
 
 
@@ -64,11 +65,15 @@ def get_metrics_layout():
     ])
     return metrics_layout
 
+
 def get_metrics_breakdown(df_id, day_start, day_end, night_start, night_end, 
                         additional_tirs, lv1_hypo, lv2_hypo, lv1_hyper, 
                         lv2_hyper, short_mins, long_mins):
     all_results = pd.DataFrame()
     df_id['time'] = pd.to_datetime(df_id['time'])
+
+    info = metrics_helper.helper_missing(df_id)
+    
     # Total df
     all, all_mg = metrics_experiment.calculate_all_metrics(df_id, 
                         #ID='blob', units=i['Units'], 
@@ -78,11 +83,13 @@ def get_metrics_breakdown(df_id, day_start, day_end, night_start, night_end,
     # mmol
     all['period'] = 'All'
     all['units'] = 'mmol/L'
+    all = {**info, **all}
     all_results = all_results.append(all)
 
     # mg
     all_mg['period'] = 'All'
     all_mg['units'] = 'mg/dL'
+    all_mg = {**info, **all_mg}
     all_results = all_results.append(all_mg)
 
     df_day, df_night = periods.get_day_night_breakdown(df_id, day_start, day_end, night_start, night_end)
@@ -97,15 +104,21 @@ def get_metrics_breakdown(df_id, day_start, day_end, night_start, night_end,
         # mmol
         day['period'] = 'Day'
         day['units'] = 'mmol/L'
+        day = {**info, **day}
+
         
         # mg
         day_mg['period'] = 'Day'
         day_mg['units'] = 'mg/dL'
+        day_mg = {**info, **day_mg}
+
         
     else:
         day = pd.DataFrame({'period':['Day'], 'units':['mmol/L']})
+        day = {**info, **day}
+        
         day_mg = pd.DataFrame({'period':['Day'], 'units':['mg/dL']})
-
+        day_mg = {**info, **day_mg}
     if not df_night.empty:
 
         # Night breakdown metrics
@@ -118,19 +131,23 @@ def get_metrics_breakdown(df_id, day_start, day_end, night_start, night_end,
         # mmol  
         night['period'] = 'Night'
         night['units'] = 'mmol/L'  
-        
+        night = {**info, **night}
         # mg
         night_mg['period'] = 'Night'
         night_mg['units'] = 'mg/dL'
+        night_mg = {**info, **night_mg}
     else:
         night = pd.DataFrame({'period':['Night'], 'units':['mmol/L']})
+        night = {**info, **night}
         night_mg = pd.DataFrame({'period':['Night'], 'units':['mg/dL']})
+        night_mg = {**info, **night_mg}
     
     all_results = all_results.append(day)
     all_results = all_results.append(day_mg)
     all_results = all_results.append(night)
     all_results = all_results.append(night_mg)
     return all_results
+
 
 def replace_cutoffs(dict, lo_cutoff, hi_cutoff, lo_hi_cutoff_checklist):
     df = pd.DataFrame(dict)

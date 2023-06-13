@@ -338,32 +338,39 @@ def helper_missing(df, gap_size, start_time=None, end_time=None):
     Helper for percent_missing function
     """
     # Calculate start and end time from dataframe
-    if start_time is None:
-        start_time = df['time'].iloc[0]
-    if end_time is None:
-        end_time = df['time'].iloc[-1]
-    
-    # Subsection of df with start and end times provided
-    df = df.loc[(df['time']>=start_time)&(df['time']<=end_time)]
+    # Determine start and end time from the DataFrame if not provided
+    start_time = start_time or df['time'].iloc[0]
+    end_time = end_time or df['time'].iloc[-1]
 
-    if gap_size == 5:
+    # Subset the DataFrame based on the provided time range
+    df = df.loc[(df['time'] >= start_time) & (df['time'] <= end_time)]
+
+    # Calculate the interval size
+    gap_size = gap_size or df['time'].diff().mode().iloc[0]
+    # If it doesn't conform to 5 or 15 then don't count it
+    if ((timedelta(minutes=4) < gap_size) & (gap_size < timedelta(minutes=6))):
         freq = '5min'
-    elif gap_size==15:
+    elif ((timedelta(minutes=14) < gap_size) & (gap_size < timedelta(minutes=16))):
         freq = '15min'
     else:
-        return print('YOU CAN\'T USE THAT INTERVAL!')
-    
-    # calculate the number of non-null values
-    number_readings = sum(df.set_index('time').groupby(pd.Grouper(freq=freq)).count()['glc'] > 0)
-    # calculate the missing data based on start and end of df
-    total_readings = ((end_time - start_time)+timedelta(minutes=gap_size))/+timedelta(minutes=gap_size)
+        raise ValueError('Invalid gap size. Gap size must be 5 or 15.')
 
+    # Calculate the number of non-null values
+    number_readings = sum(df.set_index('time').groupby(pd.Grouper(freq=freq)).count()['glc'] > 0)
+    # Calculate the total expected readings based on the start and end of the time range
+    total_readings = ((end_time - start_time) + gap_size) / gap_size
+
+    # Calculate the data sufficiency percentage
     if number_readings >= total_readings:
         data_sufficiency = 100
     else:
-        data_sufficiency = number_readings*100/total_readings
-    
-    return {'Start DateTime': str(start_time.round('min')), 'End DateTime':str(end_time.round('min')), 'Data Sufficiency (%)':np.round(data_sufficiency, 1)}
+        data_sufficiency = number_readings * 100 / total_readings
+
+    return {
+        'Start DateTime': str(start_time.round('min')),
+        'End DateTime': str(end_time.round('min')),
+        'Data Sufficiency (%)': np.round(data_sufficiency, 1)
+    }
 
 # LBGI and HBGI
 def calc_bgi(glucose, units):
