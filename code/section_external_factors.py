@@ -279,7 +279,7 @@ def periodic_calculations(info, glc_data, id_raw_data, first_time,
         
     else:
         data_sufficiency = metrics_helper.helper_missing(sub_df, 
-                                                            gap_size=id_raw_data['Interval'], 
+                                                            #gap_size=id_raw_data['Interval'], 
                                                             start_time=first_time, 
                                                             end_time=last_time)['Data Sufficiency (%)']
         info['Data Sufficiency (%)'] = data_sufficiency
