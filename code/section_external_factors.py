@@ -101,7 +101,6 @@ def create_period_of_interest():
                         ), className="radio-group"
                         ),
                     ]),
-                    
                 ]),
                 html.Div(dbc.Spinner(spinner_style={"width": "3rem", "height": "3rem"}), 
                             style={'textAlign':'center'}, id='poi-metrics')
@@ -279,7 +278,7 @@ def periodic_calculations(info, glc_data, id_raw_data, first_time,
         
     else:
         data_sufficiency = metrics_helper.helper_missing(sub_df, 
-                                                            #gap_size=id_raw_data['Interval'], 
+                                                            gap_size=id_raw_data['Interval'], 
                                                             start_time=first_time, 
                                                             end_time=last_time)['Data Sufficiency (%)']
         info['Data Sufficiency (%)'] = data_sufficiency
@@ -338,7 +337,7 @@ def calculate_periodic_metrics(poi_ranges, set_periods, poi_data, raw_data,
         
         glc_data['glc'] = pd.to_numeric(glc_data['glc'], errors='ignore')
         if units == 'mg/dL':
-                        glc_data['glc'] = glc_data['glc'].apply(lambda x: x*0.0557 
+                        glc_data['glc'] = glc_data['glc'].apply(lambda x: x/18 
                                                                 if (isinstance(x, int) or 
                                                                     isinstance(x, float)) else x)
 
@@ -434,7 +433,7 @@ def create_data_table(data):
                 },
                 style_table={
                     'overflowX': 'auto',
-                    'maxHeight': '40vh',
+                    'maxHeight': '60vh',
                     },
                 
                 style_header={

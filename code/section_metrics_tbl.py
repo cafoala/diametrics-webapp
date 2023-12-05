@@ -71,8 +71,7 @@ def get_metrics_breakdown(df_id, day_start, day_end, night_start, night_end,
                         lv2_hyper, short_mins, long_mins):
     all_results = pd.DataFrame()
     df_id['time'] = pd.to_datetime(df_id['time'])
-
-    info = metrics_helper.helper_missing(df_id)
+    info = metrics_helper.helper_missing(df_id, None, None, None)
     info = pd.DataFrame.from_dict(info, orient='index').T
     
     # Total df

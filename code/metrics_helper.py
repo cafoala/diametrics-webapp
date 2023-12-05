@@ -333,20 +333,23 @@ def lv2_calc(df, time, glc, lv2_threshold):
     return lv2
 
 
-def helper_missing(df, start_time=None, end_time=None):
+def helper_missing(df, gap_size, start_time, end_time):
     """
     Helper for percent_missing function
     """
-    # Calculate start and end time from dataframe
     # Determine start and end time from the DataFrame if not provided
     start_time = start_time or df['time'].iloc[0]
     end_time = end_time or df['time'].iloc[-1]
+    days = np.round((end_time-start_time).total_seconds()/86400, 1)
 
     # Subset the DataFrame based on the provided time range
     df = df.loc[(df['time'] >= start_time) & (df['time'] <= end_time)]
 
+    if gap_size is not None:
+        gap_size = timedelta(minutes=gap_size)
     # Calculate the interval size
-    gap_size = df['time'].diff().mode().iloc[0]
+    else:
+        gap_size = df['time'].diff().mode().iloc[0]
     # If it doesn't conform to 5 or 15 then don't count it
     if ((timedelta(minutes=4) < gap_size) & (gap_size < timedelta(minutes=6))):
         freq = '5min'
@@ -366,9 +369,11 @@ def helper_missing(df, start_time=None, end_time=None):
     else:
         data_sufficiency = number_readings * 100 / total_readings
 
+
     return {
         'Start DateTime': str(start_time.round('min')),
         'End DateTime': str(end_time.round('min')),
+        'Days':days,
         'Data Sufficiency (%)': np.round(data_sufficiency, 1)
     }
 
