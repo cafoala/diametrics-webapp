@@ -3,10 +3,41 @@ from dash import dcc, html, dash_table
 import dash_bootstrap_components as dbc
 import dash_mantine_components as dmc
 import datetime
+#import dash_daq as daq
 
 def get_analysis_options_layout():
     accordion = html.Div(
         dbc.Accordion([
+            dbc.AccordionItem([
+                #daq.BooleanSwitch(id='my-boolean-switch', on=False),
+                dbc.Row([
+                    dbc.Col([
+                        html.H6('Max. limit for interpolation (mins)'),
+                        dbc.Input(id='interp-max-mins', type="number", min=0, max=1000, step=1,
+                                value=30, disabled=True)
+                    ]),
+                    dbc.Col([
+                        html.H6('Interpolation method'),
+                        html.Div(dbc.RadioItems(
+                            id="inter-method-options",
+                            className="btn-group",
+                            inputClassName="btn-check",
+                            labelClassName="btn btn-outline-primary",
+                            labelCheckedClassName="active",
+                            options=[
+                                {"label": 'Linear', "value": 'linear', 'disabled':True},
+                                {"label": "Cubic", "value": 'pchip', 'disabled':True},
+                                #{"label": "Both", "value": 'both'},
+                            ],
+                            value='linear',
+                            style={'textAlign': 'center'},
+                        ), className="radio-group"
+                        )
+                    ]),
+                ])
+            ],
+            title="Interpolate missing values"
+            ),
             dbc.AccordionItem([
                 html.P('Edit the times below to adjust the wake/sleep period. The defaults are taken from the international consensus'),
                 dbc.Row([
@@ -14,10 +45,10 @@ def get_analysis_options_layout():
                         dbc.Card([
                             html.H5('Day time'),
                             dbc.Row([
-                                dbc.Col(width=3),
+                              dbc.Col(width=3),
                                 dbc.Col([html.Div(
                                     dmc.Group(
-                                        spacing=50,
+                                          spacing=50,
                                         children=[
                                             dmc.TimeInput(
                                                 id='start-day-time', label="Start", format="24", value=datetime.datetime(year=1, month=1, day=1, hour=6, minute=0)
@@ -147,7 +178,7 @@ def get_analysis_options_layout():
                 ],
                 title="Adjust the thresholds for glycemic events",
             ),    
-dbc.AccordionItem(
+            dbc.AccordionItem(
                 [
                     html.P("Use the sliders below to select the thresholds for level 1 and level 2 hypoglycemic episodes"),
                     dbc.Checklist(options=[{'label':'Remove LO/HI values', 'value':1},
