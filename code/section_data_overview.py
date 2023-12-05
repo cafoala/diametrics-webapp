@@ -163,8 +163,11 @@ def create_data_table(children):
                         'End DateTime': 'The last reading from your CGM data (YYYY-MM-DD HH:MM:SS)',
                         'Days': 'Number of days of data for each file. Will be highlighted orange if less than 14 days (see FAQs)'
                     },
-                    ), 
-            ])
+            ),
+            dbc.Button('Download Combined Data', id='download-combined-button', color='primary'),  
+            dcc.Download(id="download-dataframe-csv"),
+
+        ])
 
 def calculate_data_sufficiency(filename, start, end, raw_data):
     start = pd.to_datetime(start)

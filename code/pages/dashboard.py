@@ -231,6 +231,17 @@ def update_columns(timestamp, rows, raw_data):
 def store_processed_data(time, table_data, raw_data):
     return section_data_overview.merge_glc_data(table_data, raw_data)
 
+
+@callback(Output("download-dataframe-csv", 'data'),
+    Input('download-combined-button', "n_clicks"),
+    State("processed-data-store", "data"),
+    prevent_initial_call=True,
+)
+def func(n_clicks, data):
+    df = pd.DataFrame(data)
+    df = df[['ID', 'time', 'glc']]
+    return dcc.send_data_frame(df.to_csv, "DMTRCS_MERGED_DATA.csv")
+
 ## ANALYSIS OPTIONS ##
 #def analysis_options_callbacks(app):
 @callback(Output('tir-sliders', 'children'),
