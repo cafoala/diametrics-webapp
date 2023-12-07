@@ -52,7 +52,9 @@ def get_metrics_layout():
             )
         ]),
         dbc.Row([
-                dbc.Col(width=5),
+                dbc.Col(width=4),
+                dbc.Col([dbc.Button('Download Raw CGM Data', id='download-combined-button', color='primary'),  
+                        dcc.Download(id="download-dataframe-csv")],width=2,),
                 dbc.Col(units, width=3, style={'textAlign': 'right'}),
                 dbc.Col(time_period, width=3, style={'textAlign': 'right'}),
         ]),
@@ -159,17 +161,10 @@ def get_metrics_breakdown(df_id, day_start, day_end, night_start, night_end,
 
 def calculate_metrics(processed_data, day_start, day_end, night_start, 
                             night_end, additional_tirs, lv1_hypo, lv2_hypo,
-                            lv1_hyper, lv2_hyper, short_mins, long_mins,
-                            lo_cutoff, hi_cutoff, lo_hi_cutoff_checklist, interp,
-                            interp_method, interp_limit): #
+                            lv1_hyper, lv2_hyper, short_mins, long_mins): #
     # Breakdown df into night and day
-    #processed_data = pd.DataFrame(processed_data)
-    processed_data = metrics_helper.replace_cutoffs(processed_data, lo_cutoff, hi_cutoff, lo_hi_cutoff_checklist)
-    
-    if interp:
-        processed_data.dropna(inplace=True)
-        processed_data = processed_data.groupby('ID').apply(lambda group: metrics_helper.interpolate(group, 15, interp_method, interp_limit)).reset_index(drop=True)
-        processed_data.dropna(inplace=True)
+    processed_data = pd.DataFrame(processed_data)
+    #processed_data = metrics_helper.replace_cutoffs(processed_data, lo_cutoff, hi_cutoff, lo_hi_cutoff_checklist)
 
     all_results = processed_data.groupby('ID').apply(lambda group: 
                                 get_metrics_breakdown(group, day_start, 

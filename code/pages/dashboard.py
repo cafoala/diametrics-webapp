@@ -224,11 +224,15 @@ def update_columns(timestamp, rows, raw_data):
 
 @callback(Output('processed-data-store', 'data'),
         Input('data-tbl', 'data_timestamp'),
+        Input('interp-switch', 'on'),
+        Input('inter-method-options', 'value'),
+        Input('interp-max-mins', 'value'),
         State('data-tbl', 'data'),
         State('raw-data-store', 'data'),
+        prevent_initial_call=True
         )
-def store_processed_data(time, table_data, raw_data):
-    return section_data_overview.merge_glc_data(table_data, raw_data)
+def store_processed_data(time, interp, interp_method, interp_limit, table_data, raw_data):
+    return section_data_overview.merge_glc_data(table_data, raw_data, interp, interp_method, interp_limit)
 
 
 @callback(Output("download-dataframe-csv", 'data'),
@@ -318,7 +322,7 @@ def display_day_time(day_start, day_end, night_start, night_end):
 @callback(Output('metrics-store', 'data'),
         #Output('metrics-tbl', 'children')],
         Input('tir-store', 'data'),
-        State('processed-data-store', 'data'),
+        Input('processed-data-store', 'data'),
         State('data-tbl','data'),
         State('lv1-hypo-slider', 'value'),
         State('lv2-hypo-slider', 'value'),
@@ -332,17 +336,10 @@ def display_day_time(day_start, day_end, night_start, night_end):
         State('end-day-time', 'value'),
         State('start-night-time', 'value'),
         State('end-night-time', 'value'),
-        State('lo-cutoff-slider', 'value'),
-        State('hi-cutoff-slider', 'value'),
-        State('lo-hi-cutoff-checklist', 'value'),
-        State('interp-switch', 'on'),
-        State('inter-method-options', 'value'),
-        State('interp-max-mins', 'value'),
         prevent_initial_call=True)
 def calculate_metrics(additional_tirs, processed_data, edited_data, lv1_hypo, lv2_hypo, 
                       lv1_hyper, lv2_hyper, short_mins, long_mins, n_clicks, raw_data, 
-                      day_start, day_end, night_start, night_end, lo_cutoff, hi_cutoff, 
-                      lo_hi_cutoff_checklist, interp, interp_method, interp_limit):
+                      day_start, day_end, night_start, night_end):
     if n_clicks is None or raw_data is None:
         # prevent the None callbacks is important with the store component.
         # you don't want to update the store for nothing.
@@ -354,8 +351,7 @@ def calculate_metrics(additional_tirs, processed_data, edited_data, lv1_hypo, lv
     all_results = section_metrics_tbl.calculate_metrics(processed_data, times[0], times[1], 
                                                         times[2], times[3], additional_tirs, 
                                                         lv1_hypo, lv2_hypo,  lv1_hyper, lv2_hyper, 
-                                                        short_mins, long_mins, lo_cutoff, hi_cutoff, 
-                                                        lo_hi_cutoff_checklist, interp, interp_method, interp_limit)
+                                                        short_mins, long_mins)
 
     #metrics = pd.DataFrame.from_dict(all_results).round(2) # this is stupid - already a dict
     
@@ -420,15 +416,12 @@ def create_individual_figs(ts, metrics):
     Input('subject-id', 'value'),
     #State('raw-data-store', 'data'),
     State('processed-data-store', 'data'),
-    State('lo-cutoff-slider', 'value'),
-    State('hi-cutoff-slider', 'value'),
-    State('lo-hi-cutoff-checklist', 'value'),
     #prevent_initial_call=True
 )
-def update_indiv_figs(subject_id, data, low_cutoff, high_cutoff, checklist):
+def update_indiv_figs(subject_id, data):
     #subject_data = next(item for item in data if item["ID"] == subject_id)
-    #subject_data = pd.DataFrame(data)
-    subject_data = section_metrics_tbl.replace_cutoffs(data, low_cutoff, high_cutoff, checklist)
+    subject_data = pd.DataFrame(data)
+    #subject_data = section_metrics_tbl.replace_cutoffs(data)
 
     df = subject_data.loc[subject_data['ID']==subject_id]
     #df = pd.DataFrame.from_dict(subject_data['data'])
@@ -581,9 +574,6 @@ def poi(date, contents, filename):
     State('prolonged-events-mins', 'value'),
     State('start-night-time', 'value'),
     State('end-night-time', 'value'),
-    State('lo-cutoff-slider', 'value'),
-    State('hi-cutoff-slider', 'value'),
-    State('lo-hi-cutoff-checklist', 'value'),
     State('units-first-button', 'value'),
     prevent_initial_call=True)
 def metrics(poi_ranges, set_periods, poi_data, raw_data, 
@@ -612,8 +602,7 @@ def metrics(poi_ranges, set_periods, poi_data, raw_data,
                                                                   raw_data, additional_tirs, lv1_hypo,
                                                                   lv2_hypo, lv1_hyper, lv2_hyper, 
                                                                   short_mins, long_mins, night_start, 
-                                                                  night_end, low_cutoff, high_cutoff, 
-                                                                  checklist, units)
+                                                                  night_end, units)
     return metrics
 
 

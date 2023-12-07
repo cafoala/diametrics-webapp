@@ -182,7 +182,35 @@ def get_analysis_options_layout():
                 ],
                 title="Adjust the thresholds for glycemic events",
             ),    
-            dbc.AccordionItem(
+            
+        ],
+        start_collapsed=True,
+        )
+    )
+   
+    analysis_layout = html.Div([
+        dbc.Row([
+                dbc.Col(#html.Div([
+                    html.H2('Select your analysis options')),
+                dbc.Col(
+                    dbc.Alert(
+                    [
+                            html.I(className="bi bi-info-circle-fill me-2"),
+                            'If you want to adjust the default analysis option do so by playing around with the buttons below',
+                    ],
+                    color="info",
+                    className="d-flex align-items-center",
+                    )),
+                        ]),
+           # ]),
+        dbc.Row([
+                dbc.Col(html.Div(accordion,id='options-accordion'))
+            ]),
+        
+    ])
+    return analysis_layout
+'''
+dbc.AccordionItem(
                 [
                     html.P("Use the sliders below to select the thresholds for level 1 and level 2 hypoglycemic episodes"),
                     dbc.Checklist(options=[{'label':'Remove LO/HI values', 'value':1},
@@ -214,33 +242,7 @@ def get_analysis_options_layout():
                 ],
                 title="Adjust the low/high glucose cut-off",
             ),    
-        ],
-        start_collapsed=True,
-        )
-    )
-   
-    analysis_layout = html.Div([
-        dbc.Row([
-                dbc.Col(#html.Div([
-                    html.H2('Select your analysis options')),
-                dbc.Col(
-                    dbc.Alert(
-                    [
-                            html.I(className="bi bi-info-circle-fill me-2"),
-                            'If you want to adjust the default analysis option do so by playing around with the buttons below',
-                    ],
-                    color="info",
-                    className="d-flex align-items-center",
-                    )),
-                        ]),
-           # ]),
-        dbc.Row([
-                dbc.Col(html.Div(accordion,id='options-accordion'))
-            ]),
-        
-    ])
-    return analysis_layout
-
+        '''
 def create_range_slider(n_clicks, children, units):
     id = 'tir-'+str(n_clicks)
     slider_id = id+'-slider'

@@ -306,7 +306,7 @@ def periodic_calculations(info, glc_data, id_raw_data, first_time,
 def calculate_periodic_metrics(poi_ranges, set_periods, poi_data, raw_data, 
                                additional_tirs, lv1_hypo, lv2_hypo, lv1_hyper, 
                                lv2_hyper, short_mins, long_mins, night_start, 
-                               night_end, low_cutoff, high_cutoff, checklist, units):
+                               night_end, units):
     results = []
     
     for i in poi_data:
@@ -342,8 +342,7 @@ def calculate_periodic_metrics(poi_ranges, set_periods, poi_data, raw_data,
                                                                     isinstance(x, float)) else x)
 
         # Replace lo/hi values
-        glc_data = section_metrics_tbl.replace_cutoffs(glc_data, low_cutoff, 
-                                                     high_cutoff, checklist)
+        #glc_data = section_metrics_tbl.replace_cutoffs(glc_data, low_cutoff, high_cutoff, checklist)
         for drag in poi_ranges:
             # First num values
             first, last, first_num, last_num = drag_values(drag)

@@ -10,6 +10,42 @@ def calculate_time_interval(df):
     diff_mins = int(diff[0].total_seconds()/60)
     return diff_mins
 
+def replace_lo_hi(df, device, units):
+    print(df.head())
+
+    # Define cutoff values for different devices and units
+    cutoffs = {
+    'FreeStyle Libre': {
+        'High': {'mmol/L': 27.9, 'mg/dL': 401},
+        'Low': {'mmol/L': 2.1, 'mg/dL': 2.1 * 18}
+    },
+    'Dexcom': {
+        'High': {'mmol/L': 22.3, 'mg/dL': 22.3 * 18},
+        'Low': {'mmol/L': 2.1, 'mg/dL': 2.1 * 18}
+    },
+    'Medtronic': {
+        'High': {'mmol/L': 22.3, 'mg/dL': 22.3 * 18},
+        'Low': {'mmol/L': 2.1, 'mg/dL': 2.1 * 18}
+    }
+}
+
+    # Variations of 'High' and 'Low' to be replaced
+    high_variations = ['High', 'high', 'HI', 'hi']
+    low_variations = ['Low', 'low', 'LO', 'lo']
+
+    # Create a replacement dictionary using list comprehensions
+    replace_dict = {variation: cutoffs[device]['High'][units] for variation in high_variations}
+    replace_dict.update({variation: cutoffs[device]['Low'][units] for variation in low_variations})
+
+    # Replace the textual high/low values with numeric cutoffs
+    df['glc'] = df['glc'].replace(replace_dict)
+
+    # Convert the 'glc' column to numeric, coercing errors to NaN
+    df['glc'] = pd.to_numeric(df['glc'], errors='coerce')
+    
+    return df
+
+
 # let's assume we're getting 1 file in and it's already been confirmed that it's a df
 def preprocess_df(df, filename, dt_format, device, units):
     data_dictionary = {}
@@ -33,7 +69,11 @@ def preprocess_df(df, filename, dt_format, device, units):
             # Check if there's an interval
             if df_transformed.interval is None:
                 df_transformed.interval = calculate_time_interval(df_transformed.data)
-            
+            print(df_transformed.data.head())
+            # Tranform any low/high values in the data
+            df_transformed.data = replace_lo_hi(df_transformed.data, device, units)
+            print(df_transformed.data.head())
+
             data_stats = metrics_helper.helper_missing(df_transformed.data, df_transformed.interval, None, None)
             #days = str(pd.to_datetime(data_stats['End DateTime']) - pd.to_datetime(data_stats['Start DateTime']))
             

@@ -164,8 +164,7 @@ def create_data_table(children):
                         'Days': 'Number of days of data for each file. Will be highlighted orange if less than 14 days (see FAQs)'
                     },
             ),
-            dbc.Button('Download Combined Data', id='download-combined-button', color='primary'),  
-            dcc.Download(id="download-dataframe-csv"),
+            
 
         ])
 
@@ -180,7 +179,7 @@ def calculate_data_sufficiency(filename, start, end, raw_data):
     ds = results['Data Sufficiency (%)']
     return ds
 
-def merge_glc_data(table_data, raw_data):
+def merge_glc_data(table_data, raw_data, interp, interp_method, interp_limit):
     results = pd.DataFrame()
     for row in table_data:
         if row['Days'] == 'N/A':
@@ -188,13 +187,16 @@ def merge_glc_data(table_data, raw_data):
         subject = [i for i in raw_data if i['Filename']==row['Filename']][0]
         data = pd.DataFrame(subject['data'])
         data['time'] = pd.to_datetime(data['time'])
-
         start = row['Start DateTime']
         end = row['End DateTime']
         data_sub = data.loc[(data['time']>=start)&(data['time']<=end)]
         if subject['Units']=='mg/dL':
-            data_sub['glc'] = pd.to_numeric(data_sub['glc'])*0.0557
+            data_sub['glc'] = pd.to_numeric(data_sub['glc'])/18
+        if interp:
+            data_sub = metrics_helper.interpolate(data_sub, subject['Interval'], interp_method, interp_limit)
+        
         data_sub['ID'] = row['ID']
+        
         results = results.append(data_sub)
     results = results.to_dict('records')
     return results

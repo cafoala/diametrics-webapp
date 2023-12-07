@@ -88,7 +88,7 @@ def interpolate(df, interval, interp_method, max_interp_time):
     # Interpolate datetime
     resampled_df['time'] = resampled_df['time'].apply(lambda x: x.timestamp() if pd.notnull(x) else np.nan)    
     resampled_df['time'] = resampled_df['time'].interpolate(method='linear',
-                                                   limit=limit+1, 
+                                                   #limit=limit+1, 
                                                    limit_direction='forward', 
                                                    limit_area='inside')
     resampled_df['time'] = pd.to_datetime(resampled_df['time'], unit='s')
