@@ -3,17 +3,21 @@ from dash import dcc, html, dash_table
 import dash_bootstrap_components as dbc
 import dash_mantine_components as dmc
 import datetime
-#import dash_daq as daq
+import dash_daq as daq
 
 def get_analysis_options_layout():
     accordion = html.Div(
         dbc.Accordion([
             dbc.AccordionItem([
-                #daq.BooleanSwitch(id='my-boolean-switch', on=False),
                 dbc.Row([
                     dbc.Col([
+                        html.H6('Interpolate missing data'),
+                        daq.BooleanSwitch(id='interp-switch', on=False),
+
+                    ]),
+                    dbc.Col([
                         html.H6('Max. limit for interpolation (mins)'),
-                        dbc.Input(id='interp-max-mins', type="number", min=0, max=1000, step=1,
+                        dbc.Input(id='interp-max-mins', type="number", min=0, max=500, step=1,
                                 value=30, disabled=True)
                     ]),
                     dbc.Col([
@@ -27,9 +31,9 @@ def get_analysis_options_layout():
                             options=[
                                 {"label": 'Linear', "value": 'linear', 'disabled':True},
                                 {"label": "Cubic", "value": 'pchip', 'disabled':True},
-                                #{"label": "Both", "value": 'both'},
+                                {"label": "Akima", "value": 'akima', 'disabled':True},
                             ],
-                            value='linear',
+                            value='pchip',
                             style={'textAlign': 'center'},
                         ), className="radio-group"
                         )

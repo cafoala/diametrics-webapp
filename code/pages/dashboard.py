@@ -114,7 +114,6 @@ def show_metrics_tab(children):
 def show_metrics_tab(children):
     return False, False, False
 
-
 for i in [#['data-tab', 'upload-next-button'],#['other-metrics-tab', 'data-overview-next-button'], 
                 ['metrics-tab', 'analysis-options-next-button']]:#, ['indiv-vis', 'analysis-options-next-button'],
                 #['external-tab', 'analysis-options-next-button']]:
@@ -292,6 +291,18 @@ def update_store(clicks, children):
     return ranges
 
 
+@callback(Output('inter-method-options', 'options'),
+          Output('interp-max-mins', 'disabled'),
+          Input('interp-switch', 'on'),
+          State('inter-method-options', 'options')
+          )
+def disable_interp_button(switch, options):
+    disabled = not switch
+    for option in options:
+        option['disabled'] = disabled
+    return options, disabled
+
+
 ## METRICS TABLE ##
 # Layout
 @callback(Output('asterix-day-time', 'children'),
@@ -324,11 +335,14 @@ def display_day_time(day_start, day_end, night_start, night_end):
         State('lo-cutoff-slider', 'value'),
         State('hi-cutoff-slider', 'value'),
         State('lo-hi-cutoff-checklist', 'value'),
+        State('interp-switch', 'on'),
+        State('inter-method-options', 'value'),
+        State('interp-max-mins', 'value'),
         prevent_initial_call=True)
 def calculate_metrics(additional_tirs, processed_data, edited_data, lv1_hypo, lv2_hypo, 
                       lv1_hyper, lv2_hyper, short_mins, long_mins, n_clicks, raw_data, 
                       day_start, day_end, night_start, night_end, lo_cutoff, hi_cutoff, 
-                      lo_hi_cutoff_checklist):
+                      lo_hi_cutoff_checklist, interp, interp_method, interp_limit):
     if n_clicks is None or raw_data is None:
         # prevent the None callbacks is important with the store component.
         # you don't want to update the store for nothing.
@@ -336,11 +350,12 @@ def calculate_metrics(additional_tirs, processed_data, edited_data, lv1_hypo, lv
     times = [i[11:16] for i in [day_start, day_end, night_start, night_end]]
     #all_results = section_metrics_tbl.calculate_metrics(raw_data, edited_data, times[0], times[1], times[2], times[3], additional_tirs, lv1_hypo, lv2_hypo,  lv1_hyper, lv2_hyper)
         
+    
     all_results = section_metrics_tbl.calculate_metrics(processed_data, times[0], times[1], 
                                                         times[2], times[3], additional_tirs, 
                                                         lv1_hypo, lv2_hypo,  lv1_hyper, lv2_hyper, 
                                                         short_mins, long_mins, lo_cutoff, hi_cutoff, 
-                                                        lo_hi_cutoff_checklist)
+                                                        lo_hi_cutoff_checklist, interp, interp_method, interp_limit)
 
     #metrics = pd.DataFrame.from_dict(all_results).round(2) # this is stupid - already a dict
     

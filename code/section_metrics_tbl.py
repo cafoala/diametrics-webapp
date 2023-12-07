@@ -155,31 +155,22 @@ def get_metrics_breakdown(df_id, day_start, day_end, night_start, night_end,
     all_results = all_results.append(night_mg)
     return all_results
 
-
-def replace_cutoffs(dict, lo_cutoff, hi_cutoff, lo_hi_cutoff_checklist):
-    df = pd.DataFrame(dict)
-    if not 1 in lo_hi_cutoff_checklist:
-        df['glc']= pd.to_numeric(df['glc'].replace({'High': hi_cutoff, 'Low': lo_cutoff, 'high': hi_cutoff, 'low': lo_cutoff, 
-                             'HI':hi_cutoff, 'LO':lo_cutoff, 'hi':hi_cutoff, 'lo':lo_cutoff}))
-
-        if 2 in lo_hi_cutoff_checklist:
-            df['glc'][df['glc']>hi_cutoff] = hi_cutoff
-            df['glc'][df['glc']<lo_cutoff] = lo_cutoff
-
-    df = df[pd.to_numeric(df['glc'], errors='coerce').notnull()]
-    df['glc'] = pd.to_numeric(df['glc'])
-    df['time'] = pd.to_datetime(df['time'])
-    df = df.reset_index(drop=True)
-    return df
-
+ 
 
 def calculate_metrics(processed_data, day_start, day_end, night_start, 
                             night_end, additional_tirs, lv1_hypo, lv2_hypo,
                             lv1_hyper, lv2_hyper, short_mins, long_mins,
-                            lo_cutoff, hi_cutoff, lo_hi_cutoff_checklist): #
+                            lo_cutoff, hi_cutoff, lo_hi_cutoff_checklist, interp,
+                            interp_method, interp_limit): #
     # Breakdown df into night and day
     #processed_data = pd.DataFrame(processed_data)
-    processed_data = replace_cutoffs(processed_data, lo_cutoff, hi_cutoff, lo_hi_cutoff_checklist)
+    processed_data = metrics_helper.replace_cutoffs(processed_data, lo_cutoff, hi_cutoff, lo_hi_cutoff_checklist)
+    
+    if interp:
+        processed_data.dropna(inplace=True)
+        processed_data = processed_data.groupby('ID').apply(lambda group: metrics_helper.interpolate(group, 15, interp_method, interp_limit)).reset_index(drop=True)
+        processed_data.dropna(inplace=True)
+
     all_results = processed_data.groupby('ID').apply(lambda group: 
                                 get_metrics_breakdown(group, day_start, 
                                 day_end, night_start, night_end, additional_tirs, 

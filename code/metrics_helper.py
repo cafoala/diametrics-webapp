@@ -30,6 +30,74 @@ def check_df(df):
             return False
         else:
             return True
+        
+def replace_cutoffs(dict, lo_cutoff, hi_cutoff, lo_hi_cutoff_checklist):
+    df = pd.DataFrame(dict)
+    if not 1 in lo_hi_cutoff_checklist:
+        df['glc']= pd.to_numeric(df['glc'].replace({'High': hi_cutoff, 'Low': lo_cutoff, 'high': hi_cutoff, 'low': lo_cutoff, 
+                             'HI':hi_cutoff, 'LO':lo_cutoff, 'hi':hi_cutoff, 'lo':lo_cutoff}))
+
+        if 2 in lo_hi_cutoff_checklist:
+            df['glc'][df['glc']>hi_cutoff] = hi_cutoff
+            df['glc'][df['glc']<lo_cutoff] = lo_cutoff
+
+    df = df[pd.to_numeric(df['glc'], errors='coerce').notnull()]
+    df['glc'] = pd.to_numeric(df['glc'])
+    df['time'] = pd.to_datetime(df['time'])
+    df = df.reset_index(drop=True)
+    return df
+
+def interpolate(df, interval, interp_method, max_interp_time):
+    # Determine the limit for interpolation based on max_interp_time and interval
+    limit = int(np.round(max_interp_time/interval, 0))
+
+    # Set the frequency for resampling based on the interval
+    if interval==5:
+        freq = '5min'
+    elif interval==15:
+        freq='15min'
+    else:
+        freq = '1min'
+
+    # Convert 'time' to datetime and round to nearest 5 or 15 minutes
+    df['time_round'] = pd.to_datetime(df['time']).dt.round(freq)
+    # Create a boolean series to identify duplicates
+    duplicates = df['time_round'].duplicated(keep=False)
+    # Set 'time' as index
+    df.set_index('time_round', inplace=True)
+
+    resampled_df = df.resample(freq).asfreq()
+    
+    # Create a mask for NaN values
+    nan_mask = resampled_df['glc'].isna()
+
+    # Create groups for consecutive NaNs
+    nan_groups = nan_mask.ne(nan_mask.shift()).cumsum()
+
+    # Count the size of each group of NaNs
+    nan_group_sizes = nan_mask.groupby(nan_groups).transform('sum')
+
+    # Create a final mask for rows to keep
+    rows_to_keep = nan_group_sizes <= limit
+
+    # Interpolate
+    resampled_df['glc'] = resampled_df['glc'].interpolate(method=interp_method,
+                                                   limit=limit,#+1, 
+                                                   limit_direction='forward', 
+                                                   limit_area='inside')
+    # Interpolate datetime
+    resampled_df['time'] = resampled_df['time'].apply(lambda x: x.timestamp() if pd.notnull(x) else np.nan)    
+    resampled_df['time'] = resampled_df['time'].interpolate(method='linear',
+                                                   limit=limit+1, 
+                                                   limit_direction='forward', 
+                                                   limit_area='inside')
+    resampled_df['time'] = pd.to_datetime(resampled_df['time'], unit='s')
+
+    # Use the mask to set the gaps to null
+    resampled_df['glc'][~rows_to_keep] = np.nan
+
+    filtered_df = resampled_df.reset_index(drop=True)
+    return filtered_df
             
 def calculate_auc(df):
     if df.shape[0]>1:
