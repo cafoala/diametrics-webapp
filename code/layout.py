@@ -55,7 +55,7 @@ jumbotron = html.Div(
                             html.P('You can use Diametrics to:'),
                             html.H6(
                                 html.Ul([
-                                    html.Li("Calculate the standard metrics of glycemic control"), 
+                                    html.Li("Advanced CGM Data Analysis Made Easy"), 
                                     html.Br(),
                                     html.Li("Visualise your data"),
                                     html.Br(),

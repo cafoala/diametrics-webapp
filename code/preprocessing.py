@@ -11,7 +11,6 @@ def calculate_time_interval(df):
     return diff_mins
 
 def replace_lo_hi(df, device, units):
-    print(df.head())
 
     # Define cutoff values for different devices and units
     cutoffs = {

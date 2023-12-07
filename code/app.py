@@ -48,7 +48,7 @@ sidebar = html.Div(
         html.Br(),
         html.H3("Diametrics", className="display-6"),
         html.Hr(),
-        html.P("Calculate the metrics of glycemic control",
+        html.P("Advanced CGM Data Analysis Made Easy",
             className="lead"
         ),
         html.Br(),
