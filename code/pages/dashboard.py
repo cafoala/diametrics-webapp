@@ -322,7 +322,7 @@ def display_day_time(day_start, day_end, night_start, night_end):
 @callback(Output('metrics-store', 'data'),
         #Output('metrics-tbl', 'children')],
         Input('tir-store', 'data'),
-        Input('processed-data-store', 'data'),
+        State('processed-data-store', 'data'),
         State('data-tbl','data'),
         State('lv1-hypo-slider', 'value'),
         State('lv2-hypo-slider', 'value'),
@@ -579,7 +579,7 @@ def poi(date, contents, filename):
 def metrics(poi_ranges, set_periods, poi_data, raw_data, 
             additional_tirs, lv1_hypo, lv2_hypo, lv1_hyper, 
             lv2_hyper, short_mins, long_mins, night_start, 
-            night_end, low_cutoff, high_cutoff, checklist, units):
+            night_end, units):
     if poi_ranges is None:
         raise PreventUpdate
     if poi_data is None:

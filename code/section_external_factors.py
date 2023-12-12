@@ -25,9 +25,7 @@ def create_period_of_interest():
                 dbc.Alert(
                     [
                         html.I(className="bi bi-info-circle-fill me-2"),
-                        'This section enables you to take a more in depth look at \
-                            different periods of interest in your data. For more info \
-                                and examples see instructions'
+                        'Take a more in depth look at different periods of interest in your data.'
                     ],
                     color="info",
                     className="d-flex align-items-center")
@@ -142,10 +140,15 @@ def create_range_slider(n_clicks, children):
         return [section]
 
 def add_time_to_date(date, minutes):
-    datetime = date + timedelta(minutes=minutes)
+    #Check if either 'date' or 'minutes' is NaN
+    if pd.isna(date) or pd.isna(minutes):
+        return np.nan 
+    datetime = pd.to_datetime(date) + timedelta(minutes=minutes)
     return datetime
 
 def combine_date_and_time(date, time):
+    if pd.isna(date) or pd.isna(time):
+        return np.nan 
     dt = datetime.datetime.combine(date, time)
     return dt
 
@@ -172,6 +175,7 @@ def standardise_poi_df(df):
         if set(['start_datetime', 'end_datetime']).issubset(cols):
             df = df.rename(columns={'start_datetime':'Start of event', 'end_datetime':'End of event'})
             df = df.set_index(['ID', 'Start of event', 'End of event']).reset_index()
+            df = df.dropna(subset=['ID', 'Start of event', 'End of event']).reset_index(drop=True)
             return df
         else:
             return None
@@ -312,6 +316,7 @@ def calculate_periodic_metrics(poi_ranges, set_periods, poi_data, raw_data,
     for i in poi_data:
         ID = i['ID']
         start_event =  pd.to_datetime(i['Start of event']).round('S')
+        print(ID, start_event)
         end_event = pd.to_datetime(i['End of event']).round('S')
         info = {'ID':ID, 'Start of event':start_event, 
                 'End of event':end_event, 'Period':'CGM file not available'}
@@ -334,7 +339,7 @@ def calculate_periodic_metrics(poi_ranges, set_periods, poi_data, raw_data,
             continue
         glc_data = pd.DataFrame.from_dict(id_raw_data['data'])
         glc_data['time'] = pd.to_datetime(glc_data['time'])
-        
+        print('reaching here')
         glc_data['glc'] = pd.to_numeric(glc_data['glc'], errors='ignore')
         if units == 'mg/dL':
                         glc_data['glc'] = glc_data['glc'].apply(lambda x: x/18 
