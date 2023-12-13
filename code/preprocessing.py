@@ -68,10 +68,8 @@ def preprocess_df(df, filename, dt_format, device, units):
             # Check if there's an interval
             if df_transformed.interval is None:
                 df_transformed.interval = calculate_time_interval(df_transformed.data)
-            print(df_transformed.data.head())
             # Tranform any low/high values in the data
             df_transformed.data = replace_lo_hi(df_transformed.data, device, units)
-            print(df_transformed.data.head())
 
             data_stats = metrics_helper.helper_missing(df_transformed.data, df_transformed.interval, None, None)
             #days = str(pd.to_datetime(data_stats['End DateTime']) - pd.to_datetime(data_stats['Start DateTime']))

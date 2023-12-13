@@ -73,9 +73,10 @@ def get_metrics_breakdown(df_id, day_start, day_end, night_start, night_end,
                         lv2_hyper, short_mins, long_mins):
     all_results = pd.DataFrame()
     df_id['time'] = pd.to_datetime(df_id['time'])
-    info = metrics_helper.helper_missing(df_id, None, None, None)
-    info = pd.DataFrame.from_dict(info, orient='index').T
-    
+
+    #info = metrics_helper.helper_missing(df_id, interval, None, None)
+    #info = pd.DataFrame.from_dict(info, orient='index').T
+    info = pd.DataFrame()
     # Total df
     all, all_mg = metrics_experiment.calculate_all_metrics(df_id, 
                         #ID='blob', units=i['Units'], 
@@ -164,7 +165,6 @@ def calculate_metrics(processed_data, day_start, day_end, night_start,
                             lv1_hyper, lv2_hyper, short_mins, long_mins): #
     # Breakdown df into night and day
     processed_data = pd.DataFrame(processed_data)
-    #processed_data = metrics_helper.replace_cutoffs(processed_data, lo_cutoff, hi_cutoff, lo_hi_cutoff_checklist)
 
     all_results = processed_data.groupby('ID').apply(lambda group: 
                                 get_metrics_breakdown(group, day_start, 

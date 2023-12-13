@@ -306,6 +306,149 @@ def periodic_calculations(info, glc_data, id_raw_data, first_time,
         info_mg.update(metrics_mg)
         return info, info_mg
     
+def periodic_calculations_2(info, glc_data, interval, first_time, 
+                          last_time, additional_tirs, 
+                          lv1_hypo, lv2_hypo, lv1_hyper, lv2_hyper, 
+                          short_mins, long_mins):
+
+    sub_df = glc_data[(glc_data['time']>=first_time)&(glc_data['time']<last_time)]
+
+    if sub_df.empty:
+        info['Data Sufficiency (%)'] = 0
+        info_mg = info.copy()
+        info['units'] = 'mmol/L'
+        info_mg['units'] = 'mg/dL'
+        return info, info_mg
+        
+    else:
+        data_sufficiency = metrics_helper.helper_missing(sub_df, 
+                                                            gap_size=interval, 
+                                                            start_time=first_time, 
+                                                            end_time=last_time)['Data Sufficiency (%)']
+        info['Data Sufficiency (%)'] = data_sufficiency
+        info_mg = info.copy()
+        metrics, metrics_mg = metrics_experiment.calculate_all_metrics(sub_df, return_df=False, 
+                        #units=id_raw_data['Units'], #interval=id_raw_data['Interval'], 
+                        additional_tirs=additional_tirs, lv1_hypo=lv1_hypo, 
+                        lv2_hypo=lv2_hypo, lv1_hyper=lv1_hyper, lv2_hyper=lv2_hyper, 
+                        event_mins=short_mins, event_long_mins=long_mins
+                        )
+        if metrics is None:
+            info['Data Sufficiency (%)'] = 0
+            info_mg = info.copy()
+            info['units'] = 'mmol/L'
+            info_mg['units'] = 'mg/dL'
+            return info, info_mg
+
+        metrics['units'] = 'mmol/L'
+        metrics_mg['units'] = 'mg/dL'
+        info.update(metrics)
+        info_mg.update(metrics_mg)
+        return info, info_mg
+    
+
+def calculate_periodic_metrics_2(poi_ranges, set_periods, poi_data, processed_data, 
+                               additional_tirs, lv1_hypo, lv2_hypo, lv1_hyper, 
+                               lv2_hyper, short_mins, long_mins, night_start, 
+                               night_end, units, device):
+    results = []
+    processed_data = pd.DataFrame(processed_data)
+    processed_data['ID'] = processed_data['ID'].astype(str)
+
+    for i in poi_data:
+        ID = str(i['ID'])
+        start_event =  pd.to_datetime(i['Start of event']).round('S')
+        end_event = pd.to_datetime(i['End of event']).round('S')
+        info = {'ID':ID, 'Start of event':start_event, 
+                'End of event':end_event, 'Period':'CGM file not available'}
+        info_mg = info.copy()
+        info['units'] = 'mmol/L'
+        info_mg['units'] = 'mg/dL'
+
+        glc_data = processed_data.loc[processed_data['ID'] == ID]
+
+        if device == 'FreeStyle Libre':
+            interval = 15
+        else:
+            interval = 5
+            
+        if glc_data.empty:
+            ##### Add sumink #####
+            results.append(info)
+            results.append(info_mg)
+            continue
+
+
+        glc_data['time'] = pd.to_datetime(glc_data['time'])
+
+        glc_data['glc'] = pd.to_numeric(glc_data['glc'], errors='ignore')
+
+        # Replace lo/hi values
+        #glc_data = section_metrics_tbl.replace_cutoffs(glc_data, low_cutoff, high_cutoff, checklist)
+        for drag in poi_ranges:
+            # First num values
+            first, last, first_num, last_num = drag_values(drag)
+            first_time, last_time = get_drag_times(first_num, last_num, 
+                                                   start_event, end_event)
+
+            info_drag = info.copy()
+            info_drag['Period'] = f'{first} to {last}'
+            metrics, metrics_mg = periodic_calculations_2(info_drag, glc_data, interval, 
+                                                        first_time, last_time, additional_tirs, lv1_hypo, 
+                                                        lv2_hypo, lv1_hyper, lv2_hyper, 
+                                                        short_mins, long_mins) 
+            results.append(metrics)
+            results.append(metrics_mg)
+
+        
+        if 1 in set_periods:
+            info_24 = info.copy()
+            info_24['Period'] = f'24hrs after'
+            first_time = end_event
+            last_time = end_event + timedelta(hours=24)
+            metrics, metrics_mg = periodic_calculations_2(info_24, glc_data, interval,
+                                                        first_time, last_time, additional_tirs, lv1_hypo, 
+                                                        lv2_hypo, lv1_hyper, lv2_hyper,
+                                                        short_mins, long_mins) 
+            results.append(metrics)
+            results.append(metrics_mg)
+        
+        
+        if 2 in set_periods:
+            info_eve = info.copy()
+            info_eve['Period'] = f'Night after event'
+            night_start_minutes = int(night_start[14:16])
+            night_start_hours = int(night_start[11:13])
+
+            first_time = start_event.replace(hour=night_start_hours, minute=night_start_minutes)
+            if night_start_hours<12:
+                first_time += timedelta(hours=24)
+
+            night_end_minutes = int(night_end[14:16])
+            night_end_hours = int(night_end[11:13])
+            last_time = start_event.replace(hour=night_end_hours, minute=night_end_minutes)
+            if night_end_hours<12:
+                last_time += timedelta(hours=24)
+    
+            metrics, metrics_mg = periodic_calculations_2(info_eve, glc_data, interval,
+                                                        first_time, last_time, additional_tirs, lv1_hypo, 
+                                                        lv2_hypo, lv1_hyper, lv2_hyper,
+                                                        short_mins, long_mins) 
+            results.append(metrics)
+            results.append(metrics_mg)
+    all_metrics = pd.DataFrame.from_dict(results)
+    all_metrics['ID'] = all_metrics['ID'].astype(str)
+    all_metrics['Start of event'] = pd.to_datetime(all_metrics['Start of event']).round('S')
+    all_metrics['End of event'] = pd.to_datetime(all_metrics['End of event']).round('S')
+
+    poi_data = pd.DataFrame.from_dict(poi_data)
+    poi_data['ID'] = poi_data['ID'].astype(str)
+    poi_data['Start of event'] = pd.to_datetime(poi_data['Start of event']).round('S')
+    poi_data['End of event'] = pd.to_datetime(poi_data['End of event']).round('S')
+    merged_results = pd.merge(poi_data, all_metrics, how='left', 
+                              on=['ID', 'Start of event', 'End of event'])
+    return merged_results.to_dict('records')
+
 
 def calculate_periodic_metrics(poi_ranges, set_periods, poi_data, raw_data, 
                                additional_tirs, lv1_hypo, lv2_hypo, lv1_hyper, 
@@ -316,7 +459,6 @@ def calculate_periodic_metrics(poi_ranges, set_periods, poi_data, raw_data,
     for i in poi_data:
         ID = i['ID']
         start_event =  pd.to_datetime(i['Start of event']).round('S')
-        print(ID, start_event)
         end_event = pd.to_datetime(i['End of event']).round('S')
         info = {'ID':ID, 'Start of event':start_event, 
                 'End of event':end_event, 'Period':'CGM file not available'}
@@ -339,7 +481,6 @@ def calculate_periodic_metrics(poi_ranges, set_periods, poi_data, raw_data,
             continue
         glc_data = pd.DataFrame.from_dict(id_raw_data['data'])
         glc_data['time'] = pd.to_datetime(glc_data['time'])
-        print('reaching here')
         glc_data['glc'] = pd.to_numeric(glc_data['glc'], errors='ignore')
         if units == 'mg/dL':
                         glc_data['glc'] = glc_data['glc'].apply(lambda x: x/18 

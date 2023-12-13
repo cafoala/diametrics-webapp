@@ -320,7 +320,6 @@ def display_day_time(day_start, day_end, night_start, night_end):
     return html.P(f'* Day {times[0]}-{times[1]}, night {times[2]}-{times[3]}')
 
 @callback(Output('metrics-store', 'data'),
-        #Output('metrics-tbl', 'children')],
         Input('tir-store', 'data'),
         State('processed-data-store', 'data'),
         State('data-tbl','data'),
@@ -331,31 +330,32 @@ def display_day_time(day_start, day_end, night_start, night_end):
         State('short-events-mins', 'value'),
         State('prolonged-events-mins', 'value'),
         State('analysis-options-next-button', 'n_clicks'),
-        State('raw-data-store', 'data'),
         State('start-day-time', 'value'),
         State('end-day-time', 'value'),
         State('start-night-time', 'value'),
         State('end-night-time', 'value'),
         prevent_initial_call=True)
-def calculate_metrics(additional_tirs, processed_data, edited_data, lv1_hypo, lv2_hypo, 
-                      lv1_hyper, lv2_hyper, short_mins, long_mins, n_clicks, raw_data, 
+def calculate_metrics(additional_tirs, processed_data, data_tbl, lv1_hypo, lv2_hypo, 
+                      lv1_hyper, lv2_hyper, short_mins, long_mins, n_clicks,
                       day_start, day_end, night_start, night_end):
-    if n_clicks is None or raw_data is None:
+    if n_clicks is None or processed_data is None:
         # prevent the None callbacks is important with the store component.
         # you don't want to update the store for nothing.
         raise PreventUpdate
-    times = [i[11:16] for i in [day_start, day_end, night_start, night_end]]
-    #all_results = section_metrics_tbl.calculate_metrics(raw_data, edited_data, times[0], times[1], times[2], times[3], additional_tirs, lv1_hypo, lv2_hypo,  lv1_hyper, lv2_hyper)
-        
+
+    # Creating a new dictionary with ID as the key and Start/End DateTime as values
+    data_tbl = pd.DataFrame(data_tbl)[['ID', 'Start DateTime', 'End DateTime', 'Days', 'Data Sufficiency (%)']]
+
+    times = [i[11:16] for i in [day_start, day_end, night_start, night_end]]        
     
     all_results = section_metrics_tbl.calculate_metrics(processed_data, times[0], times[1], 
                                                         times[2], times[3], additional_tirs, 
                                                         lv1_hypo, lv2_hypo,  lv1_hyper, lv2_hyper, 
                                                         short_mins, long_mins)
-
-    #metrics = pd.DataFrame.from_dict(all_results).round(2) # this is stupid - already a dict
+    all_results = pd.DataFrame(all_results)
+    all_results = pd.merge(data_tbl, all_results, how='left', on='ID')
     
-    return all_results#, collapse_table
+    return all_results.to_dict('records')#, collapse_table
 
 def get_rounded_colums(df, units):
     if units=='mmol/L':
@@ -564,6 +564,52 @@ def poi(date, contents, filename):
     Input('ranges-store', 'data'),
     State('set-periods-poi-checklist', 'value'),
     State('poi-store', 'data'),
+    State('processed-data-store', 'data'),
+    State('tir-store', 'data'),
+    State('lv1-hypo-slider', 'value'),
+    State('lv2-hypo-slider', 'value'),
+    State('lv1-hyper-slider', 'value'),
+    State('lv2-hyper-slider', 'value'),
+    State('short-events-mins', 'value'),
+    State('prolonged-events-mins', 'value'),
+    State('start-night-time', 'value'),
+    State('end-night-time', 'value'),
+    State('units-first-button', 'value'),
+    State('device-button', 'value'),
+    prevent_initial_call=True)
+def metrics(poi_ranges, set_periods, poi_data, raw_data, 
+            additional_tirs, lv1_hypo, lv2_hypo, lv1_hyper, 
+            lv2_hyper, short_mins, long_mins, night_start, 
+            night_end, units, device):
+    if poi_ranges is None:
+        raise PreventUpdate
+    if poi_data is None:
+        return dbc.Alert(
+            "Oops! You haven't uploaded your periods file. Go back to step 1 to upload your data",
+            id="alert-fade",
+            dismissable=True,
+            is_open=True,
+            color='danger'
+        ),
+    if raw_data is None:
+        return dbc.Alert(
+            "You haven't uploaded any CGM data! Go back to page 1 to upload your CGM data",
+            id="alert-fade",
+            dismissable=True,
+            is_open=True,
+            color='danger'
+        ),
+    metrics = section_external_factors.calculate_periodic_metrics_2(poi_ranges, set_periods, poi_data,
+                                                                  raw_data, additional_tirs, lv1_hypo,
+                                                                  lv2_hypo, lv1_hyper, lv2_hyper, 
+                                                                  short_mins, long_mins, night_start, 
+                                                                  night_end, units, device)
+    return metrics
+
+'''@callback(Output('poi-metrics-store', 'data'),
+    Input('ranges-store', 'data'),
+    State('set-periods-poi-checklist', 'value'),
+    State('poi-store', 'data'),
     State('raw-data-store', 'data'),
     State('tir-store', 'data'),
     State('lv1-hypo-slider', 'value'),
@@ -603,7 +649,7 @@ def metrics(poi_ranges, set_periods, poi_data, raw_data,
                                                                   lv2_hypo, lv1_hyper, lv2_hyper, 
                                                                   short_mins, long_mins, night_start, 
                                                                   night_end, units)
-    return metrics
+    return metrics'''
 
 
 # Update

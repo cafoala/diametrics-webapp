@@ -72,7 +72,7 @@ def read_files(files):
 
         except Exception as e:
             data_dictionary = {'Usable': False, 'Filename': filename, 
-             'Device':'N/A', #'Interval': 'N/A', 'data': 'N/A',
+             #'Device':'N/A', #'Interval': 'N/A', 'data': 'N/A',
                 'ID': 'N/A', 'Start DateTime': 'N/A', 'End DateTime': 'N/A',
                 'Days': 'N/A', 'Data Sufficiency (%)':'N/A'}
             processed_files.append(data_dictionary)
@@ -102,7 +102,7 @@ def read_files_2(file, filename, dt_format, device, units):
 
     except Exception as e:
         data_dictionary = {'Usable': False, 'Filename': filename, 
-         'Device':device, #'Interval': 'N/A', 'data': 'N/A',
+         #'Device':device, #'Interval': 'N/A', 'data': 'N/A',
             'ID': 'N/A', 'Start DateTime': 'N/A', 'End DateTime': 'N/A',
             'Days': 'N/A', 'Data Sufficiency (%)':'N/A'}
         return data_dictionary
@@ -148,7 +148,7 @@ def create_data_table(children):
                         'color': 'black',
                         #'fontWeight': 'bold'
                     },
-                    #editable=True,              # allow editing of data inside all cells
+                    editable=True,              # allow editing of data inside all cells
                     #filter_action="native",     # allow filtering of data by user ('native') or not ('none')
                     #sort_action="native",       # enables data to be sorted per-column by user or not ('none')
                     #export_format="csv",
@@ -190,6 +190,8 @@ def merge_glc_data(table_data, raw_data, interp, interp_method, interp_limit):
         start = row['Start DateTime']
         end = row['End DateTime']
         data_sub = data.loc[(data['time']>=start)&(data['time']<=end)]
+        
+        ### CHECK THIS! ### 
         if subject['Units']=='mg/dL':
             data_sub['glc'] = pd.to_numeric(data_sub['glc'])/18
         if interp:
