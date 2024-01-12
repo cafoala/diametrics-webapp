@@ -150,7 +150,7 @@ def create_data_table(children):
                     },
                     editable=True,              # allow editing of data inside all cells
                     #filter_action="native",     # allow filtering of data by user ('native') or not ('none')
-                    #sort_action="native",       # enables data to be sorted per-column by user or not ('none')
+                    sort_action="native",       # enables data to be sorted per-column by user or not ('none')
                     #export_format="csv",
                     #export_headers="display",
                     #fixed_rows={'headers':True},
