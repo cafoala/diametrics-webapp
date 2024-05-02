@@ -1,4 +1,4 @@
-# diametrics-webapp-dash
+# Diametrics WebApp
 A webapp that enables users to calculate the metrics of glycemic control from CGM data in Dash
 
 [Diametrics](https://diametrics.org) is a Python package and web application designed for the analysis of Continuous Glucose Monitoring (CGM) data. 
