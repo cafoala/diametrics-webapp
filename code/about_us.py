@@ -7,6 +7,18 @@ about_us_layout = html.Div([
     html.P(''),
     
     dbc.Card(
+    [dbc.CardHeader(html.H3('Reference'),),
+    dbc.CardBody([
+
+        dcc.Markdown(
+            '''
+            If you use Diametrics in your research, please reference us! :D
+ 
+            Russon, Catherine L., et al. "A User-Friendly Web Tool for Custom Analysis of Continuous Glucose Monitoring Data." Journal of Diabetes Science and Technology 18.6 (2024): 1511-1513 - it's available [here](https://journals.sagepub.com/doi/full/10.1177/19322968241274322?casa_token=9uruVbvGbZYAAAAA%3AceTcASVJ-jzQFWbmO-XnKBWv11AZ4FK450RLdzHdHtuPDqTkn9tK8wSFFOp0c9xaPRSZwOtzmrI).
+    ''')])]),
+
+
+    dbc.Card(
     [dbc.CardHeader(html.H3('The Project'),),
     dbc.CardBody([
 

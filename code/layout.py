@@ -40,7 +40,7 @@ jumbotron = html.Div(
         [
             html.H1("Welcome to Diametrics", className="display-3"),
             html.P(
-                "A no-code webtool for Diabetes researchers to calculate the metrics of glycemic control and exploring continuous glucose monitoring (CGM) data",
+                "A no-code webtool for Diabetes researchers to calculate the metrics of glycemic control and explore continuous glucose monitoring (CGM) data",
                 className="lead",
             ),
             html.Hr(className="my-2"),
@@ -50,32 +50,42 @@ jumbotron = html.Div(
                 ]),
                 dbc.Col([
                     dbc.Card([
-                        dbc.CardHeader(html.H4("Get started")),
+                        dbc.CardHeader(html.H5("What is Diametrics?")),
                         dbc.CardBody([
-                            html.P('You can use Diametrics to:'),
-                            html.H6(
+                            #html.P('You can use Diametrics to:'),
+                            html.H5(
                                 html.Ul([
-                                    html.Li("Advanced CGM Data Analysis Made Easy"), 
+                                    html.Li("Calculate overview metrics of glycemic control"), 
                                     html.Br(),
                                     html.Li("Visualise your data"),
                                     html.Br(),
-                                    html.Li("Explore and calculate metrics for specific periods of interest")]),),
-                            html.Div([
+                                    html.Li("Explore specific periods of interest, like exercise or mealtimes")]),),
+                            html.P([
                                 "For step-by-step instructions and examples, see the ", 
                                 dcc.Link("documentation", href='/documentation'),
                             
                                 " or jump straight into the ", 
                                 dcc.Link("dashboard", href='/dashboard'),
                                 " right away!"
-                            ]),                      
-                        ]),
-                        
-      
- 
+                            ]),
+                        ])
+                    ]),
                 ]),
-                ])
+                    
+               # ])
             ]),
             html.Br(),
+
+            dbc.Card([
+                dbc.CardHeader(html.H5("Please reference us :D")),
+                dbc.CardBody([
+                    dcc.Markdown(
+                        '''                
+                        Russon, CL., et al. "A User-Friendly Web Tool for Custom Analysis of Continuous Glucose Monitoring Data." Journal of Diabetes Science and Technology 18.6 (2024): 1511-1513 - it's available [here](https://journals.sagepub.com/doi/full/10.1177/19322968241274322?casa_token=9uruVbvGbZYAAAAA%3AceTcASVJ-jzQFWbmO-XnKBWv11AZ4FK450RLdzHdHtuPDqTkn9tK8wSFFOp0c9xaPRSZwOtzmrI).
+                        ''')
+                ])
+            ]),
+
             dbc.Card([
                 dbc.CardHeader('Created with support from'),
                 dbc.CardBody([
