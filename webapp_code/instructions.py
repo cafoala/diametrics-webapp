@@ -15,7 +15,8 @@ layout = html.Div([
                                 
                             #]),
                             #dbc.Col([
-                                dp.DashPlayer(url='https://youtu.be/EWoB2ALtBZs', controls=True),
+                                #dp.DashPlayer(url='https://youtu.be/EWoB2ALtBZs', controls=True),
+                                dp.DashPlayer(url='https://youtu.be/bfiQRGhCLh4?si=6bDqCwpqjOACMQm_', controls=True)
                             #])
                         ])
                     ], title='Overview'),

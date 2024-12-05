@@ -46,7 +46,7 @@ jumbotron = html.Div(
             html.Hr(className="my-2"),
             dbc.Row([
                 dbc.Col([            
-                    dp.DashPlayer(url='https://youtu.be/uUcuigkCrm0', controls=True, playing=True),
+                    dp.DashPlayer(url='https://youtu.be/uUcuigkCrm0', controls=True, playing=False),
                 ]),
                 dbc.Col([
                     dbc.Card([
