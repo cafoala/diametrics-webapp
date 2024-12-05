@@ -4,7 +4,7 @@ FROM python:3.10-slim-bullseye
 WORKDIR /app
 
 # Copy source code to working directory
-COPY code /app/
+COPY webapp_code /app/
 COPY requirements.txt /app/
 
 # Install packages from requirements.txt
