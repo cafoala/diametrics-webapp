@@ -69,7 +69,9 @@ def create_period_of_interest():
                     dbc.AccordionItem([
                         html.P('Select the periods you\'re interested in around the event'),
                         dbc.Checklist(options=[{'label':'All 24hrs after event', 'value':1},
-                                        {'label':'Night after event','value':2}], 
+                                                {'label': 'All 48hrs after event', 'value':3},
+                                                {'label':'All 72hrs after event','value':4},
+                                                {'label':'Night after event','value':2}], 
                                         id='set-periods-poi-checklist', value=[]),
                     ], title='Set periods around event'),
                 ], start_collapsed=True),
@@ -413,6 +415,29 @@ def calculate_periodic_metrics_2(poi_ranges, set_periods, poi_data, processed_da
             results.append(metrics)
             results.append(metrics_mg)
         
+        if 3 in set_periods:
+            info_48 = info.copy()
+            info_48['Period'] = f'48hrs after'
+            first_time = end_event
+            last_time = end_event + timedelta(hours=48)
+            metrics, metrics_mg = periodic_calculations_2(info_48, glc_data, interval,
+                                                        first_time, last_time, additional_tirs, lv1_hypo, 
+                                                        lv2_hypo, lv1_hyper, lv2_hyper,
+                                                        short_mins, long_mins) 
+            results.append(metrics)
+            results.append(metrics_mg)
+
+        if 4 in set_periods:
+            info_72 = info.copy()
+            info_72['Period'] = f'72hrs after'
+            first_time = end_event
+            last_time = end_event + timedelta(hours=72)
+            metrics, metrics_mg = periodic_calculations_2(info_72, glc_data, interval,
+                                                        first_time, last_time, additional_tirs, lv1_hypo, 
+                                                        lv2_hypo, lv1_hyper, lv2_hyper,
+                                                        short_mins, long_mins) 
+            results.append(metrics)
+            results.append(metrics_mg)
         
         if 2 in set_periods:
             info_eve = info.copy()
@@ -521,6 +546,7 @@ def calculate_periodic_metrics(poi_ranges, set_periods, poi_data, raw_data,
             results.append(metrics_mg)
         
         if 3 in set_periods:
+            print(selected)
             info_48 = info.copy()
             info_48['Period'] = f'48hrs after'
             first_time = end_event
