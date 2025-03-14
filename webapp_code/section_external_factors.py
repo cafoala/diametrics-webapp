@@ -520,6 +520,30 @@ def calculate_periodic_metrics(poi_ranges, set_periods, poi_data, raw_data,
             results.append(metrics)
             results.append(metrics_mg)
         
+        if 3 in set_periods:
+            info_48 = info.copy()
+            info_48['Period'] = f'48hrs after'
+            first_time = end_event
+            last_time = end_event + timedelta(hours=48)
+            metrics, metrics_mg = periodic_calculations_2(info_48, glc_data, interval,
+                                                        first_time, last_time, additional_tirs, lv1_hypo, 
+                                                        lv2_hypo, lv1_hyper, lv2_hyper,
+                                                        short_mins, long_mins)
+
+            results.append(metrics)
+            results.append(metrics_mg)
+
+        if 4 in set_periods:
+            info_72 = info.copy()
+            info_72['Period'] = f'72hrs after'
+            first_time = end_event
+            last_time = end_event + timedelta(hours=72)
+            metrics, metrics_mg = periodic_calculations_2(info_72, glc_data, interval,
+                                                        first_time, last_time, additional_tirs, lv1_hypo, 
+                                                        lv2_hypo, lv1_hyper, lv2_hyper,
+                                                        short_mins, long_mins) 
+            results.append(metrics)
+            results.append(metrics_mg)
         
         if 2 in set_periods:
             info_eve = info.copy()
