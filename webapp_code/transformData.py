@@ -16,8 +16,8 @@ class transformData:
              #   print('it\'s a libre')
             try:
                 self.convert_flash_libre(df)
-            except:
-                print('Can\'t convert to libre')
+            except Exception as e:
+                print(e)
         elif device =='Dexcom': #self.assert_dexcom(df):
             print('it\'s a dexcom')
             try:
@@ -90,22 +90,24 @@ class transformData:
 
     
     def convert_medtronic(self, df):
+        print('Converting medtronic')
+        print(df.head())
         # Set first row as column headers
-        df.columns = df.iloc[5]
+        df.columns = df.iloc[10]
+        print(df.columns)
         # Drop top rows
-        df = df.iloc[6:]
-        #df.drop(index=[2], inplace=True)
+        df = df.iloc[11:]
+        print(df.head())
         df.reset_index(inplace=True, drop=True)
-        if 'BG Reading (mmol/L)' in df.columns:
+        if 'Sensor Glucose (mmol/L)' in df.columns:
             # Keep important columns
-            df = df.loc[:,('Date', 'Time', 'BG Reading (mmol/L)')]
-        elif 'BG Reading (mg/dL)' in df.columns:
-            df = df.loc[:,('Date', 'Time', 'BG Reading (mg/dL)')]
-        
-        df.columns = ['date', 'time', 'glc']
+            df = df.loc[:,('Timestamp', 'Sensor Glucose (mmol/L)')]
+        elif 'Sensor Glucose (mg/dL)' in df.columns:
+            df = df.loc[:,('Timestamp', 'Sensor Glucose (mg/dL)')]
+
+        print(df.head())
+        df.columns = ['time', 'glc']
         df = df.dropna()
-        df['time'] = pd.to_datetime(df.apply(lambda x: combine_datetime(x['date'], x['time']), axis=1))
-        df = df.drop(columns='date')
         # Rename cols
         # Replace low high values
         #df = df.replace({'High': 22.3, 'Low': 2.1, 'HI':22.3, 'LO':2.1, 'hi':22.3, 'lo':2.1})
