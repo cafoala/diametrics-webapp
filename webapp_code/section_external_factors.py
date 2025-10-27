@@ -370,6 +370,13 @@ def periodic_calculations_2(info, glc_data, interval, first_time,
 
         metrics['units'] = 'mmol/L'
         metrics_mg['units'] = 'mg/dL'
+
+        metrics['Start of event'] = first_time
+        metrics['End of event'] = last_time
+        
+        metrics_mg['Start of event'] = first_time
+        metrics_mg['End of event'] = last_time
+
         info.update(metrics)
         info_mg.update(metrics_mg)
         return info, info_mg
@@ -491,143 +498,17 @@ def calculate_periodic_metrics_2(poi_ranges, set_periods, poi_data, processed_da
     all_metrics['ID'] = all_metrics['ID'].astype(str)
     all_metrics['Start of event'] = pd.to_datetime(all_metrics['Start of event']).round('S')
     all_metrics['End of event'] = pd.to_datetime(all_metrics['End of event']).round('S')
-
-    poi_data = pd.DataFrame.from_dict(poi_data)
-    poi_data['ID'] = poi_data['ID'].astype(str)
-    poi_data['Start of event'] = pd.to_datetime(poi_data['Start of event']).round('S')
-    poi_data['End of event'] = pd.to_datetime(poi_data['End of event']).round('S')
-    merged_results = pd.merge(poi_data, all_metrics, how='left', 
-                              on=['ID', 'Start of event', 'End of event'])
+    print(all_metrics.columns)
+    print(all_metrics.head())
+    #poi_data = pd.DataFrame.from_dict(poi_data)
+    #poi_data['ID'] = poi_data['ID'].astype(str)
+    #poi_data['Start of event'] = pd.to_datetime(poi_data['Start of event']).round('S')
+    #poi_data['End of event'] = pd.to_datetime(poi_data['End of event']).round('S')
+    #merged_results = pd.merge(poi_data, all_metrics, how='left', 
+    #                          on=['ID', 'Start of event', 'End of event'])
+    merged_results = all_metrics.copy()
     return merged_results.to_dict('records')
 
-
-def calculate_periodic_metrics(poi_ranges, set_periods, poi_data, raw_data, 
-                               additional_tirs, lv1_hypo, lv2_hypo, lv1_hyper, 
-                               lv2_hyper, short_mins, long_mins, night_start, 
-                               night_end, units):
-    results = []
-    
-    for i in poi_data:
-        ID = i['ID']
-        start_event =  pd.to_datetime(i['Start of event']).round('S')
-        end_event = pd.to_datetime(i['End of event']).round('S')
-        info = {'ID':ID, 'Start of event':start_event, 
-                'End of event':end_event, 'Period':'CGM file not available'}
-        info_mg = info.copy()
-        info['units'] = 'mmol/L'
-        info_mg['units'] = 'mg/dL'
-
-        try:
-            id_raw_data = next(item for item in raw_data if item['ID'] == ID)
-            
-        except:
-            ##### Add sumink #####
-            results.append(info)
-            results.append(info_mg)
-            continue
-        if not id_raw_data['Usable']:
-            # Return ID with sumink or uvver
-            results.append(info)
-            results.append(info_mg)
-            continue
-        glc_data = pd.DataFrame.from_dict(id_raw_data['data'])
-        glc_data['time'] = pd.to_datetime(glc_data['time'])
-        glc_data['glc'] = pd.to_numeric(glc_data['glc'], errors='ignore')
-        if units == 'mg/dL':
-                        glc_data['glc'] = glc_data['glc'].apply(lambda x: x/18 
-                                                                if (isinstance(x, int) or 
-                                                                    isinstance(x, float)) else x)
-
-        # Replace lo/hi values
-        #glc_data = section_metrics_tbl.replace_cutoffs(glc_data, low_cutoff, high_cutoff, checklist)
-        for drag in poi_ranges:
-            # First num values
-            first, last, first_num, last_num = drag_values(drag)
-            first_time, last_time = get_drag_times(first_num, last_num, 
-                                                   start_event, end_event)
-
-            info_drag = info.copy()
-            info_drag['Period'] = f'{first} to {last}'
-            metrics, metrics_mg = periodic_calculations(info_drag, glc_data, id_raw_data, 
-                                                        first_time, last_time, start_event, 
-                                                        end_event, additional_tirs, lv1_hypo, 
-                                                        lv2_hypo, lv1_hyper, lv2_hyper, 
-                                                        short_mins, long_mins) 
-            
-            results.append(metrics)
-            results.append(metrics_mg)
-
-        
-        if 1 in set_periods:
-            info_24 = info.copy()
-            info_24['Period'] = f'24hrs after'
-            first_time = end_event
-            last_time = end_event + timedelta(hours=24)
-            metrics, metrics_mg = periodic_calculations(info_24, glc_data, id_raw_data,
-                                                        first_time, last_time, start_event,
-                                                        end_event,additional_tirs, lv1_hypo, 
-                                                        lv2_hypo, lv1_hyper, lv2_hyper,
-                                                        short_mins, long_mins) 
-            results.append(metrics)
-            results.append(metrics_mg)
-        
-        if 3 in set_periods:
-            print(selected)
-            info_48 = info.copy()
-            info_48['Period'] = f'48hrs after'
-            first_time = end_event
-            last_time = end_event + timedelta(hours=48)
-            metrics, metrics_mg = periodic_calculations_2(info_48, glc_data, interval,
-                                                        first_time, last_time, additional_tirs, lv1_hypo, 
-                                                        lv2_hypo, lv1_hyper, lv2_hyper,
-                                                        short_mins, long_mins)
-
-            results.append(metrics)
-            results.append(metrics_mg)
-
-        if 4 in set_periods:
-            info_72 = info.copy()
-            info_72['Period'] = f'72hrs after'
-            first_time = end_event
-            last_time = end_event + timedelta(hours=72)
-            metrics, metrics_mg = periodic_calculations_2(info_72, glc_data, interval,
-                                                        first_time, last_time, additional_tirs, lv1_hypo, 
-                                                        lv2_hypo, lv1_hyper, lv2_hyper,
-                                                        short_mins, long_mins) 
-            results.append(metrics)
-            results.append(metrics_mg)
-        
-        if 2 in set_periods:
-            info_eve = info.copy()
-            info_eve['Period'] = f'Night after event'
-            night_start_minutes = int(night_start[14:16])
-            night_start_hours = int(night_start[11:13])
-
-            first_time = start_event.replace(hour=night_start_hours, minute=night_start_minutes)
-            if night_start_hours<12:
-                first_time += timedelta(hours=24)
-
-            night_end_minutes = int(night_end[14:16])
-            night_end_hours = int(night_end[11:13])
-            last_time = start_event.replace(hour=night_end_hours, minute=night_end_minutes)
-            if night_end_hours<12:
-                last_time += timedelta(hours=24)
-    
-            metrics, metrics_mg = periodic_calculations(info_eve, glc_data, id_raw_data,
-                                                        first_time, last_time, start_event,
-                                                        end_event,additional_tirs, lv1_hypo, 
-                                                        lv2_hypo, lv1_hyper, lv2_hyper,
-                                                        short_mins, long_mins) 
-            results.append(metrics)
-            results.append(metrics_mg)
-    all_metrics = pd.DataFrame.from_dict(results)
-    poi_data = pd.DataFrame.from_dict(poi_data)
-    poi_data['Start of event'] = pd.to_datetime(poi_data['Start of event'])#.round('S')
-    poi_data['End of event'] = pd.to_datetime(poi_data['End of event'])#.round('S')
-
-    merged_results = pd.merge(poi_data, all_metrics, how='left', 
-                              on=['ID', 'Start of event', 'End of event'])
-    return merged_results.to_dict('records')
 
 def create_data_table(data):
     df = pd.DataFrame.from_dict(data).round(2)
