@@ -507,11 +507,12 @@ def update_store(clicks, children):
 @callback(Output('poi-datafile', 'children'),
     Output('poi-store', 'data'),
     Input('upload-poi-data', 'last_modified'),
+    Input('datetime-format-advanced', 'value'),
     State('upload-poi-data', 'contents'),
     State('upload-poi-data', 'filename'),
     prevent_initial_call=True)
-def poi(date, contents, filename):
-    data = section_external_factors.parse_file(contents, filename, date)#.round(2)
+def poi(date, dt_format, contents, filename):
+    data = section_external_factors.parse_file(contents, filename)
     if data=='columns':
         table = dbc.Alert(
             "Your file doesn't have the correct headings!",
@@ -532,9 +533,13 @@ def poi(date, contents, filename):
         )
         return table, None
     else:
+        if dt_format=='euro':
+            dayfirst=True
+        else:
+            dayfirst=False
         df = pd.DataFrame.from_dict(data)
-        df['Start of event'] = pd.to_datetime(df['Start of event']).round('S').astype(str)
-        df['End of event'] = pd.to_datetime(df['End of event']).round('S').astype(str)
+        df['Start of event'] = pd.to_datetime(df['Start of event'], dayfirst=dayfirst).round('S').astype(str)
+        df['End of event'] = pd.to_datetime(df['End of event'], dayfirst=dayfirst).round('S').astype(str)
         df['ID'] = df['ID'].astype(str)
         table = dash_table.DataTable(id='poi-data', data=df.to_dict('records'), 
                                             style_data={

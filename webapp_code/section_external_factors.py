@@ -31,13 +31,18 @@ def create_period_of_interest():
                     className="d-flex align-items-center")
             )
         ]),
-        dbc.Card(dbc.CardBody([
-            html.H4('1.Upload external data'),
-            dbc.Collapse([
-                html.P('For this to work you\'ll need to upload a file that includes the ID of the participant, the start and end times of the period \
-                    of interest and an optional label.'),
-                dcc.Upload(children=html.Div(
-                        [
+       dbc.Card(dbc.CardBody([
+        html.H4('1. Upload external data'),
+        dbc.Collapse([
+            html.P(
+                "For this to work you'll need to upload a file that includes "
+                "the ID of the participant, the start and end times of the period "
+                "of interest and an optional label."
+            ),
+            dbc.Row([
+                dbc.Col(
+                    dcc.Upload(
+                        children=html.Div([
                             'Drag and Drop or ',
                             html.A('Select Files')
                         ]),
@@ -50,11 +55,32 @@ def create_period_of_interest():
                             'borderRadius': '5px',
                             'textAlign': 'center',
                             'margin': '10px'
-                        },id='upload-poi-data',),
-                html.Div(id='poi-datafile'),
+                        },
+                        id='upload-poi-data',
+                    ),
+                    width=8
+                ),
+                dbc.Col([
+                    html.H6('Date format'),
+                    html.Div([
+                        dbc.RadioItems(
+                            id="datetime-format-advanced",
+                            class_name="btn-group",
+                            inputClassName="btn-check",
+                            labelClassName="btn btn-outline-primary",
+                            labelCheckedClassName="active",
+                            options=[
+                                {"label": "European", "value": 'euro'},
+                                {"label": "American", "value": 'amer'},
+                            ],
+                            value='euro',
+                        )
+                    ], className="radio-group"),  
+                ])
+            ]),
+            html.Div(id='poi-datafile'),
         ], is_open=True),
-        ])),
-
+    ])),
         dbc.Card(dbc.CardBody([
             html.H4('2. Select windows around events'),
             dbc.Collapse([
@@ -105,7 +131,7 @@ def create_period_of_interest():
                 html.Div(dbc.Spinner(spinner_style={"width": "3rem", "height": "3rem"}), 
                             style={'textAlign':'center'}, id='poi-metrics')
             ],id='poi-collapse-3', is_open=False)
-            ])),
+        ])),
     ])
 
 def create_range_slider(n_clicks, children):
@@ -184,7 +210,7 @@ def standardise_poi_df(df):
     else:
         return None
 
-def parse_file(contents, filename, date):
+def parse_file(contents, filename):
     content_type, content_string = contents.split(',')
     decoded = base64.b64decode(content_string)
     try:
