@@ -262,7 +262,7 @@ content = html.Div([
                     ])],
                         label="Advanced analysis", 
                         tab_id="external-tab", id='external-tab',
-                        disabled=False, active_label_style={"color": "#FB79B3"}
+                        disabled=True, active_label_style={"color": "#FB79B3"}
                 ),
 
             ],
