@@ -4,8 +4,7 @@ import dash_player as dp
 
 contact_info = html.Div([
                     html.P("Contact Information", style={"font-size": "24px"}),
-                    dcc.Markdown('''Project Email: [diametrics@proton.me](mailto:diametrics@proton.me)''', style={"font-size": "16px"}),
-                    dcc.Markdown('''Cat's Email: [cr91@exeter.ac.uk](mailto:cr591@exeter.ac.uk)'''),#, style={"font-size": "16px"}),
+                    dcc.Markdown('''Cat's Email: [c.russon@exeter.ac.uk](mailto:c.russon@exeter.ac.uk)'''),#, style={"font-size": "16px"}),
                     dcc.Markdown('''Cat's LinkedIn: [https://uk.linkedin.com/in/catherine-russon](https://uk.linkedin.com/in/catherine-russon)''')
                 ], style={
                     "border": "2px solid #ccc",
