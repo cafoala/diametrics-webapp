@@ -20,15 +20,11 @@ import section_metrics_tbl
 import section_overview_figs
 import section_individual_figs
 import section_external_factors
-import dash_uploader as du
 import datetime
-from dash_extensions.enrich import Output, DashProxy, Input, MultiplexerTransform
 logging.basicConfig(level=logging.DEBUG)
 
 
 app = dash.get_app()
-# 1) configure the upload folder
-du.configure_upload(app, r"C:\tmp\Uploads")
 
 dash.register_page(__name__)
 '''external_stylesheets = [dbc.themes.BOOTSTRAP, dbc.icons.BOOTSTRAP]

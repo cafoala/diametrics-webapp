@@ -1,4 +1,4 @@
-FROM python:3.10-slim-bullseye
+FROM python:3.11-slim
 
 # Working Directory
 WORKDIR /app
@@ -10,7 +10,11 @@ COPY requirements.txt /app/
 # Install packages from requirements.txt
 # hadolint ignore=DL3013
 RUN pip install --no-cache-dir --upgrade pip &&\
-    pip install --no-cache-dir --trusted-host pypi.python.org -r requirements.txt
+    pip install --no-cache-dir -r requirements.txt
+
+# Don't run the web server as root
+RUN useradd --system --no-create-home app
+USER app
 
 ENV PORT=8080
 EXPOSE ${PORT}

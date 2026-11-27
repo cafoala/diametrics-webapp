@@ -5,7 +5,6 @@ import dash_bootstrap_components as dbc
 import layout
 import about_us
 import contact
-import dash_uploader as du
 import ssl
 import smtplib
 

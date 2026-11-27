@@ -1,0 +1,24 @@
+# Direct runtime dependencies. requirements.txt is the compiled lock; regenerate with
+#   uv pip compile requirements.in -o requirements.txt --python-version 3.11 --python-platform x86_64-unknown-linux-gnu
+#
+# ponytail: dash stays on 2.x (caps Flask/Werkzeug <3.1). Dash >=3.1.1 needs the
+# dash-bootstrap-components 2 / dash-mantine-components 1+ migration.
+dash==2.18.2
+dash-bootstrap-components==1.2.1
+dash-daq==0.5.0
+dash-mantine-components==0.11.1
+dash-player==1.0.6
+
+# Held at their existing versions so metric results don't shift.
+numpy==1.23.4
+openpyxl==3.0.10
+pandas==1.5.1
+plotly==5.11.0
+scipy==1.9.3
+statsmodels==0.13.5
+
+scikit-learn>=1.5.0
+
+# importlib-metadata 10.2 pulls in lazy-importer 0.1.0, which has no source/maintainer
+# metadata on PyPI. Lift once its provenance is clear.
+importlib-metadata<10.2

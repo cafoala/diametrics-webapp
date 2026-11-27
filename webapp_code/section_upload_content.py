@@ -1,6 +1,5 @@
 from dash import dcc, html, dash_table
 import dash_bootstrap_components as dbc
-import dash_uploader as du
 import pandas as pd
 
 
